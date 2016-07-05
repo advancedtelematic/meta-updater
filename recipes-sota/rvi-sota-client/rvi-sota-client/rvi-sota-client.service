@@ -1,0 +1,9 @@
+[Unit]
+Description=RVI SOTA Client
+
+[Service]
+User=root
+ExecStart=/usr/bin/run.sh
+
+[Install]
+WantedBy=multi-user.target
