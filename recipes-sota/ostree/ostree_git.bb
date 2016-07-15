@@ -3,7 +3,7 @@ LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://COPYING;md5=5f30f0716dfdd0d91eb439ebec522ec2"
 
 SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master"
-SRCREV="${AUTOREV}"
+SRCREV="v2016.7"
 
 S = "${WORKDIR}/git"
 
