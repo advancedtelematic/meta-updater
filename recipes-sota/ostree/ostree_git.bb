@@ -9,9 +9,9 @@ SRCREV="v2016.7"
 
 S = "${WORKDIR}/git"
 
-DEPENDS += "attr libarchive glib-2.0 pkgconfig gpgme libgsystem fuse libsoup-2.4 e2fsprogs"
+DEPENDS += "attr libarchive glib-2.0 pkgconfig gpgme libgsystem fuse libsoup-2.4 e2fsprogs systemd"
 
-RDEPENDS_${PN} = "python libsystemd util-linux-libuuid util-linux-libblkid util-linux-libmount libcap liblzma"
+RDEPENDS_${PN} = "python util-linux-libuuid util-linux-libblkid util-linux-libmount libcap liblzma"
 
 PACKAGECONFIG ??= "${@base_contains('DISTRO_FEATURES', 'systemd', 'systemd', '', d)}"
 PACKAGECONFIG[systemd] = "--with-systemdsystemunitdir=${systemd_unitdir}/system/,,,"
