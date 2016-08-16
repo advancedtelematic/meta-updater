@@ -1,0 +1,36 @@
+From 2b4d519bef51d9bfb646588aa5198f71022a867b Mon Sep 17 00:00:00 2001
+From: Anton Gerasimov <anton@advancedtelematic.com>
+Date: Mon, 15 Aug 2016 15:54:20 +0200
+Subject: [PATCH] Set up environment for OSTree integration
+
+---
+ include/configs/qemu-x86.h | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/include/configs/qemu-x86.h b/include/configs/qemu-x86.h
+index 476d37d..f49e2a5 100644
+--- a/include/configs/qemu-x86.h
++++ b/include/configs/qemu-x86.h
+@@ -56,4 +56,19 @@
+ #undef CONFIG_ENV_IS_IN_SPI_FLASH
+ #define CONFIG_ENV_IS_NOWHERE
+ 
++#undef CONFIG_BOOTARGS
++#define CONFIG_BOOTARGS "root=/dev/hda2 console=ttyS0"
++
++#undef CONFIG_BOOTCOMMAND
++#define CONFIG_BOOTCOMMAND "run loadenv;" \
++			   "ext2load ide 0:1 $loadaddr $kernel_image;" \
++			   "ext2load ide 0:1 $ramdiskaddr $ramdisk_image;" \
++			   "zboot $loadaddr - $ramdiskaddr $filesize"
++
++#undef CONFIG_EXTRA_ENV_SETTINGS
++#define CONFIG_EXTRA_ENV_SETTINGS "kernel_image=/bzImage\0" \
++				  "ramdisk_image=/initrd\0" \
++				  "ramdiskaddr=0x4000000\0" \
++				  "loadenv=if ext2ls ide 0:1 /loader.0/uEnv.txt; then ext2load ide 0:1 $loadaddr uEnv.txt; env import -t $loadaddr $filesize; fi;" 
++
+ #endif	/* __CONFIG_H */
+-- 
+2.8.3
+
