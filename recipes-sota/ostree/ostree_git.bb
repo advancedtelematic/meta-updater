@@ -5,7 +5,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=5f30f0716dfdd0d91eb439ebec522ec2"
 inherit autotools-brokensep pkgconfig systemd
 
 SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master"
-SRCREV="v2016.7"
+SRCREV="v2016.8"
 
 S = "${WORKDIR}/git"
 
