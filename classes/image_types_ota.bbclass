@@ -1,6 +1,6 @@
 # Image to use with u-boot as BIOS and OSTree deployment system
 
-inherit image_types
+#inherit image_types
 
 # Boot filesystem size in MiB
 # OSTree updates may require some space on boot file system for
@@ -9,12 +9,15 @@ inherit image_types
 BOOTFS_EXTRA_SIZE ?= "512"
 export BOOTFS_EXTRA_SIZE
 
-IMAGE_TYPES += " otaimg"
-IMAGE_DEPENDS_ota = "e2fsprogs-native \
-                     virtual/bootloader \
-		     virtual/kernel \
-		     parted-native \
-                     ${INITRD_IMAGE}"
+do_otaimg[depends] += "e2fsprogs-native:do_populate_sysroot \
+		       parted-native:do_populate_sysroot \
+		       virtual/kernel:do_deploy \
+		       ${INITRD_IMAGE}:do_rootfs \
+		       ${PN}:do_rootfs"
+
+ROOTFS ?= "${DEPLOY_DIR_IMAGE}/${IMAGE_BASENAME}-${MACHINE}.ext4"
+INITRD_IMAGE ?= "core-image-minimal-initramfs"
+INITRD ?= "${DEPLOY_DIR_IMAGE}/${INITRD_IMAGE}-${MACHINE}.cpio.gz"
 
 build_bootfs () {
 	KERNEL_FILE=${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE} 
@@ -36,7 +39,7 @@ build_bootfs () {
 	rm -rf $BOOTTMP
 }
 
-IMAGE_CMD_otaimg () {
+do_otaimg () {
 	BOOTIMG=${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaboot.ext4
 	rm -f $BOOTIMG
 	build_bootfs $BOOTIMG
@@ -70,4 +73,8 @@ IMAGE_CMD_otaimg () {
 	ln -s ${IMAGE_NAME}.otaimg ${IMAGE_LINK_NAME}.otaimg
 }
 
+addtask otaimg before do_build
+
+IMAGE_TYPES += " otaimg"
+IMAGE_TYPES_MASKED += "otaimg"
 IMAGE_TYPEDEP_otaimg = "ext4"
