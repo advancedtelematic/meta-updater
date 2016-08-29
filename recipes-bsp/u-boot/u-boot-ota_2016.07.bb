@@ -13,7 +13,10 @@ SRC_URI += "file://0001-Set-up-environment-for-OSTree-integration.patch"
 
 PV = "v2016.07+git${SRCPV}"
 
-EXTRA_OEMAKE_append = " KCFLAGS=-fgnu89-inline BUILD_ROM=y"
+EXTRA_OEMAKE_append = " KCFLAGS=-fgnu89-inline"
+EXTRA_OEMAKE_append_qemux86 = " KCFLAGS=-fgnu89-inline BUILD_ROM=y"
+EXTRA_OEMAKE_append_qemux86-64 = " KCFLAGS=-fgnu89-inline BUILD_ROM=y"
 
-UBOOT_SUFFIX = "rom"
-
+UBOOT_SUFFIX = "bin"
+UBOOT_SUFFIX_qemux86 = "rom"
+UBOOT_SUFFIX_qemux86-64 = "rom"
