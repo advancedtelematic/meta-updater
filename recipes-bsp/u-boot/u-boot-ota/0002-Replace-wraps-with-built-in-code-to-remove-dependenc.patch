@@ -1,0 +1,141 @@
+From d5bea58bf85522a289194d59dfab00207ffdfb4f Mon Sep 17 00:00:00 2001
+From: Anton Gerasimov <anton@advancedtelematic.com>
+Date: Fri, 26 Aug 2016 13:51:30 +0200
+Subject: [PATCH 2/2] Replace wraps with built-in code to remove dependency on
+ multilib
+
+---
+ arch/x86/config.mk |  3 --
+ arch/x86/lib/gcc.c | 97 +++++++++++++++++++++++++++++++++++++++++++++++-------
+ 2 files changed, 86 insertions(+), 14 deletions(-)
+
+diff --git a/arch/x86/config.mk b/arch/x86/config.mk
+index d7addd8..892e0fc 100644
+--- a/arch/x86/config.mk
++++ b/arch/x86/config.mk
+@@ -21,9 +21,6 @@ PLATFORM_RELFLAGS += -ffunction-sections -fvisibility=hidden
+ 
+ PLATFORM_LDFLAGS += -Bsymbolic -Bsymbolic-functions -m elf_i386
+ 
+-LDFLAGS_FINAL += --wrap=__divdi3 --wrap=__udivdi3
+-LDFLAGS_FINAL += --wrap=__moddi3 --wrap=__umoddi3
+-
+ # This is used in the top-level Makefile which does not include
+ # PLATFORM_LDFLAGS
+ LDFLAGS_EFI_PAYLOAD := -Bsymbolic -Bsymbolic-functions -shared --no-undefined
+diff --git a/arch/x86/lib/gcc.c b/arch/x86/lib/gcc.c
+index 3c70d79..6b47785 100644
+--- a/arch/x86/lib/gcc.c
++++ b/arch/x86/lib/gcc.c
+@@ -8,22 +8,97 @@
+ 
+ #ifdef __GNUC__
+ 
++#include <stdint.h>
++#include <stddef.h>
+ /*
+  * GCC's libgcc handling is quite broken. While the libgcc functions
+  * are always regparm(0) the code that calls them uses whatever the
+  * compiler call specifies. Therefore we need a wrapper around those
+  * functions. See gcc bug PR41055 for more information.
+  */
+-#define WRAP_LIBGCC_CALL(type, name) \
+-	type __normal_##name(type a, type b) __attribute__((regparm(0))); \
+-	type __wrap_##name(type a, type b); \
+-	type __attribute__((no_instrument_function)) \
+-		__wrap_##name(type a, type b) \
+-		 { return __normal_##name(a, b); }
+-
+-WRAP_LIBGCC_CALL(long long, __divdi3)
+-WRAP_LIBGCC_CALL(unsigned long long, __udivdi3)
+-WRAP_LIBGCC_CALL(long long, __moddi3)
+-WRAP_LIBGCC_CALL(unsigned long long, __umoddi3)
++uint64_t __udivmoddi4 ( uint64_t num,
++			uint64_t den,
++			uint64_t *rem_p )
++{
++	uint64_t quot = 0, qbit = 1;
++
++	if ( den == 0 ) {
++		return 1/((unsigned)den); /* Intentional divide by zero, without
++					     triggering a compiler warning which
++					     would abort the build */
++	}
++
++	/* Left-justify denominator and count shift */
++	while ( (int64_t)den >= 0 ) {
++		den <<= 1;
++		qbit <<= 1;
++	}
++
++	while ( qbit ) {
++		if ( den <= num ) {
++			num -= den;
++			quot += qbit;
++		}
++		den >>= 1;
++		qbit >>= 1;
++	}
++
++	if ( rem_p )
++		*rem_p = num;
++
++	return quot;
++} 	
++
++uint64_t __udivdi3( uint64_t num, uint64_t den )
++{
++	return __udivmoddi4(num, den, NULL);
++}
++
++uint64_t __umoddi3 ( uint64_t num, uint64_t den )
++{
++	uint64_t v;
++
++	(void) __udivmoddi4(num, den, &v);
++	return v;
++}
++
++int64_t __divmoddi4 ( int64_t num,
++		int64_t den,
++		int64_t* rem_p )
++{
++	int minus = 0;
++	int64_t v;
++
++	if ( num < 0 ) {
++		num = -num;
++		minus = 1;
++	}
++	if ( den < 0 ) {
++		den = -den;
++		minus ^= 1;
++	}
++
++	v = __udivmoddi4(num, den, (uint64_t *)rem_p);
++	if ( minus ) {
++		v = -v;
++		if ( rem_p )
++			*rem_p = -(*rem_p);
++	}
++
++	return v;
++}
++
++int64_t __moddi3 (int64_t num, int64_t den)
++{
++	int64_t v;
++
++	(void) __divmoddi4(num, den, &v);
++	return v;
++}
++
++int64_t __divdi3(int64_t num, int64_t den)
++{
++ 	return __divmoddi4(num, den, NULL);
++}
+ 
+ #endif
+-- 
+2.9.2
+

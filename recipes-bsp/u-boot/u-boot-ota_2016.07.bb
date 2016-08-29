@@ -9,7 +9,8 @@ LIC_FILES_CHKSUM = "file://Licenses/README;md5=a2c678cfd4a4d97135585cad908541c6"
 # repo during parse
 SRCREV = "25922d42f8e9e7ae503ae55a972ba1404e5b6a8c"
 
-SRC_URI += "file://0001-Set-up-environment-for-OSTree-integration.patch"
+SRC_URI += "file://0001-Set-up-environment-for-OSTree-integration.patch \
+	    file://0002-Replace-wraps-with-built-in-code-to-remove-dependenc.patch"
 
 PV = "v2016.07+git${SRCPV}"
 
