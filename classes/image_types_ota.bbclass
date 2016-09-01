@@ -12,6 +12,7 @@ export BOOTFS_EXTRA_SIZE
 do_otaimg[depends] += "e2fsprogs-native:do_populate_sysroot \
 		       parted-native:do_populate_sysroot \
 		       virtual/kernel:do_deploy \
+		       virtual/bootloader:do_deploy \
 		       ${INITRD_IMAGE}:do_rootfs \
 		       ${PN}:do_rootfs"
 
