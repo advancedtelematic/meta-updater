@@ -22,9 +22,17 @@ FILES_${PN} += "${libdir}/ostree/ ${libdir}/ostbuild"
 
 BBCLASSEXTEND = "native"
 
+export STAGING_INCDIR
+export STAGING_LIBDIR
+
 do_configure() {
  NOCONFIGURE=true ./autogen.sh
  oe_runconf
+}
+
+do_compile_prepend() {
+ export BUILD_SYS="${BUILD_SYS}"
+ export HOST_SYS="${HOST_SYS}"
 }
 
 do_install_append() {
@@ -37,5 +45,9 @@ do_install_append() {
 SYSTEMD_SERVICE_${PN} = "ostree-prepare-root.service ostree-remount.service"
 FILES_${PN} += " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '${systemd_unitdir}/system/', '', d)} \
+    ${datadir}/gir-1.0 \
+    ${datadir}/gir-1.0/OSTree-1.0.gir \
     ${libdir}/dracut/ \
+    ${libdir}/girepository-1.0 \
+    ${libdir}/girepository-1.0/OSTree-1.0.typelib \
 "
