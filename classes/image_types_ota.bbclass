@@ -13,8 +13,8 @@ do_otaimg[depends] += "e2fsprogs-native:do_populate_sysroot \
 		       parted-native:do_populate_sysroot \
 		       virtual/kernel:do_deploy \
 		       virtual/bootloader:do_deploy \
-		       ${INITRD_IMAGE}:do_rootfs \
-		       ${PN}:do_rootfs"
+		       ${INITRD_IMAGE}:do_image_cpio \
+		       ${PN}:do_image_ext4"
 
 ROOTFS ?= "${DEPLOY_DIR_IMAGE}/${IMAGE_BASENAME}-${MACHINE}.ext4"
 INITRD_IMAGE ?= "core-image-minimal-initramfs"
@@ -45,7 +45,6 @@ do_otaimg () {
 	rm -f $BOOTIMG
 	build_bootfs $BOOTIMG
 
-	# ext4 image should be already here because of IMAGE_TYPEDEP_otaimg
 	ROOTIMG=${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.ext4
 
 	BOOTFSBLOCKS=`du -bks ${BOOTIMG} | cut -f 1`

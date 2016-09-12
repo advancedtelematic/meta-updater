@@ -4,7 +4,7 @@ inherit image_types
 
 IMAGE_DEPENDS_ostree = "ostree-native:do_populate_sysroot \ 
 			virtual/kernel:do_deploy \
-			${INITRAMFS_IMAGE}:do_rootfs"
+			${INITRAMFS_IMAGE}:do_image_cpio"
 
 # Please redefine OSTREE_REPO in your local.conf in order to have a persistent
 #   OSTree repo
