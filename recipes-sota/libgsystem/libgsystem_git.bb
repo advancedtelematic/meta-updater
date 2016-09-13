@@ -15,7 +15,23 @@ inherit autotools-brokensep
 
 BBCLASSEXTEND += "native"
 
+export STAGING_INCDIR
+export STAGING_LIBDIR
+
 do_configure() {
  NOCONFIGURE=true ./autogen.sh
  oe_runconf
 }
+
+do_compile_prepend() {
+ export BUILD_SYS="${BUILD_SYS}"
+ export HOST_SYS="${HOST_SYS}"
+}
+
+FILES_${PN} += " \
+    ${datadir} \
+    ${datadir}/gir-1.0 \
+    ${datadir}/gir-1.0/GSystem-1.0.gir \
+    ${libdir}/girepository-1.0/ \
+    ${libdir}/girepository-1.0/GSystem-1.0.typelib \
+"
