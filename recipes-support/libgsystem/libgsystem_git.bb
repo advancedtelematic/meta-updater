@@ -7,13 +7,14 @@ SRCREV="d606bec68ddfea78de4b03c3f3568afb71bdc1ce"
 
 S = "${WORKDIR}/git"
 
-DEPENDS += "attr glib-2.0 pkgconfig libcap"
-
-RDEPENDS_${PN} = "systemd liblzma"
-
 inherit autotools-brokensep
 
-BBCLASSEXTEND += "native"
+DEPENDS += "attr glib-2.0 pkgconfig libcap"
+RDEPENDS_${PN} = "xz systemd"
+
+RDEPENDS_${PN}_remove_class-native = "systemd-native"
+
+BBCLASSEXTEND = "native"
 
 export STAGING_INCDIR
 export STAGING_LIBDIR
