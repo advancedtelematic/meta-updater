@@ -59,5 +59,7 @@ FILES_${PN} += " \
     ${@'${systemd_unitdir}/system/' if d.getVar('SYSTEMD_REQUIRED', True) else ''} \
     ${datadir}/gir-1.0 \
     ${datadir}/gir-1.0/OSTree-1.0.gir \
+    ${libdir}/girepository-1.0 \
+    ${libdir}/girepository-1.0/OSTree-1.0.typelib \
 "
 
