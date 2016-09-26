@@ -6,75 +6,103 @@
 # OSTree updates may require some space on boot file system for
 # boot scripts, kernel and initramfs images
 #
-BOOTFS_EXTRA_SIZE ?= "512"
-export BOOTFS_EXTRA_SIZE
 
-do_otaimg[depends] += "e2fsprogs-native:do_populate_sysroot \
-		       parted-native:do_populate_sysroot \
-		       virtual/kernel:do_deploy \
-		       virtual/bootloader:do_deploy \
-		       ${INITRD_IMAGE}:do_image_cpio \
-		       ${PN}:do_image_ext4"
+inherit image
 
-ROOTFS ?= "${DEPLOY_DIR_IMAGE}/${IMAGE_BASENAME}-${MACHINE}.ext4"
-INITRD_IMAGE ?= "core-image-minimal-initramfs"
-INITRD ?= "${DEPLOY_DIR_IMAGE}/${INITRD_IMAGE}-${MACHINE}.cpio.gz"
+IMAGE_DEPENDS_otaimg = "e2fsprogs-native:do_populate_sysroot \
+			virtual/bootloader:do_deploy"
 
-build_bootfs () {
-	KERNEL_FILE=${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE} 
-	KERNEL_SIZE=`du -Lbs ${KERNEL_FILE} | cut -f 1`
+calculate_size () {
+	BASE=$1
+	SCALE=$2
+	MIN=$3
+	MAX=$4
+	EXTRA=$5
+	ALIGN=$6
 
-	RAMDISK_FILE=${DEPLOY_DIR_IMAGE}/${INITRD_IMAGE}-${MACHINE}.cpio.gz 
-	RAMDISK_SIZE=`du -Lbs ${RAMDISK_FILE} | cut -f 1`
+	SIZE=`echo "$BASE * $SCALE" | bc -l`
+	REM=`echo $SIZE | cut -d "." -f 2`
+	SIZE=`echo $SIZE | cut -d "." -f 1`
 
-	EXTRA_BYTES=$(expr $BOOTFS_EXTRA_SIZE \* 1024 \* 1024)
+	if [ -n "$REM" -o ! "$REM" -eq 0 ]; then
+		SIZE=`expr $SIZE \+ 1`
+	fi
 
-	TOTAL_SIZE=$(expr ${KERNEL_SIZE} \+ ${RAMDISK_SIZE} \+ ${EXTRA_BYTES})
-	TOTAL_BLOCKS=$(expr 1 \+ $TOTAL_SIZE / 1024)
+	if [ "$SIZE" -lt "$MIN" ]; then
+		$SIZE=$MIN
+	fi
 
-	dd if=/dev/zero of=$1 bs=1024 count=${TOTAL_BLOCKS}
-	BOOTTMP=$(mktemp -d mkotaboot-XXX) 
-	cp ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE} ${BOOTTMP}
-	cp ${DEPLOY_DIR_IMAGE}/${INITRD_IMAGE}-${MACHINE}.cpio.gz ${BOOTTMP}
-	mkfs.ext4 $1 -d ${BOOTTMP}
-	rm -rf $BOOTTMP
+	SIZE=`expr $SIZE \+ $EXTRA`
+	SIZE=`expr $SIZE \+ $ALIGN \- 1`
+	SIZE=`expr $SIZE \- $SIZE \% $ALIGN`
+
+	if [ -n "$MAX" ]; then
+		if [ "$SIZE" -gt "$MAX" ]; then
+			return -1
+		fi
+	fi
+	
+	echo "${SIZE}"
 }
 
-do_otaimg () {
-	BOOTIMG=${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaboot.ext4
-	rm -f $BOOTIMG
-	build_bootfs $BOOTIMG
+export OSTREE_OSNAME
+export OSTREE_BRANCHNAME
+export OSTREE_REPO
 
-	ROOTIMG=${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.ext4
+IMAGE_CMD_otaimg () {
+	if ${@bb.utils.contains('IMAGE_FSTYPES', 'otaimg', 'true', 'false', d)}; then
+		if [ -z "$OSTREE_REPO" ]; then
+			bbfatal "OSTREE_REPO should be set in your local.conf"
+		fi
 
-	BOOTFSBLOCKS=`du -bks ${BOOTIMG} | cut -f 1`
+		if [ -z "$OSTREE_OSNAME" ]; then
+			bbfatal "OSTREE_OSNAME should be set in your local.conf"
+		fi
 
-	ROOTFSBLOCKS=`du -bks ${ROOTIMG} | cut -f 1`
-	TOTALSIZE=`expr $BOOTFSBLOCKS \+ $ROOTFSBLOCKS`
-	END1=`expr $BOOTFSBLOCKS \* 1024`
-	END2=`expr $END1 + 512`
-	END3=`expr \( $ROOTFSBLOCKS \* 1024 \) + $END1`
+		if [ -z "$OSTREE_BRANCHNAME" ]; then
+			bbfatal "OSTREE_BRANCHNAME should be set in your local.conf"
+		fi
 
-	FULLIMG=${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg
-	rm -rf ${FULLIMG}
 
-	dd if=/dev/zero of=${FULLIMG} bs=1024 seek=${TOTALSIZE} count=1
-	parted ${FULLIMG} mklabel msdos 
-	parted ${FULLIMG} mkpart primary ext4 0 ${END1}B
-	parted ${FULLIMG} unit B mkpart primary ext4 ${END2}B ${END3}B
+		PHYS_SYSROOT=`mktemp -d ${WORKDIR}/ota-sysroot-XXXXX`
 
-	OFFSET=`expr $END2 / 512`
+		ostree admin --sysroot=${PHYS_SYSROOT} init-fs ${PHYS_SYSROOT}
+		ostree admin --sysroot=${PHYS_SYSROOT} os-init ${OSTREE_OSNAME}
 
-	dd if=${BOOTIMG} of=${FULLIMG} conv=notrunc seek=1 bs=512
-	dd if=${ROOTIMG} of=${FULLIMG} conv=notrunc seek=$OFFSET bs=512
+		mkdir -p ${PHYS_SYSROOT}/boot/loader.0
+		ln -s loader.0 ${PHYS_SYSROOT}/boot/loader
 
-	cd ${DEPLOY_DIR_IMAGE}
-	rm -f ${IMAGE_LINK_NAME}.otaimg
-	ln -s ${IMAGE_NAME}.otaimg ${IMAGE_LINK_NAME}.otaimg
+		touch ${PHYS_SYSROOT}/boot/loader/uEnv.txt
+
+		ostree --repo=${PHYS_SYSROOT}/ostree/repo pull-local --remote=${OSTREE_OSNAME} ${OSTREE_REPO} ${OSTREE_BRANCHNAME}
+		ostree admin --sysroot=${PHYS_SYSROOT} deploy --os=${OSTREE_OSNAME} ${OSTREE_OSNAME}:${OSTREE_BRANCHNAME}
+		
+		# Copy deployment /home to sysroot
+		HOME_TMP=`mktemp -d ${WORKDIR}/home-tmp-XXXXX`
+		tar --xattrs --xattrs-include='*' -C ${HOME_TMP} -xf ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2 ./usr/homedirs
+		mv ${HOME_TMP}/usr/homedirs/home ${PHYS_SYSROOT}/
+		rm -rf ${HOME_TMP}
+
+		OTA_ROOTFS_SIZE=$(calculate_size `du -ks $PHYS_SYSROOT | cut -f 1`  "${IMAGE_OVERHEAD_FACTOR}" "${IMAGE_ROOTFS_SIZE}" "${IMAGE_ROOTFS_MAXSIZE}" `expr ${IMAGE_ROOTFS_EXTRA_SPACE}` "${IMAGE_ROOTFS_ALIGNMENT}")
+
+		if [ $OTA_ROOTFS_SIZE -lt 0 ]; then
+			exit -1
+		fi
+		eval local COUNT=\"0\"
+		eval local MIN_COUNT=\"60\"
+		if [ $OTA_ROOTFS_SIZE -lt $MIN_COUNT ]; then
+			eval COUNT=\"$MIN_COUNT\"
+		fi
+
+		rm -rf ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg
+		sync
+		dd if=/dev/zero of=${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg seek=$OTA_ROOTFS_SIZE count=$COUNT bs=1024
+		mkfs.ext4 ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg -d ${PHYS_SYSROOT}
+		rm -rf ${PHYS_SYSROOT}
+
+		rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg
+		ln -s ${IMAGE_NAME}.otaimg ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg
+	fi
 }
 
-addtask otaimg before do_build
-
-IMAGE_TYPES += " otaimg"
-IMAGE_TYPES_MASKED += "otaimg"
-IMAGE_TYPEDEP_otaimg = "ext4"
+IMAGE_TYPEDEP_otaimg = "ostree"

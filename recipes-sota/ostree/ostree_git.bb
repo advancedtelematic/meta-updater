@@ -7,7 +7,7 @@ inherit autotools-brokensep pkgconfig systemd
 INHERIT_remove_class-native = "systemd"
 
 SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master"
-SRCREV="v2016.10"
+SRCREV="v2016.5"
 
 S = "${WORKDIR}/git"
 
@@ -19,7 +19,8 @@ DEPENDS_remove_class-native = "systemd-native"
 RDEPENDS_${PN} = "python util-linux-libuuid util-linux-libblkid util-linux-libmount libcap xz"
 RDEPENDS_${PN}_remove_class-native = "python-native"
 
-EXTRA_OECONF = "--with-libarchive --disable-gtk-doc --disable-gtk-doc-html --disable-gtk-doc-pdf --disable-man"
+EXTRA_OECONF = "CFLAGS='-DDISABLE_OTMPFILE' --with-libarchive --disable-gtk-doc --disable-gtk-doc-html --disable-gtk-doc-pdf --disable-man"
+EXTRA_OEMAKE = "CFLAGS='-DDISABLE_OTMPFILE'"
 
 SYSTEMD_REQUIRED = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}"
 SYSTEMD_REQUIRED_class-native = ""
@@ -29,7 +30,7 @@ SYSTEMD_SERVICE_${PN}_class-native = ""
 
 PACKAGECONFIG ??= "${@base_contains('DISTRO_FEATURES', 'systemd', 'systemd', '', d)}"
 PACKAGECONFIG_class-native = ""
-PACKAGECONFIG[systemd] = "--with-systemdsystemunitdir=${systemd_unitdir}/system/,,,"
+PACKAGECONFIG[systemd] = "--with-systemdsystemunitdir=${systemd_unitdir}/system/ --with-dracut"
 
 FILES_${PN} += "${libdir}/ostree/ ${libdir}/ostbuild"
 
@@ -57,6 +58,7 @@ do_install_append() {
 
 FILES_${PN} += " \
     ${@'${systemd_unitdir}/system/' if d.getVar('SYSTEMD_REQUIRED', True) else ''} \
+    ${@'${libdir}/dracut/modules.d/98ostree/module-setup.sh' if d.getVar('SYSTEMD_REQUIRED', True) else ''} \
     ${datadir}/gir-1.0 \
     ${datadir}/gir-1.0/OSTree-1.0.gir \
     ${libdir}/girepository-1.0 \
