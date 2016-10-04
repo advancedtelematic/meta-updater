@@ -7,6 +7,7 @@ inherit autotools-brokensep pkgconfig systemd
 INHERIT_remove_class-native = "systemd"
 
 SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master"
+
 SRCREV="v2016.5"
 
 S = "${WORKDIR}/git"
@@ -64,4 +65,10 @@ FILES_${PN} += " \
     ${libdir}/girepository-1.0 \
     ${libdir}/girepository-1.0/OSTree-1.0.typelib \
 "
+
+PACKAGES =+ "${PN}-switchroot"
+
+FILES_${PN}-switchroot = "${sbindir}/ostree-prepare-root"
+RDEPENDS_${PN}-switchroot = ""
+DEPENDS_remove_class-native = "systemd-native"
 

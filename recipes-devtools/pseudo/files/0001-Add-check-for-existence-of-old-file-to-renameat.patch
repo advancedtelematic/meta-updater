@@ -1,0 +1,40 @@
+From 41bb6c818a7ec9eeb33b60302c55c9c5ee393c5f Mon Sep 17 00:00:00 2001
+From: Anton Gerasimov <anton@advancedtelematic.com>
+Date: Fri, 30 Sep 2016 17:12:19 +0200
+Subject: [PATCH 1/1] Add check for existence of old file to renameat
+
+---
+ ports/unix/guts/renameat.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/ports/unix/guts/renameat.c b/ports/unix/guts/renameat.c
+index ade0509..d5e36fa 100644
+--- a/ports/unix/guts/renameat.c
++++ b/ports/unix/guts/renameat.c
+@@ -11,6 +11,7 @@
+ 	int oldrc, newrc;
+ 	int save_errno;
+ 	int old_db_entry = 0;
++	int may_unlinked = 0;
+ 
+ 	pseudo_debug(PDBGF_FILE, "renameat: %d,%s->%d,%s\n",
+ 		olddirfd, oldpath ? oldpath : "<nil>",
+@@ -44,10 +45,14 @@
+ 	/* as with unlink, we have to mark that the file may get deleted */
+ 	msg = pseudo_client_op(OP_MAY_UNLINK, 0, -1, newdirfd, newpath, newrc ? NULL : &newbuf);
+ 	if (msg && msg->result == RESULT_SUCCEED)
++		may_unlinked = 1;
++	msg = pseudo_client_op(OP_STAT, 0, -1, olddirfd, oldpath, oldrc ? NULL : &oldbuf);
++	if (msg && msg->result == RESULT_SUCCEED)
+ 		old_db_entry = 1;
++
+ 	rc = real_renameat(olddirfd, oldpath, newdirfd, newpath);
+ 	save_errno = errno;
+-	if (old_db_entry) {
++	if (may_unlinked) {
+ 		if (rc == -1) {
+ 			/* since we failed, that wasn't really unlinked -- put
+ 			 * it back.
+-- 
+2.9.3
+

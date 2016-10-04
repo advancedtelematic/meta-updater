@@ -1,7 +1,7 @@
 # Netboot initramfs image.
 DESCRIPTION = "OSTree initramfs image"
 
-PACKAGE_INSTALL = "ostree ostree-initramfs systemd-initramfs busybox base-passwd ${ROOTFS_BOOTSTRAP_INSTALL}"
+PACKAGE_INSTALL = "ostree-switchroot ostree-initrd busybox base-passwd ${ROOTFS_BOOTSTRAP_INSTALL}"
 
 SYSTEMD_DEFAULT_TARGET = "initrd.target"
 

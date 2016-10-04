@@ -4,7 +4,7 @@ inherit image
 
 IMAGE_DEPENDS_ostree = "ostree-native:do_populate_sysroot \ 
 			virtual/kernel:do_deploy \
-			${OSTREE_INITRAMFS_IMAGE}:do_image_cpio"
+			${OSTREE_INITRAMFS_IMAGE}:do_image_ext4"
 
 export OSTREE_REPO
 export OSTREE_BRANCHNAME
@@ -93,7 +93,7 @@ IMAGE_CMD_ostree () {
 	checksum=`sha256sum ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE} | cut -f 1 -d " "`
 
 	cp ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE} boot/vmlinuz-${checksum}
-	cp ${DEPLOY_DIR_IMAGE}/${OSTREE_INITRAMFS_IMAGE}-${MACHINE}.cpio.gz boot/initramfs-${checksum}
+	cp ${DEPLOY_DIR_IMAGE}/${OSTREE_INITRAMFS_IMAGE}-${MACHINE}.ext4.gz boot/initramfs-${checksum}
 
 	cd ${WORKDIR}
 
