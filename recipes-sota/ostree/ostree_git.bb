@@ -8,7 +8,7 @@ INHERIT_remove_class-native = "systemd"
 
 SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master"
 
-SRCREV="v2016.5"
+SRCREV="v2016.11"
 
 S = "${WORKDIR}/git"
 
@@ -20,8 +20,9 @@ DEPENDS_remove_class-native = "systemd-native"
 RDEPENDS_${PN} = "python util-linux-libuuid util-linux-libblkid util-linux-libmount libcap xz"
 RDEPENDS_${PN}_remove_class-native = "python-native"
 
-EXTRA_OECONF = "CFLAGS='-DDISABLE_OTMPFILE' --with-libarchive --disable-gtk-doc --disable-gtk-doc-html --disable-gtk-doc-pdf --disable-man"
-EXTRA_OEMAKE = "CFLAGS='-DDISABLE_OTMPFILE'"
+EXTRA_OECONF = "CFLAGS='-g' --with-libarchive --disable-gtk-doc --disable-gtk-doc-html --disable-gtk-doc-pdf --disable-man"
+EXTRA_OEMAKE = "CFLAGS='-g'"
+EXTRA_OECONF_append_class-native = " --enable-wrpseudo-compat"
 
 SYSTEMD_REQUIRED = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}"
 SYSTEMD_REQUIRED_class-native = ""
@@ -68,7 +69,7 @@ FILES_${PN} += " \
 
 PACKAGES =+ "${PN}-switchroot"
 
-FILES_${PN}-switchroot = "${sbindir}/ostree-prepare-root"
+FILES_${PN}-switchroot = "${libdir}/ostree/ostree-prepare-root"
 RDEPENDS_${PN}-switchroot = ""
 DEPENDS_remove_class-native = "systemd-native"
 

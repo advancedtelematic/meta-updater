@@ -35,7 +35,7 @@ get_ostree_sysroot() {
 	done
 }
 
-export PATH=/sbin:/usr/sbin:/bin:/usr/bin
+export PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/lib/ostree
 
 log_info "starting initrd script"
 
