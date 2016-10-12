@@ -13,7 +13,9 @@ IMAGE_LINGUAS = ""
 
 LICENSE = "MIT"
 
-IMAGE_FSTYPES = "${INITRAMFS_FSTYPES}"
+# was ${INITRAMFS_FSTYPES} which defaults to cpio.gz
+# due to xattr, we need ext3/4
+IMAGE_FSTYPES = "ext4.gz"
 inherit core-image
 
 IMAGE_ROOTFS_SIZE = "8192"
