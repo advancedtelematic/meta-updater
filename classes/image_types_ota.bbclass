@@ -9,8 +9,11 @@
 
 inherit image
 
-IMAGE_DEPENDS_otaimg = "e2fsprogs-native:do_populate_sysroot \
-			virtual/bootloader:do_deploy"
+IMAGE_DEPENDS_otaimg = "e2fsprogs-native:do_populate_sysroot"
+
+# For qemux86 u-boot is not included in any live image and is built separately
+IMAGE_DEPENDS_otaimg_append_qemux86 = " virtual/bootloader:do_deploy"
+IMAGE_DEPENDS_otaimg_append_qemux86-64 = " virtual/bootloader:do_deploy"
 
 calculate_size () {
 	BASE=$1
