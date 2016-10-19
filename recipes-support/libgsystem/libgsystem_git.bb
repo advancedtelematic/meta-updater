@@ -7,7 +7,7 @@ SRCREV="d606bec68ddfea78de4b03c3f3568afb71bdc1ce"
 
 S = "${WORKDIR}/git"
 
-inherit autotools-brokensep
+inherit autotools-brokensep gobject-introspection
 
 DEPENDS += "attr glib-2.0 pkgconfig libcap"
 RDEPENDS_${PN} = "xz systemd"
