@@ -1,0 +1,7 @@
+fdt_addr_r=0x0c800000
+bootcmd_dtb=fdt addr $fdt_addr_r; fdt get value bootargs_fdt /chosen bootargs
+bootcmd_otenv=ext2load mmc 0:2 $loadaddr /boot/loader/uEnv.txt; env import -t $loadaddr $filesize
+bootcmd_args=setenv bootargs "$bootargs $bootargs_fdt ostree_root=/dev/mmcblk0p2 root=/dev/ram0 rw rootwait rootdelay=2 ramdisk_size=8192"
+bootcmd_load=ext2load mmc 0:2 $kernel_addr_r "/boot"$kernel_image; ext2load mmc 0:2 $ramdisk_addr_r "/boot"$ramdisk_image
+bootcmd_run=bootm $kernel_addr_r $ramdisk_addr_r $fdt_addr_r
+bootcmd=run bootcmd_dtb; run bootcmd_otenv; run bootcmd_args; run bootcmd_load; run bootcmd_run
