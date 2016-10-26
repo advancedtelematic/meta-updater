@@ -2,7 +2,7 @@ SUMMARY = "Tool for managing bootable, immutable, versioned filesystem trees"
 LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://COPYING;md5=5f30f0716dfdd0d91eb439ebec522ec2"
 
-inherit autotools-brokensep pkgconfig systemd
+inherit autotools-brokensep pkgconfig systemd gobject-introspection
 
 INHERIT_remove_class-native = "systemd"
 
