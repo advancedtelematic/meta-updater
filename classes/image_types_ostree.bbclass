@@ -9,6 +9,9 @@ IMAGE_DEPENDS_ostree = "ostree-native:do_populate_sysroot \
 export OSTREE_REPO
 export OSTREE_BRANCHNAME
 
+RAMDISK_EXT ?= ".ext4.gz"
+RAMDISK_EXT_arm = ".ext4.gz.u-boot"
+
 IMAGE_CMD_ostree () {
 	if [ -z "$OSTREE_REPO" ]; then
 		bbfatal "OSTREE_REPO should be set in your local.conf"
@@ -93,7 +96,7 @@ IMAGE_CMD_ostree () {
 	checksum=`sha256sum ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE} | cut -f 1 -d " "`
 
 	cp ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE} boot/vmlinuz-${checksum}
-	cp ${DEPLOY_DIR_IMAGE}/${OSTREE_INITRAMFS_IMAGE}-${MACHINE}.ext4.gz boot/initramfs-${checksum}
+	cp ${DEPLOY_DIR_IMAGE}/${OSTREE_INITRAMFS_IMAGE}-${MACHINE}${RAMDISK_EXT} boot/initramfs-${checksum}
 
 	cd ${WORKDIR}
 

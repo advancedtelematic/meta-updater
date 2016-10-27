@@ -13,9 +13,9 @@ IMAGE_LINGUAS = ""
 
 LICENSE = "MIT"
 
-# was ${INITRAMFS_FSTYPES} which defaults to cpio.gz
-# due to xattr, we need ext3/4
 IMAGE_FSTYPES = "ext4.gz"
+IMAGE_FSTYPES_append_arm = " ext4.gz.u-boot"
+
 inherit core-image
 
 IMAGE_ROOTFS_SIZE = "8192"
