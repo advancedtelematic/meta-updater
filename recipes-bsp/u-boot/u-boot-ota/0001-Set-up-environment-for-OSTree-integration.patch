@@ -23,7 +23,7 @@ index 78c296f..79df455 100644
 +
 +#undef CONFIG_BOOTCOMMAND
 +#define CONFIG_BOOTCOMMAND "run loadenv;" \
-+			   "setenv bootargs $bootargs\" console=ttyS0 root=/dev/ram0 rw rootfstype=ext4 rootwait rootdelay=2 ostree_root=/dev/hda ramdisk_size=8192 \";" \
++			   "setenv bootargs $bootargs\" console=ttyS0 root=/dev/ram0 rw rootfstype=ext4 rootwait rootdelay=2 ostree_root=/dev/hda ramdisk_size=16384 \";" \
 +			   "ext2load ide 0 $loadaddr \"/boot\"$kernel_image;" \
 +			   "ext2load ide 0 $ramdiskaddr \"/boot\"$ramdisk_image;" \
 +			   "zboot $loadaddr - $ramdiskaddr $filesize"
