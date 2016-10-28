@@ -10,7 +10,9 @@ export OSTREE_REPO
 export OSTREE_BRANCHNAME
 
 RAMDISK_EXT ?= ".ext4.gz"
-RAMDISK_EXT_arm = ".ext4.gz.u-boot"
+RAMDISK_EXT_arm ?= ".ext4.gz.u-boot"
+
+OSTREE_KERNEL ??= "${KERNEL_IMAGETYPE}"
 
 IMAGE_CMD_ostree () {
 	if [ -z "$OSTREE_REPO" ]; then
@@ -93,9 +95,9 @@ IMAGE_CMD_ostree () {
 	mkdir -p boot/loader.1
 	ln -sf boot/loader.0 boot/loader
 
-	checksum=`sha256sum ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE} | cut -f 1 -d " "`
+	checksum=`sha256sum ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} | cut -f 1 -d " "`
 
-	cp ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE} boot/vmlinuz-${checksum}
+	cp ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} boot/vmlinuz-${checksum}
 	cp ${DEPLOY_DIR_IMAGE}/${OSTREE_INITRAMFS_IMAGE}-${MACHINE}${RAMDISK_EXT} boot/initramfs-${checksum}
 
 	cd ${WORKDIR}
