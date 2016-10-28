@@ -1,0 +1,39 @@
+---
+ src/Makefile      |    2 +-
+ src/core/Makefile |    2 +-
+ src/gui/Makefile  |    4 ++--
+ 3 files changed, 4 insertions(+), 4 deletions(-)
+
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -18,7 +18,7 @@ export MANDIR
+ export DATADIR
+ export SQLITE
+ 
+-CXX?=c++
++CXX?=$(CROSS_COMPILE)c++
+ INCLUDES=-I./core/
+ DEFINES=-DPREFIX=\"$(PREFIX)\" -DSBINDIR=\"$(SBINDIR)\" -DMANDIR=\"$(MANDIR)\" -DDATADIR=\"$(DATADIR)\"
+ CXXFLAGS=-g -Wall -g $(INCLUDES) $(DEFINES) $(RPM_OPT_FLAGS)
+--- a/src/core/Makefile
++++ b/src/core/Makefile
+@@ -1,6 +1,6 @@
+ PACKAGENAME?=lshw
+ 
+-CXX=c++
++CXX?=$(CROSS_COMPILE)c++
+ INCLUDES=
+ DEFINES=-DPREFIX=\"$(PREFIX)\" -DSBINDIR=\"$(SBINDIR)\" -DMANDIR=\"$(MANDIR)\" -DDATADIR=\"$(DATADIR)\"
+ CXXFLAGS?=-g -Wall $(INCLUDES) $(DEFINES) $(RPM_OPT_FLAGS)
+--- a/src/gui/Makefile
++++ b/src/gui/Makefile
+@@ -1,7 +1,7 @@
+ PACKAGENAME?=lshw
+ 
+-CXX?=c++
+-CC?=cc
++CXX?=$(CROSS_COMPILE)c++
++CC?=$(CROSS_COMPILE)cc
+ STRIP?=strip
+ OBJCOPY?=objcopy
+ 
