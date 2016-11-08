@@ -112,6 +112,8 @@ RDEPENDS_${PN} = " libcrypto \
                    lshw \
                    jq \
                    "
+export SOTA_VERSION = "${PV}"
+
 do_compile_prepend() {
   # Fetch and build the specific build of hyper that is specified in cargo.toml.
   # meta-rust doesn't support fetching crates that don't point to a specific tag
@@ -134,6 +136,5 @@ do_install() {
   install -c ${S}/run/sota_client.service ${D}${systemd_unitdir}/system
 
   install -d ${D}${sysconfdir}
-  echo `git log -1 --pretty=format:%H` > ${D}${sysconfdir}/sota_client.version
   install -c ${S}/run/sota_certificates ${D}${sysconfdir}
 }
