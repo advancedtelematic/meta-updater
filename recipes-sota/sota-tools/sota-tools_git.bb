@@ -6,11 +6,11 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=65d26fcc2f35ea6a181ac777e42db1ea"
 S = "${WORKDIR}/git"
 
 SRC_URI = "gitsm://github.com/advancedtelematic/sota-tools.git;branch=master"
-SRCREV = "7ff1d92c161ba4fb047a1e1e4cba5424b4adca00"
+SRCREV = "a70ae808db4cbabdc643ea3453cd7d8efac6c659"
 
 inherit cmake
 
-DEPENDS = "boost"
+DEPENDS = "boost glib-2.0"
 
 BBCLASSEXTEND = "native"
 

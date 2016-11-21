@@ -127,19 +127,9 @@ IMAGE_CMD_ostree () {
 IMAGE_TYPEDEP_ostreepush = "ostree"
 IMAGE_DEPENDS_ostreepush = "sota-tools-native:do_populate_sysroot"
 IMAGE_CMD_ostreepush () {
-	if [ ${OSTREE_REMOTE_URL} ]; then
-		if [ -z ${OSTREE_REMOTE_USER} ]; then
-			bberror "OSTREE_REMOTE_PASSWORD isn't set"
-		fi
-
-		if [ -z ${OSTREE_REMOTE_PASSWORD} ]; then
-			bberror "OSTREE_REMOTE_PASSWORD isn't set"
-		fi
-
+	if [ ${OSTREE_PUSH_CREDENTIALS} ]; then
 		garage-push --repo=${OSTREE_REPO} \
 			    --ref=${OSTREE_BRANCHNAME} \
-			    --url=${OSTREE_REMOTE_URL} \
-			    --user=${OSTREE_REMOTE_USER} \
-			    --password=${OSTREE_REMOTE_PASSWORD}
+			    --credentials=${OSTREE_PUSH_CREDENTIALS}
 	fi
 }

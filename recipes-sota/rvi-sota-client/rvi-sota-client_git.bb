@@ -8,20 +8,21 @@ inherit cargo systemd
 
 S = "${WORKDIR}/git"
 
-SRCREV = "63437b6978bc1c2e3d6a9a5914fe165fdd2a0f5f"
+SRCREV = "2d2e57609ffa09b17a2c948365f2e74bff91ae8c"
 
 # Generate with:
 #   git describe --tags | cut -b2-
-PV = "0.2.20-2-g63437b6"
+PV = "0.2.20-14-g2d2e576"
 
 BBCLASSEXTEND = "native"
 
 FILES_${PN} = " \
-                /usr/bin/sota_client \
-                /usr/bin/system_info.sh \
-                /etc/sota_client.version \
-                /etc/sota_certificates \
-                ${base_libdir}/systemd/system/sota_client.service \
+                ${bindir}/sota_client \
+                ${bindir}/system_info.sh \
+                ${sysconfdir}/sota_client.version \
+                ${sysconfdir}/sota_certificates \
+                ${systemd_unitdir}/system/sota_client.service \
+		${bindir}/sota_ostree.sh \
               "
 
 SRC_URI = " \
@@ -131,6 +132,7 @@ do_install() {
   install -d ${D}${bindir}
   install -m 0755 target/${TARGET_SYS}/release/sota_client ${D}${bindir}
   install -m 0755 run/system_info.sh ${D}${bindir}
+  install -m 0755 run/sota_ostree.sh ${D}${bindir}
 
   install -d ${D}${systemd_unitdir}/system
   install -c ${S}/run/sota_client.service ${D}${systemd_unitdir}/system
