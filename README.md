@@ -16,6 +16,10 @@ OSTree.
 Build
 -----
 
+### Build with OpenIVI ###
+### Build from scratch ###
+### Build in AGL ###
+
 With AGL you can just add agl-sota feature while configuring your build
 environment as in
 
