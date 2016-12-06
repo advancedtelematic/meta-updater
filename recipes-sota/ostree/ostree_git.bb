@@ -17,8 +17,8 @@ BBCLASSEXTEND = "native"
 DEPENDS += "attr libarchive glib-2.0 pkgconfig gpgme libgsystem fuse libsoup-2.4 e2fsprogs systemd"
 DEPENDS_remove_class-native = "systemd-native"
 
-RDEPENDS_${PN} = "python util-linux-libuuid util-linux-libblkid util-linux-libmount libcap xz"
-RDEPENDS_${PN}_remove_class-native = "python-native"
+RDEPENDS_${PN} = "python util-linux-libuuid util-linux-libblkid util-linux-libmount libcap xz os-release"
+RDEPENDS_${PN}_remove_class-native = "python-native os-release-native"
 
 EXTRA_OECONF = "CFLAGS='-g' --with-libarchive --disable-gtk-doc --disable-gtk-doc-html --disable-gtk-doc-pdf --disable-man"
 EXTRA_OEMAKE = "CFLAGS='-g'"
