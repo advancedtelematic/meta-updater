@@ -24,6 +24,12 @@ UBOOT_MACHINE_raspberrypi3 = "rpi_3_32b_defconfig"
 PREFERRED_PROVIDER_virtual/bootloader_raspberrypi2 = "u-boot"
 PREFERRED_PROVIDER_virtual/bootloader_raspberrypi3 = "u-boot"
 
+# Some BSPs (e.g. meta-raspberrypi) use this variable to turn debug on/off
+DISTRO_TYPE ?= "${@bb.utils.contains("IMAGE_FEATURES", "debug-tweaks", "debug", "release",d)}"
+
 DISTRO_FEATURES_append = " systemd"
+PREFERRED_PROVIDER_udev ?= "systemd"
+PREFERRED_PROVIDER_udev-utils ?= "systemd"
+VIRTUAL-RUNTIME_init_manager = "systemd"
 
 DISTROOVERRIDES_append = ":sota"
