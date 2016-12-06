@@ -24,4 +24,6 @@ UBOOT_MACHINE_raspberrypi3 = "rpi_3_32b_defconfig"
 PREFERRED_PROVIDER_virtual/bootloader_raspberrypi2 = "u-boot"
 PREFERRED_PROVIDER_virtual/bootloader_raspberrypi3 = "u-boot"
 
+DISTRO_FEATURES_append = " systemd"
+
 DISTROOVERRIDES_append = ":sota"
