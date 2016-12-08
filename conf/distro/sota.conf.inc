@@ -1,4 +1,4 @@
-IMAGE_INSTALL_append = " ostree rvi-sota-client"
+IMAGE_INSTALL_append = " ostree rvi-sota-client sota-credentials"
 
 # live image for OSTree-enabled systems
 IMAGE_CLASSES_append = " image_types_ostree image_types_ota"
