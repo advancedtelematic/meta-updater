@@ -14,6 +14,8 @@ RAMDISK_EXT_arm ?= ".ext4.gz.u-boot"
 
 OSTREE_KERNEL ??= "${KERNEL_IMAGETYPE}"
 
+export SYSTEMD_USED = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', '', d)}"
+
 IMAGE_CMD_ostree () {
 	if [ -z "$OSTREE_REPO" ]; then
 		bbfatal "OSTREE_REPO should be set in your local.conf"
@@ -51,13 +53,21 @@ IMAGE_CMD_ostree () {
 		fi
 	done
 	
-	if [ ! -d "usr/etc/tmpfiles.d" ]; then
-		mkdir usr/etc/tmpfiles.d
-	fi
-	tmpfiles_conf=usr/etc/tmpfiles.d/00ostree-tmpfiles.conf
+	if [ -n "$SYSTEMD_USED" ]; then
+		mkdir -p usr/etc/tmpfiles.d
+		tmpfiles_conf=usr/etc/tmpfiles.d/00ostree-tmpfiles.conf
+		echo "d /var/rootdirs 0755 root root -" >>${tmpfiles_conf}
+		echo "L /var/rootdirs/home - - - - /sysroot/home" >>${tmpfiles_conf}
+	else
+		mkdir -p usr/etc/init.d
+		tmpfiles_conf=usr/etc/init.d/tmpfiles.sh
+		echo '#!/bin/sh' > ${tmpfiles_conf}
+		echo "mkdir -p /var/rootdirs; chmod 755 /var/rootdirs" >> ${tmpfiles_conf}
+		echo "ln -sf /sysroot/home /var/rootdirs/home" >> ${tmpfiles_conf}
 
-	echo "d /var/rootdirs 0755 root root -" >>${tmpfiles_conf}
-	echo "L /var/rootdirs/home - - - - /sysroot/home" >>${tmpfiles_conf}
+		ln -s ../init.d/tmpfiles.sh usr/etc/rcS.d/S20tmpfiles.sh
+	fi
+
 	# Preserve data in /home to be later copied to /sysroot/home by
 	#   sysroot generating procedure
 	mkdir -p usr/homedirs
@@ -74,7 +84,12 @@ IMAGE_CMD_ostree () {
 			if [ "$(ls -A $dir)" ]; then
 				bbwarn "Data in /$dir directory is not preserved by OSTree. Consider moving it under /usr"
 			fi
-			echo "d /var/rootdirs/${dir} 0755 root root -" >>${tmpfiles_conf}
+
+			if [ -n "$SYSTEMD_USED" ]; then
+				echo "d /var/rootdirs/${dir} 0755 root root -" >>${tmpfiles_conf}
+			else
+				echo "mkdir -p /var/rootdirs/${dir}; chown 755 /var/rootdirs/${dir}" >>${tmpfiles_conf}
+			fi
 			rm -rf ${dir}
 			ln -sf var/rootdirs/${dir} ${dir}
 		fi
@@ -84,7 +99,13 @@ IMAGE_CMD_ostree () {
 		if [ "$(ls -A root)" ]; then
 			bberror "Data in /root directory is not preserved by OSTree."
 		fi
-		echo "d /var/roothome 0755 root root -" >>${tmpfiles_conf}
+
+		if [ -n "$SYSTEMD_USED" ]; then
+			echo "d /var/roothome 0755 root root -" >>${tmpfiles_conf}
+		else
+			echo "mkdir -p /var/roothome; chown 755 /var/roothome" >>${tmpfiles_conf}
+		fi
+
 		rm -rf root
 		ln -sf var/roothome root
 	fi

@@ -21,7 +21,7 @@ FILES_${PN} = " \
                 ${bindir}/system_info.sh \
                 ${sysconfdir}/sota_client.version \
                 ${sysconfdir}/sota_certificates \
-                ${systemd_unitdir}/system/sota_client.service \
+		${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '${systemd_unitdir}/system/sota_client.service', '', d)} \
 		${bindir}/sota_ostree.sh \
               "
 
@@ -134,8 +134,10 @@ do_install() {
   install -m 0755 run/system_info.sh ${D}${bindir}
   install -m 0755 run/sota_ostree.sh ${D}${bindir}
 
-  install -d ${D}${systemd_unitdir}/system
-  install -c ${S}/run/sota_client.service ${D}${systemd_unitdir}/system
+  if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
+    install -d ${D}${systemd_unitdir}/system
+    install -c ${S}/run/sota_client.service ${D}${systemd_unitdir}/system
+  fi
 
   install -d ${D}${sysconfdir}
   install -c ${S}/run/sota_certificates ${D}${sysconfdir}

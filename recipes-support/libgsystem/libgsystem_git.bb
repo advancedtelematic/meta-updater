@@ -9,9 +9,9 @@ S = "${WORKDIR}/git"
 
 inherit autotools-brokensep gobject-introspection
 
-DEPENDS += "attr glib-2.0 pkgconfig libcap"
-RDEPENDS_${PN} = "xz systemd"
+DEPENDS += "attr glib-2.0 pkgconfig libcap xz"
 
+RDEPENDS_${PN}_append = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', ' systemd', '', d)}"
 RDEPENDS_${PN}_remove_class-native = "systemd-native"
 
 BBCLASSEXTEND = "native"
