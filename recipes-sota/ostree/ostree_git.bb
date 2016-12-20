@@ -14,7 +14,9 @@ S = "${WORKDIR}/git"
 
 BBCLASSEXTEND = "native"
 
-DEPENDS += "attr libarchive glib-2.0 pkgconfig gpgme libgsystem fuse libsoup-2.4 e2fsprogs systemd"
+DEPENDS += "attr libarchive glib-2.0 pkgconfig gpgme libgsystem fuse libsoup-2.4 e2fsprogs"
+DEPENDS_append = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', ' systemd', '', d)}"
+
 DEPENDS_remove_class-native = "systemd-native"
 
 RDEPENDS_${PN} = "python util-linux-libuuid util-linux-libblkid util-linux-libmount libcap xz os-release"
@@ -25,7 +27,7 @@ EXTRA_OEMAKE = "CFLAGS='-g'"
 EXTRA_OECONF_append_class-native = " --enable-wrpseudo-compat"
 
 SYSTEMD_REQUIRED = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}"
-SYSTEMD_REQUIRED_class-native = ""
+SYSTEMD_REQUIRED_class-native = "false"
 
 SYSTEMD_SERVICE_${PN} = "ostree-prepare-root.service ostree-remount.service"
 SYSTEMD_SERVICE_${PN}_class-native = ""
@@ -52,8 +54,7 @@ do_compile_prepend() {
 export SYSTEMD_REQUIRED
 
 do_install_append() {
- if [ -n ${SYSTEMD_REQUIRED} ]; then
-  install -p -D ${S}/src/boot/ostree-prepare-root.service ${D}${systemd_unitdir}/system/ostree-prepare-root.service
+ if [ "$SYSTEMD_REQUIRED" == "true" ]; then
   install -p -D ${S}/src/boot/ostree-remount.service ${D}${systemd_unitdir}/system/ostree-remount.service
  fi
 }
