@@ -19,7 +19,7 @@ DEPENDS_append = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', ' systemd',
 
 DEPENDS_remove_class-native = "systemd-native"
 
-RDEPENDS_${PN} = "python util-linux-libuuid util-linux-libblkid util-linux-libmount libcap xz os-release"
+RDEPENDS_${PN} = "python util-linux-libuuid util-linux-libblkid util-linux-libmount libcap xz os-release ca-certificates"
 RDEPENDS_${PN}_remove_class-native = "python-native os-release-native"
 
 EXTRA_OECONF = "CFLAGS='-g' --with-libarchive --disable-gtk-doc --disable-gtk-doc-html --disable-gtk-doc-pdf --disable-man"
