@@ -118,7 +118,11 @@ do_install() {
 
   if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
     install -d ${D}${systemd_unitdir}/system
-    install -c ${S}/run/sota_client.service ${D}${systemd_unitdir}/system
+    if ${@bb.utils.contains('DISTRO_FEATURES', 'sota', 'true', 'false', d)}; then
+      install -c ${S}/run/sota_client_ostree.service ${D}${systemd_unitdir}/system/sota_client.service
+    else
+      install -c ${S}/run/sota_client.service ${D}${systemd_unitdir}/system/sota_client.service
+    fi
   fi
 
   install -d ${D}${sysconfdir}

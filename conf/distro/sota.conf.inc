@@ -1,4 +1,4 @@
-IMAGE_INSTALL_append = " ostree rvi-sota-client sota-credentials"
+IMAGE_INSTALL_append = " ostree rvi-sota-client"
 
 # live image for OSTree-enabled systems
 IMAGE_CLASSES_append = " image_types_ostree image_types_ota"
@@ -28,3 +28,4 @@ PREFERRED_PROVIDER_virtual/bootloader_raspberrypi3 = "u-boot"
 DISTRO_TYPE ?= "${@bb.utils.contains("IMAGE_FEATURES", "debug-tweaks", "debug", "release",d)}"
 
 DISTROOVERRIDES_append = ":sota"
+DISTRO_FEATURES_append = " sota"

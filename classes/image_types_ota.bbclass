@@ -87,6 +87,22 @@ IMAGE_CMD_otaimg () {
 		mv ${HOME_TMP}/usr/homedirs/home ${PHYS_SYSROOT}/
 		rm -rf ${HOME_TMP}
 
+		# Deploy device credentials
+		if [ -n "$SOTA_CREDENTIALS" ]; then
+			if [ -f "$SOTA_CREDENTIALS" ]; then
+				EXT=`basename $SOTA_CREDENTIALS | cut -d'.' -f2`
+				if [ "$EXT" != "toml" ]; then
+					bbwarn "File\'s extension is not \'toml\', make sure you have the correct file"
+				fi
+
+				cat $SOTA_CREDENTIALS | sed 's/^package_manager = .*$/package_manager = "ostree"/' > ${PHYS_SYSROOT}/boot/sota.toml
+				chmod 644 ${PHYS_SYSROOT}/boot/sota.toml
+			else
+                        	bberror "File $SOTA_CREDENTIALS does not exist"
+			fi
+		fi
+
+		# Calculate image type
 		OTA_ROOTFS_SIZE=$(calculate_size `du -ks $PHYS_SYSROOT | cut -f 1`  "${IMAGE_OVERHEAD_FACTOR}" "${IMAGE_ROOTFS_SIZE}" "${IMAGE_ROOTFS_MAXSIZE}" `expr ${IMAGE_ROOTFS_EXTRA_SPACE}` "${IMAGE_ROOTFS_ALIGNMENT}")
 
 		if [ $OTA_ROOTFS_SIZE -lt 0 ]; then
@@ -98,6 +114,7 @@ IMAGE_CMD_otaimg () {
 			eval COUNT=\"$MIN_COUNT\"
 		fi
 
+		# create image
 		rm -rf ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg
 		sync
 		dd if=/dev/zero of=${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg seek=$OTA_ROOTFS_SIZE count=$COUNT bs=1024
