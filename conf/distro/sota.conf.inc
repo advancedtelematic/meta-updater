@@ -10,7 +10,9 @@ OSTREE_BRANCHNAME ?= "ota-${MACHINE}"
 OSTREE_OSNAME ?= "poky"
 OSTREE_INITRAMFS_IMAGE ?= "initramfs-ostree-image"
 
-# Platform-specific configuration
+# Platform-specific configurations
+
+## RaspberryPi
 IMAGE_CLASSES_append_raspberrypi2 = " image_types_uboot sdcard_image-rpi-ota"
 IMAGE_CLASSES_append_raspberrypi3 = " image_types_uboot sdcard_image-rpi-ota"
 IMAGE_FSTYPES += "${@'rpi-sdimg-ota' if d.getVar('MACHINE', True).startswith('raspberrypi') else ''}"
@@ -26,6 +28,16 @@ PREFERRED_PROVIDER_virtual/bootloader_raspberrypi3 = "u-boot"
 
 # Some BSPs (e.g. meta-raspberrypi) use this variable to turn debug on/off
 DISTRO_TYPE ?= "${@bb.utils.contains("IMAGE_FEATURES", "debug-tweaks", "debug", "release",d)}"
+
+## Minnowboard
+PREFERRED_PROVIDER_virtual/bootloader_intel-corei7-64 = "u-boot-ota"
+UBOOT_MACHINE_intel-corei7-64 = "minnowmax_defconfig"
+
+## QEMU
+PREFERRED_PROVIDER_virtual/bootloader_qemux86 = "u-boot-ota"
+UBOOT_MACHINE_qemux86 = "qemu-x86_defconfig"
+PREFERRED_PROVIDER_virtual/bootloader_qemux86-64= "u-boot-ota"
+UBOOT_MACHINE_qemux86-64 = "qemu-x86_defconfig"
 
 DISTROOVERRIDES_append = ":sota"
 DISTRO_FEATURES_append = " sota"
