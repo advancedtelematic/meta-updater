@@ -10,17 +10,17 @@ IMAGE_ROOTFS_ALIGNMENT = "4096"
 SDIMG_OTA_ROOTFS_TYPE ?= "otaimg"
 SDIMG_OTA_ROOTFS = "${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.${SDIMG_OTA_ROOTFS_TYPE}"
 
-IMAGE_TYPEDEP_porter-sdimg-ota = "${SDIMG_OTA_ROOTFS_TYPE}"
-IMAGE_DEPENDS_porter-sdimg-ota = " \
+IMAGE_TYPEDEP_minnowboard-sdimg-ota = "${SDIMG_OTA_ROOTFS_TYPE}"
+IMAGE_DEPENDS_minnowboard-sdimg-ota = " \
 			parted-native \
 			mtools-native \
 			dosfstools-native \
-			porter-bootfiles \
+			minnowboard-bootfiles \
 			"
 
-SDIMG_OTA = "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.porter-sdimg-ota"
+SDIMG_OTA = "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.minnowboard-sdimg-ota"
 
-IMAGE_CMD_porter-sdimg-ota () {
+IMAGE_CMD_minnowboard-sdimg-ota () {
 	OTAROOT_SIZE=`du -Lb ${SDIMG_OTA_ROOTFS} | cut -f1`
 	OTAROOT_SIZE=$(expr ${OTAROOT_SIZE} / 1024 + 1)
 	BOOT_SPACE_ALIGNED=$(expr ${BOOT_SPACE} + ${IMAGE_ROOTFS_ALIGNMENT} - 1)
@@ -47,7 +47,7 @@ IMAGE_CMD_porter-sdimg-ota () {
 	mkfs.vfat -n "${BOOTDD_VOLUME_ID}" -S 512 -C ${WORKDIR}/boot.img $BOOT_BLOCKS
 	sync
 
-	mcopy -i ${WORKDIR}/boot.img -s ${DEPLOY_DIR_IMAGE}/porter-bootfiles/* ::/
+	mcopy -i ${WORKDIR}/boot.img -s ${DEPLOY_DIR_IMAGE}/minnowboard-bootfiles/* ::/
 
 	sync
 	dd if=${WORKDIR}/boot.img of=${SDIMG_OTA} conv=notrunc seek=1 bs=$(expr ${IMAGE_ROOTFS_ALIGNMENT} \* 1024) && sync && sync
@@ -58,9 +58,6 @@ IMAGE_CMD_porter-sdimg-ota () {
 	else
 		dd if=${SDIMG_OTA_ROOTFS} of=${SDIMG_OTA} conv=notrunc seek=1 bs=$(expr 1024 \* ${BOOT_SPACE_ALIGNED} + ${IMAGE_ROOTFS_ALIGNMENT} \* 1024) && sync && sync
 	fi
-
-	rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.porter-sdimg-ota
-	ln -s ${IMAGE_NAME}.porter-sdimg-ota ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.porter-sdimg-ota
 
 	# Optionally apply compression
 	case "${SDIMG_OTA_COMPRESSION}" in
@@ -74,5 +71,8 @@ IMAGE_CMD_porter-sdimg-ota () {
 		xz -k "${SDIMG_OTA}"
 		;;
 	esac
+
+	rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.minnowboard-sdimg-ota
+	ln -s ${IMAGE_NAME}.minnowboard-sdimg-ota ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.minnowboard-sdimg-ota
 }
 

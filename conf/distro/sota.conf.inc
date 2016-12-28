@@ -32,6 +32,8 @@ DISTRO_TYPE ?= "${@bb.utils.contains("IMAGE_FEATURES", "debug-tweaks", "debug", 
 ## Minnowboard
 PREFERRED_PROVIDER_virtual/bootloader_intel-corei7-64 = "u-boot-ota"
 UBOOT_MACHINE_intel-corei7-64 = "minnowmax_defconfig"
+IMAGE_CLASSES_append_intel-corei7-64 = " sdcard_image-minnowboard-ota"
+IMAGE_FSTYPES += "${@'minnowboard-sdimg-ota' if d.getVar('MACHINE', True).startswith('intel-corei7-64') else ''}"
 
 ## QEMU
 PREFERRED_PROVIDER_virtual/bootloader_qemux86 = "u-boot-ota"
