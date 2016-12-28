@@ -5,20 +5,24 @@ Subject: [PATCH 2/2] Replace wraps with built-in code to remove dependency on
  multilib
 
 ---
- arch/x86/config.mk |   2 --
+ arch/x86/config.mk |   3 ---
  arch/x86/lib/gcc.c | 104 ++++++++++++++++++++++++++++++++++++++++++++---------
- 2 files changed, 87 insertions(+), 19 deletions(-)
+ 2 files changed, 87 insertions(+), 20 deletions(-)
 
 diff --git a/arch/x86/config.mk b/arch/x86/config.mk
-index 999143e..139576e 100644
+index d7addd8..892e0fc 100644
 --- a/arch/x86/config.mk
 +++ b/arch/x86/config.mk
-@@ -22,5 +22,3 @@ PLATFORM_RELFLAGS += -ffunction-sections -fvisibility=hidden
- PLATFORM_LDFLAGS += --emit-relocs -Bsymbolic -Bsymbolic-functions -m elf_i386
- 
- LDFLAGS_FINAL += --gc-sections -pie
+@@ -21,9 +21,6 @@ PLATFORM_RELFLAGS += -ffunction-sections -fvisibility=hidden
+
+ PLATFORM_LDFLAGS += -Bsymbolic -Bsymbolic-functions -m elf_i386
+
 -LDFLAGS_FINAL += --wrap=__divdi3 --wrap=__udivdi3
 -LDFLAGS_FINAL += --wrap=__moddi3 --wrap=__umoddi3
+-
+ # This is used in the top-level Makefile which does not include
+ # PLATFORM_LDFLAGS
+ LDFLAGS_EFI_PAYLOAD := -Bsymbolic -Bsymbolic-functions -shared --no-undefined
 diff --git a/arch/x86/lib/gcc.c b/arch/x86/lib/gcc.c
 index 497ad75..c321b11 100644
 --- a/arch/x86/lib/gcc.c

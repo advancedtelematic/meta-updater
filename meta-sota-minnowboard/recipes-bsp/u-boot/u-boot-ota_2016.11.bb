@@ -1,23 +1,23 @@
 include recipes-bsp/u-boot/u-boot.inc
-DEPENDS += "dtc-native intel-fsp-native"
+DEPENDS += "dtc-native intel-fsp-native iasl-native"
 
 LICENSE = "GPLv2+"
-LIC_FILES_CHKSUM = "file://Licenses/README;md5=0507cd7da8e7ad6d6701926ec9b84c95"
+LIC_FILES_CHKSUM = "file://Licenses/README;md5=a2c678cfd4a4d97135585cad908541c6"
 
-# This revision corresponds to the tag "v2015.07"
+# This revision corresponds to the tag "v2016.11"
 # We use the revision in order to avoid having to fetch it from the
 # repo during parse
-SRCREV = "baba2f57e8f4ed3fa67fe213d22da0de5e00f204"
+SRCREV = "29e0cfb4f77f7aa369136302cee14a91e22dca71"
 
 SRC_URI += "file://0002-Replace-wraps-with-built-in-code-to-remove-dependenc.patch \
-	    http://firmware.intel.com/sites/default/files/2014-WW42.4-MinnowBoardMax.73-64-bit.bin_Release.zip \
+	    http://firmware.intel.com/sites/default/files/MinnowBoard.MAX_.X64.92.R01.zip \
 	    "
 
-# Hashes for 2014-WW42.4-MinnowBoardMax.73-64-bit.bin_Release.zip
-SRC_URI[md5sum] = "1a4256c64a0d846b81d2adf7ce07cce5"
-SRC_URI[sha256sum] = "883b1399b89e8e13033367e911a1e69423dffa9a6c4b5d306fc070d9ed7412b7"
+# Hashes for MinnowBoard.MAX_.X64.92.R01.zip
+SRC_URI[md5sum] = "236070e3d0fb193e03a102939822cf59"
+SRC_URI[sha256sum] = "708f00d835cc9c49df4e937ef59852ccb6b95026291ac9779b5411dd09baed1f"
 
-PV = "v2015.07+git${SRCPV}"
+PV = "v2016.11+git${SRCPV}"
 
 EXTRA_OEMAKE_append = " KCFLAGS=-fgnu89-inline BUILD_ROM=y"
 
@@ -26,7 +26,7 @@ UBOOT_SUFFIX = "rom"
 do_configure_prepend() {
     make ${UBOOT_MACHINE}
     make tools
-    ./tools/ifdtool -x ${WORKDIR}/MNW2MAX1.X64.0073.R02.1409160934.bin
+    ./tools/ifdtool -x ${WORKDIR}/MNW2MAX1.X64.0092.R01.1605221712.bin
     cp flashregion_0_flashdescriptor.bin ./board/intel/minnowmax/descriptor.bin
     cp flashregion_2_intel_me.bin ./board/intel/minnowmax/me.bin
     cp ${STAGING_DIR_NATIVE}/${datadir}/IntelFsp/BayTrailFSP.fd ./board/intel/minnowmax/fsp.bin

@@ -8,7 +8,8 @@ SRCREV="187409120bcba0ccc3fb514deb3bb923e9723c0c"
 
 inherit native
 
-FILES_${PN} = "${datadir}/IntelFsp/BayTrailFSP.fd"
+FILES_${PN} = "${datadir}/IntelFsp/BayTrailFSP.fd \
+	       ${datadir}/IntelFsp/Vga.dat"
 
 do_install() {
     install -d ${D}${datadir}/IntelFsp
