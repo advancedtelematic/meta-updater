@@ -1,0 +1,17 @@
+bootkaddr=0x01000000
+bootiaddr=0x04000000
+
+bootargs_console=console=ttyS0,115200
+bootargs_extra=rw rootfstype=ext4 rootwait rootdelay=2
+
+bootargs_root=ostree_root=/dev/mmcblk0p2 root=/dev/ram0 ramdisk_size=16384
+
+bootmmc=1:2
+
+booteload_sd=ext4load mmc ${bootmmc} ${bootkaddr} boot/loader/uEnv.txt; env import -t ${bootkaddr} ${filesize}
+
+bootkload_sd=ext4load mmc ${bootmmc} ${bootkaddr} boot/${kernel_image}
+bootiload_sd=ext4load mmc ${bootmmc} ${bootiaddr} boot/${ramdisk_image}
+
+bootcmd=run booteload_sd; setenv bootargs ${bootargs} ${bootargs_console} ${bootargs_root} ${bootargs_extra}; run bootkload_sd; run bootiload_sd; zboot ${bootkaddr} - ${bootiaddr} ${filesize}
+

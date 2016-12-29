@@ -9,7 +9,8 @@ LIC_FILES_CHKSUM = "file://Licenses/README;md5=a2c678cfd4a4d97135585cad908541c6"
 # repo during parse
 SRCREV = "29e0cfb4f77f7aa369136302cee14a91e22dca71"
 
-SRC_URI += "file://0002-Replace-wraps-with-built-in-code-to-remove-dependenc.patch \
+SRC_URI += "file://0001-Load-environment-from-the-boot-partition.patch \
+	    file://0002-Replace-wraps-with-built-in-code-to-remove-dependenc.patch \
 	    http://firmware.intel.com/sites/default/files/MinnowBoard.MAX_.X64.92.R01.zip \
 	    "
 
