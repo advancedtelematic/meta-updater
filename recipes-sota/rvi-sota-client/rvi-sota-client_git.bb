@@ -19,6 +19,7 @@ BBCLASSEXTEND = "native"
 FILES_${PN} = " \
                 ${bindir}/sota_client \
                 ${bindir}/sota_sysinfo.sh \
+                ${bindir}/system_info.sh \
 		${bindir}/sota_ostree.sh \
                 ${sysconfdir}/sota_client.version \
                 ${sysconfdir}/sota_certificates \
@@ -117,6 +118,7 @@ do_install() {
   install -d ${D}${bindir}
   install -m 0755 target/${TARGET_SYS}/release/sota_client ${D}${bindir}
   install -m 0755 run/sota_sysinfo.sh ${D}${bindir}
+  ln -fs ${bindir}/sota_sysinfo.sh ${D}${bindir}/system_info.sh  # For compatibilty with old sota.toml files
   install -m 0755 run/sota_ostree.sh ${D}${bindir}
 
   if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
