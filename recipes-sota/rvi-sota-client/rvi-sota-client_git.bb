@@ -39,12 +39,12 @@ crate://crates.io/cookie/0.2.5 \
 crate://crates.io/crossbeam/0.2.10 \
 crate://crates.io/dbus/0.4.1 \
 crate://crates.io/env_logger/0.3.5 \
-crate://crates.io/gcc/0.3.39 \
+crate://crates.io/gcc/0.3.40 \
 crate://crates.io/gdi32-sys/0.2.0 \
 crate://crates.io/getopts/0.2.14 \
 crate://crates.io/hpack/0.2.0 \
 crate://crates.io/httparse/1.2.1 \
-crate://crates.io/hyper/0.9.13 \
+crate://crates.io/hyper/0.9.14 \
 crate://crates.io/idna/0.1.0 \
 crate://crates.io/kernel32-sys/0.2.2 \
 crate://crates.io/language-tags/0.2.2 \
@@ -55,10 +55,10 @@ crate://crates.io/log/0.3.6 \
 crate://crates.io/matches/0.1.4 \
 crate://crates.io/memchr/0.1.11 \
 crate://crates.io/mime/0.2.2 \
-crate://crates.io/mio/0.5.1 \
-crate://crates.io/miow/0.1.3 \
+crate://crates.io/mio/0.6.1 \
+crate://crates.io/miow/0.1.4 \
 crate://crates.io/net2/0.2.26 \
-crate://crates.io/nix/0.5.1 \
+crate://crates.io/nix/0.7.0 \
 crate://crates.io/nom/1.2.4 \
 crate://crates.io/num_cpus/1.2.0 \
 crate://crates.io/openssl-sys/0.9.3 \
@@ -72,7 +72,7 @@ crate://crates.io/rustc-serialize/0.3.22 \
 crate://crates.io/rustc_version/0.1.7 \
 crate://crates.io/semver/0.1.20 \
 crate://crates.io/sha1/0.2.0 \
-crate://crates.io/slab/0.1.3 \
+crate://crates.io/slab/0.3.0 \
 crate://crates.io/solicit/0.4.4 \
 crate://crates.io/thread-id/2.0.0 \
 crate://crates.io/thread_local/0.2.7 \
@@ -87,6 +87,7 @@ crate://crates.io/unix_socket/0.5.0 \
 crate://crates.io/url/1.2.3 \
 crate://crates.io/user32-sys/0.2.0 \
 crate://crates.io/utf8-ranges/0.1.3 \
+crate://crates.io/void/1.0.2 \
 crate://crates.io/winapi-build/0.1.1 \
 crate://crates.io/winapi/0.2.8 \
 crate://crates.io/ws/0.5.3 \
