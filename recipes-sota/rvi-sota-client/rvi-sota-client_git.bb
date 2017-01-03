@@ -17,10 +17,11 @@ PV = "0.2.23-21-gfe04468"
 BBCLASSEXTEND = "native"
 
 FILES_${PN} = " \
-                /usr/bin/sota_client \
-                /usr/bin/sota_sysinfo.sh \
-                /etc/sota_client.version \
-                /etc/sota_certificates \
+                ${bindir}/sota_client \
+                ${bindir}/sota_sysinfo.sh \
+		${bindir}/sota_ostree.sh \
+                ${sysconfdir}/sota_client.version \
+                ${sysconfdir}/sota_certificates \
                 ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '${systemd_unitdir}/system/sota_client.service', '', d)} \
               "
 
@@ -115,6 +116,7 @@ do_install() {
   install -d ${D}${bindir}
   install -m 0755 target/${TARGET_SYS}/release/sota_client ${D}${bindir}
   install -m 0755 run/sota_sysinfo.sh ${D}${bindir}
+  install -m 0755 run/sota_ostree.sh ${D}${bindir}
 
   if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
     install -d ${D}${systemd_unitdir}/system
