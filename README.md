@@ -16,8 +16,36 @@ OSTree.
 Build
 -----
 
+### Quickstart ###
+[ATS Garage Quickstart](https://github.com/advancedtelematic/garage-quickstart-rpi)
+is an example yocto-based project combining stadard poky distribution with
+OSTree capabilities. For detailed getting started tutorial see [README](https://github.com/advancedtelematic/garage-quickstart-rpi/blob/master/README.adoc).
+
+### Adding meta-updater capabilities to your build ###
+If you already have a Yocto-base project and you want to add atomic filesystem
+updates to it you need to do just three things:
+
+1. Clone meta-updater layer and add it to your [conf/bblayers.conf](https://www.yoctoproject.org/docs/2.1/ref-manual/ref-manual.html#structure-build-conf-bblayers.conf).
+2. Clone BSP integration layer (meta-updater-${PLATFORM}, e.g.
+meta-updater-raspberrypi) and add it to your conf/bblayers.conf. If your board
+isn't yet supported, you could write BSP integration work yourself. See [Supported boards](#supported-boards)
+section for the details.
+3. Set up your [distro](https://www.yoctoproject.org/docs/2.1/ref-manual/ref-manual.html#var-DISTRO).
+If you are using "poky", the default distro in Yocto, you can change it in your
+conf/local.conf to "poky-sota". Alternatively if you are using your own or third
+party distro configuration, you can add 'require conf/distro/sota.conf.inc' to
+it, thus combining capabilities of your distro with meta-updater features.
+
+You can then build your image as usual (bitbake <your-image-name>). After building
+the root file system bitbake will then create an [OSTree-enabled version](https://ostree.readthedocs.io/en/latest/manual/adapting-existing/)
+of it, commit it to your local OSTree repo and optionally push it to a remote
+server. Additionally a live disk image will be created (normally named
+${IMAGE_NAME}.<boardpref>-sdimg-ota e.g. core-image-raspberrypi3.rpi-sdimg-ota).
+You can control this behaviour though OSTree-related variables in your
+local.conf, see [respective section](#sota-related-variables-in-localconf)
+for details.
+
 ### Build with OpenIVI ###
-### Build from scratch ###
 ### Build in AGL ###
 
 With AGL you can just add agl-sota feature while configuring your build
@@ -39,17 +67,43 @@ some machine-dependent live images (e.g. '*.rpi-sdimg-ota' for Raspberry Pi or
 Although aglsetup.sh hooks provide reasonable defaults for SOTA-related
 variables you may want to tune some of them.
 
+Supported boards
+----------------
+
+Currently supported platforms are
+
+* [Raspberry Pi3](https://github.com/advancedtelematic/meta-updater-raspberrypi)
+* [Minnowboard](https://github.com/advancedtelematic/meta-updater-minnowboard)
+* [Native QEMU emulation](https://github.com/advancedtelematic/meta-updater-qemux86-64)
+
+### Adding support for your board
+If your board isn't yet supported you can add board integration code yourself.
+The main purpose of this code is to provide a bootloader that will get use of
+[OSTree's boot directory](https://ostree.readthedocs.io/en/latest/manual/atomic-upgrades/)
+In meta-updater integration layers finished so far it is done by
+
+1. Making the board boot into [U-Boot](http://www.denx.de/wiki/U-Boot)
+2. Making U-boot import variables from /boot/loader/uEnv.txt and load the
+kernel with initramfs and kernel command line arguments according to what is
+set this file.
+
+You may take a look into [Minnowboard](https://github.com/advancedtelematic/meta-updater-minnowboard)
+or [Raspberry Pi](https://github.com/advancedtelematic/meta-updater-raspberrypi)
+integration layers for examples.
+
+It is still possible to make other loaders work with OSTree as well.
+
 SOTA-related variables in local.conf
 ------------------------------------
 
 * OSTREE_REPO - path to your OSTree repository.
   Defaults to "${DEPLOY_DIR_IMAGE}/ostree_repo"
 * OSTREE_BRANCHNAME - the branch your rootfs will be committed to.
-  Defaults to "agl-ota"
+  Defaults to "ota"
 * OSTREE_OSNAME - OS deployment name on your target device. For more
   information about deployments and osnames see
   [OSTree documentation](https://ostree.readthedocs.io/en/latest/manual/deployment/)
-  Defaults to "agl".
+  Defaults to "poky".
 * OSTREE_INITRAMFS_IMAGE - initramfs/initrd image that is used as a proxy while
   booting into OSTree deployment. Do not change this setting unless you are
   sure that your initramfs can serve as such proxy.
