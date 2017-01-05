@@ -72,8 +72,6 @@ SDIMG_OTA = "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.rpi-sdimg-ota"
 # Additional files and/or directories to be copied into the vfat partition from the IMAGE_ROOTFS.
 FATPAYLOAD ?= ""
 
-IMAGEDATESTAMP = "${@time.strftime('%Y.%m.%d',time.gmtime())}"
-IMAGE_CMD_rpi-sdimg-ota[vardepsexclude] += "IMAGEDATESTAMP"
 IMAGE_CMD_rpi-sdimg-ota[vardepsexclude] += "DATETIME"
 
 IMAGE_CMD_rpi-sdimg-ota () {
@@ -146,10 +144,6 @@ IMAGE_CMD_rpi-sdimg-ota () {
 				mcopy -i ${WORKDIR}/boot.img -s -v ${IMAGE_ROOTFS}$entry :: || true
 		done
 	fi
-
-	# Add stamp file
-	echo "${IMAGE_NAME}-${IMAGEDATESTAMP}" > ${WORKDIR}/image-version-info
-	mcopy -i ${WORKDIR}/boot.img -v ${WORKDIR}//image-version-info ::
 
 	# Burn Partitions
 	sync
