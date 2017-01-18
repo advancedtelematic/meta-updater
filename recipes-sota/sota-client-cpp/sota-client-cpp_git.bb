@@ -10,7 +10,7 @@ inherit cmake systemd
 
 S = "${WORKDIR}/git"
 
-SRCREV = "7194ec4aa39f71157af66751098340c854537817"
+SRCREV = "a974dc2eea47594a6177f4c69c2d937a819aa7b3"
 
 SRC_URI = " \
 	git://github.com/advancedtelematic/sota_client_cpp \
@@ -18,6 +18,8 @@ SRC_URI = " \
 
 DEPENDS = "boost curl openssl"
 RDEPENDS = ""
+
+EXTRA_OECMAKE = "-DCMAKE_BUILD_TYPE=Release"
 
 do_install() {
   install -d ${D}${bindir}
