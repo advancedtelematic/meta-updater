@@ -6,7 +6,7 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=65d26fcc2f35ea6a181ac777e42db1ea"
 S = "${WORKDIR}/git"
 
 SRC_URI = "gitsm://github.com/advancedtelematic/sota-tools.git;branch=master"
-SRCREV = "27987f1651440ff692942181a882a80e7e183a4d"
+SRCREV = "c6ecec3e86c423dd6caaa362a5ff0a1a6f4072a8"
 
 inherit cmake
 
