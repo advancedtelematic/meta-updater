@@ -10,7 +10,7 @@ inherit cmake systemd
 
 S = "${WORKDIR}/git"
 
-SRCREV = "a974dc2eea47594a6177f4c69c2d937a819aa7b3"
+SRCREV = "b14c668bdf914c71e68706168aa821bcae32c8f3"
 
 SRC_URI = " \
 	git://github.com/advancedtelematic/sota_client_cpp \
