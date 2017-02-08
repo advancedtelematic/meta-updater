@@ -1,6 +1,6 @@
-SUMMARY = "SOTA Client"
+SUMMARY = "Aktualizr SOTA Client"
 DESCRIPTION = "SOTA Client application written in C++"
-HOMEPAGE = "https://github.com/advancedtelematic/sota_client_cpp"
+HOMEPAGE = "https://github.com/advancedtelematic/aktualizr"
 SECTION = "base"
 
 LICENSE = "MPL-2.0"
@@ -10,10 +10,10 @@ inherit cmake systemd
 
 S = "${WORKDIR}/git"
 
-SRCREV = "b14c668bdf914c71e68706168aa821bcae32c8f3"
+SRCREV = "ca1f1fa1e8e02b87696a0b35fdaa8bd14b05d2a3"
 
 SRC_URI = " \
-	git://github.com/advancedtelematic/sota_client_cpp \
+	git://github.com/advancedtelematic/aktualizr \
 	"
 
 DEPENDS = "boost curl openssl"
@@ -23,9 +23,9 @@ EXTRA_OECMAKE = "-DCMAKE_BUILD_TYPE=Release"
 
 do_install() {
   install -d ${D}${bindir}
-  install -m 0755 ${WORKDIR}/build/target/sota_client ${D}${bindir}/sota_client_cpp
+  install -m 0755 ${WORKDIR}/build/target/aktualizr ${D}${bindir}/aktualizr
 }
 
 FILES_${PN} = " \
-                ${bindir}/sota_client_cpp \
+                ${bindir}/aktualizr \
 		"
