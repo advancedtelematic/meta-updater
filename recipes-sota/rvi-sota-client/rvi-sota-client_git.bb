@@ -51,6 +51,7 @@ crate://crates.io/kernel32-sys/0.2.2 \
 crate://crates.io/language-tags/0.2.2 \
 crate://crates.io/lazy_static/0.1.16 \
 crate://crates.io/lazy_static/0.2.2 \
+crate://crates.io/lazycell/0.4.0 \
 crate://crates.io/libc/0.2.18 \
 crate://crates.io/log/0.3.6 \
 crate://crates.io/matches/0.1.4 \
