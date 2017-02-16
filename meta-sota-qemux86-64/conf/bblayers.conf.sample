@@ -9,9 +9,8 @@ BBLAYERS ?= " \
   ##OEROOT##/meta \
   ##OEROOT##/meta-yocto \
   ##OEROOT##/meta-yocto-bsp \
-  ##OEROOT##/../meta-raspberrypi \
   ##OEROOT##/../meta-updater \
-  ##OEROOT##/../meta-updater-minnowmax \
+  ##OEROOT##/../meta-updater-qemux86-64 \
   ##OEROOT##/../meta-openembedded/meta-oe \
   ##OEROOT##/../meta-openembedded/meta-filesystems \
   ##OEROOT##/../meta-rust \
