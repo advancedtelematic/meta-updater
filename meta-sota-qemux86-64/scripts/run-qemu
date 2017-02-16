@@ -1,0 +1,17 @@
+DIR=tmp/deploy/images/qemux86-64
+IMAGE=$DIR/core-image-minimal-qemux86-64.otaimg
+
+qemu-system-x86_64 \
+  -bios $DIR/u-boot-qemux86-64.rom \
+  -drive file=$IMAGE,format=raw \
+  -vga std -m 512 \
+  -serial stdio \
+  -serial tcp:127.0.0.1:8990,server,nowait \
+  -net user,hostfwd=tcp:0.0.0.0:2222-:22,restrict=off \
+  -net nic \
+  -usb \
+  -cpu core2duo \
+  -nographic \
+  -display none
+
+# -enable-kvm \
