@@ -143,7 +143,7 @@ PACKAGE_CLASSES ?= "package_rpm"
 # OpenIVI over tor, disable it.  empty-root-password but not debug-tweaks allows
 # passwordless login locally only.
 
-EXTRA_IMAGE_FEATURES = "empty-root-password"
+EXTRA_IMAGE_FEATURES = "debug-tweaks"
 
 #
 # Additional image features
