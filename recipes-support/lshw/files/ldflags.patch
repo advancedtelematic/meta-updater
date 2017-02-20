@@ -1,0 +1,42 @@
+diff -Naur /home/anton/lshw-old/src/Makefile lshw-B.02.16/src/Makefile
+--- /home/anton/lshw-old/src/Makefile	2017-02-07 16:21:52.554738182 +0100
++++ lshw-B.02.16/src/Makefile	2017-02-07 16:22:45.578588072 +0100
+@@ -25,9 +25,9 @@
+ ifeq ($(SQLITE), 1)
+ 	CXXFLAGS+= -DSQLITE $(shell pkg-config --cflags sqlite3)
+ endif
+-LDFLAGS=-L./core/ -g
++LDEXTRAS=-L./core/ -g
+ ifneq ($(shell $(LD) --help 2| grep -- --as-needed), )
+-	LDFLAGS+= -Wl,--as-needed
++	LDEXTRAS+= -Wl,--as-needed
+ endif
+ LDSTATIC=-static
+ LIBS=-llshw -lresolv
+@@ -37,7 +37,7 @@
+ 
+ export CXXFLAGS
+ export LIBS
+-export LDFLAGS
++export LDEXTRAS
+ 
+ DATAFILES = pci.ids usb.ids oui.txt manuf.txt
+ 
+@@ -51,7 +51,7 @@
+ 	+make -C core all
+ 
+ $(PACKAGENAME): core $(PACKAGENAME).o
+-	$(CXX) $(LDFLAGS) -o $@ $(PACKAGENAME).o $(LIBS)
++	$(CXX) $(LDFLAGS) ${LDEXTRAS} -o $@ $(PACKAGENAME).o $(LIBS)
+ 
+ .PHONY: po
+ po:
+@@ -69,7 +69,7 @@
+ static: $(PACKAGENAME)-static
+ 
+ $(PACKAGENAME)-static: core core/lib$(PACKAGENAME).a $(PACKAGENAME).o
+-	$(CXX) $(LDSTATIC) $(LDFLAGS) -o $@ $(PACKAGENAME).o $(LIBS)
++	$(CXX) $(LDSTATIC) $(LDFLAGS) ${LDEXTRAS} -o $@ $(PACKAGENAME).o $(LIBS)
+ 	$(STRIP) $@
+ 
+ .PHONY: compressed
