@@ -95,7 +95,6 @@ crate://crates.io/winapi/0.2.8 \
 crate://crates.io/ws/0.5.3 \
 crate://crates.io/ws2_32-sys/0.2.1 \
 git://github.com/advancedtelematic/rvi_sota_client \
-crate-index://crates.io/213b1a455d9270888c03a42c8d29975369102caa \
 "
 SRC_URI[index.md5sum] = "79f10f436dbf26737cc80445746f16b4"
 SRC_URI[index.sha256sum] = "86114b93f1f51aaf0aec3af0751d214b351f4ff9839ba031315c1b19dcbb1913"
