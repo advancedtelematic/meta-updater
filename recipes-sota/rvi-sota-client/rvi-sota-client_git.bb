@@ -101,10 +101,9 @@ SRC_URI[index.sha256sum] = "86114b93f1f51aaf0aec3af0751d214b351f4ff9839ba031315c
 
 SYSTEMD_SERVICE_${PN} = "sota_client.service"
 
-DEPENDS += " openssl "
+DEPENDS += " openssl dbus"
 RDEPENDS_${PN} = " libcrypto \
                    libssl \
-                   dbus \
                    bash \
                    lshw \
                    jq \
