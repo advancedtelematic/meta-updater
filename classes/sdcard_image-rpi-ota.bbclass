@@ -157,7 +157,7 @@ IMAGE_CMD_rpi-sdimg-ota () {
 	fi
 
 	rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rpi-sdimg-ota
-	ln -s ${IMAGE_NAME}.rpi-sdimg-ota ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rpi-sdimg-ota
+	ln -s ${IMAGE_NAME}.rootfs.rpi-sdimg-ota ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rpi-sdimg-ota
 
 	# Optionally apply compression
 	case "${SDIMG_OTA_COMPRESSION}" in
