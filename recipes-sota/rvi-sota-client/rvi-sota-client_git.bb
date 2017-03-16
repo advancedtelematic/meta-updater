@@ -22,7 +22,6 @@ PV = "0.2.32-104-g972e2cf"
 BBCLASSEXTEND = "native"
 
 FILES_${PN} = " \
-                /lib64 \
                 ${bindir}/canonical_json.py \
                 ${bindir}/sota_client \
                 ${bindir}/sota_sysinfo.sh \
@@ -174,7 +173,6 @@ do_install() {
   install -d ${D}${sysconfdir}
   echo `git log -1 --pretty=format:%H` > ${D}${sysconfdir}/sota_client.version
   install -c ${S}/run/sota_certificates ${D}${sysconfdir}
-  ln -fs /lib ${D}/lib64
 
   if [ -n "$SOTA_AUTOPROVISION_CREDENTIALS" ]; then
     install -d ${D}/var
