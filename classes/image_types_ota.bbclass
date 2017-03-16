@@ -14,7 +14,6 @@ IMAGE_DEPENDS_otaimg = "e2fsprogs-native:do_populate_sysroot"
 # For qemux86 u-boot is not included in any live image and is built separately
 IMAGE_DEPENDS_otaimg_append_qemux86 = " virtual/bootloader:do_deploy"
 IMAGE_DEPENDS_otaimg_append_qemux86-64 = " virtual/bootloader:do_deploy"
-IMAGE_DEPENDS_otaimg_append_corei7-64-intel-common = " virtual/bootloader:do_deploy"
 
 calculate_size () {
 	BASE=$1
@@ -81,28 +80,13 @@ IMAGE_CMD_otaimg () {
 		ostree --repo=${PHYS_SYSROOT}/ostree/repo pull-local --remote=${OSTREE_OSNAME} ${OSTREE_REPO} ${OSTREE_BRANCHNAME}
 		ostree admin --sysroot=${PHYS_SYSROOT} deploy --os=${OSTREE_OSNAME} ${OSTREE_OSNAME}:${OSTREE_BRANCHNAME}
 		
-		# Copy deployment /home to sysroot
+		# Copy deployment /home and /var/sota to sysroot
 		HOME_TMP=`mktemp -d ${WORKDIR}/home-tmp-XXXXX`
-		tar --xattrs --xattrs-include='*' -C ${HOME_TMP} -xf ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2 ./usr/homedirs
+		tar --xattrs --xattrs-include='*' -C ${HOME_TMP} -xf ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2 ./usr/homedirs ./var/sota || true
 		mv ${HOME_TMP}/usr/homedirs/home ${PHYS_SYSROOT}/
+		mv ${HOME_TMP}/var/sota ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
 		rm -rf ${HOME_TMP}
 
-		# Deploy device credentials
-		if [ -n "$SOTA_CREDENTIALS" ]; then
-			if [ -f "$SOTA_CREDENTIALS" ]; then
-				EXT=`basename $SOTA_CREDENTIALS | cut -d'.' -f2`
-				if [ "$EXT" != "toml" ]; then
-					bbwarn "File\'s extension is not \'toml\', make sure you have the correct file"
-				fi
-
-				cat $SOTA_CREDENTIALS | sed 's/^package_manager = .*$/package_manager = "ostree"/' > ${PHYS_SYSROOT}/boot/sota.toml
-				chmod 644 ${PHYS_SYSROOT}/boot/sota.toml
-			else
-                        	bberror "File $SOTA_CREDENTIALS does not exist"
-			fi
-		fi
-
-		# Calculate image type
 		OTA_ROOTFS_SIZE=$(calculate_size `du -ks $PHYS_SYSROOT | cut -f 1`  "${IMAGE_OVERHEAD_FACTOR}" "${IMAGE_ROOTFS_SIZE}" "${IMAGE_ROOTFS_MAXSIZE}" `expr ${IMAGE_ROOTFS_EXTRA_SPACE}` "${IMAGE_ROOTFS_ALIGNMENT}")
 
 		if [ $OTA_ROOTFS_SIZE -lt 0 ]; then
@@ -114,7 +98,6 @@ IMAGE_CMD_otaimg () {
 			eval COUNT=\"$MIN_COUNT\"
 		fi
 
-		# create image
 		rm -rf ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg
 		sync
 		dd if=/dev/zero of=${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg seek=$OTA_ROOTFS_SIZE count=$COUNT bs=1024
