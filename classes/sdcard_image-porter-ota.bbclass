@@ -59,9 +59,6 @@ IMAGE_CMD_porter-sdimg-ota () {
 		dd if=${SDIMG_OTA_ROOTFS} of=${SDIMG_OTA} conv=notrunc seek=1 bs=$(expr 1024 \* ${BOOT_SPACE_ALIGNED} + ${IMAGE_ROOTFS_ALIGNMENT} \* 1024) && sync && sync
 	fi
 
-	rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.porter-sdimg-ota
-	ln -s ${IMAGE_NAME}.porter-sdimg-ota ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.porter-sdimg-ota
-
 	# Optionally apply compression
 	case "${SDIMG_OTA_COMPRESSION}" in
 	"gzip")
@@ -74,5 +71,8 @@ IMAGE_CMD_porter-sdimg-ota () {
 		xz -k "${SDIMG_OTA}"
 		;;
 	esac
+
+	rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.porter-sdimg-ota
+	ln -s ${IMAGE_NAME}.rootfs.porter-sdimg-ota ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.porter-sdimg-ota
 }
 

@@ -14,12 +14,11 @@ DEPENDS = "pciutils \
     usbutils"
 COMPATIBLE_HOST = "(i.86|x86_64|arm|aarch64).*-linux"
 
-PR="r1"
-
 SRC_URI="http://ezix.org/software/files/lshw-B.${PV}.tar.gz \
     file://cross-compile.patch \
     file://ldflags.patch \
     "
+
 SRC_URI[md5sum] = "67479167add605e8f001097c30e96d0d"
 SRC_URI[sha256sum] = "809882429555b93259785cc261dbff04c16c93d064db5f445a51945bc47157cb"
 
