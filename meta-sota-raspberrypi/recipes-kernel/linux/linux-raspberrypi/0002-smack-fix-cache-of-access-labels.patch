@@ -1,0 +1,43 @@
+From 99267706991ab84bd44ceaea9a7ec886bbdd58e0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jos=C3=A9=20Bollo?= <jobol@nonadev.net>
+Date: Tue, 12 Jan 2016 21:23:40 +0100
+Subject: [PATCH 2/4] smack: fix cache of access labels
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Before this commit, removing the access property of
+a file, aka, the extended attribute security.SMACK64
+was not effictive until the cache had been cleaned.
+
+This patch fixes that problem.
+
+Signed-off-by: José Bollo <jobol@nonadev.net>
+Acked-by: Casey Schaufler <casey@schaufler-ca.com>
+---
+ security/smack/smack_lsm.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/security/smack/smack_lsm.c b/security/smack/smack_lsm.c
+index b20ef06..b2bcb14 100644
+--- a/security/smack/smack_lsm.c
++++ b/security/smack/smack_lsm.c
+@@ -1444,9 +1444,13 @@ static int smack_inode_removexattr(struct dentry *dentry, const char *name)
+ 	 * Don't do anything special for these.
+ 	 *	XATTR_NAME_SMACKIPIN
+ 	 *	XATTR_NAME_SMACKIPOUT
+-	 *	XATTR_NAME_SMACKEXEC
+ 	 */
+-	if (strcmp(name, XATTR_NAME_SMACK) == 0)
++	if (strcmp(name, XATTR_NAME_SMACK) == 0) {
++		struct super_block *sbp = d_backing_inode(dentry)->i_sb;
++		struct superblock_smack *sbsp = sbp->s_security;
++
++		isp->smk_inode = sbsp->smk_default;
++	} else if (strcmp(name, XATTR_NAME_SMACKEXEC) == 0)
+ 		isp->smk_task = NULL;
+ 	else if (strcmp(name, XATTR_NAME_SMACKMMAP) == 0)
+ 		isp->smk_mmap = NULL;
+-- 
+2.7.4
+
