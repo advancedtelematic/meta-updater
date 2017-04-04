@@ -1,0 +1,39 @@
+From ec4eb03af07b0fbc330aecca6ac4ebd6accd8825 Mon Sep 17 00:00:00 2001
+From: Rafal Krypa <r.krypa@samsung.com>
+Date: Mon, 4 Apr 2016 11:14:53 +0200
+Subject: [PATCH 3/4] Smack: ignore null signal in smack_task_kill
+
+Kill with signal number 0 is commonly used for checking PID existence.
+Smack treated such cases like any other kills, although no signal is
+actually delivered when sig == 0.
+
+Checking permissions when sig == 0 didn't prevent an unprivileged caller
+from learning whether PID exists or not. When it existed, kernel returned
+EPERM, when it didn't - ESRCH. The only effect of policy check in such
+case is noise in audit logs.
+
+This change lets Smack silently ignore kill() invocations with sig == 0.
+
+Signed-off-by: Rafal Krypa <r.krypa@samsung.com>
+Acked-by: Casey Schaufler <casey@schaufler-ca.com>
+---
+ security/smack/smack_lsm.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/security/smack/smack_lsm.c b/security/smack/smack_lsm.c
+index b2bcb14..cf8a93f 100644
+--- a/security/smack/smack_lsm.c
++++ b/security/smack/smack_lsm.c
+@@ -2239,6 +2239,9 @@ static int smack_task_kill(struct task_struct *p, struct siginfo *info,
+ 	struct smack_known *tkp = smk_of_task_struct(p);
+ 	int rc;
+ 
++	if (!sig)
++		return 0; /* null signal; existence test */
++
+ 	smk_ad_init(&ad, __func__, LSM_AUDIT_DATA_TASK);
+ 	smk_ad_setfield_u_tsk(&ad, p);
+ 	/*
+-- 
+2.7.4
+
