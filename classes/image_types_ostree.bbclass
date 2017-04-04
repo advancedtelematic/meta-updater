@@ -68,6 +68,10 @@ IMAGE_CMD_ostree () {
 		ln -s ../init.d/tmpfiles.sh usr/etc/rcS.d/S20tmpfiles.sh
 	fi
 
+	# Preserve OSTREE_BRANCHNAME for future information
+	mkdir -p usr/share/sota/
+	echo -n "${OSTREE_BRANCHNAME}" > usr/share/sota/branchname
+
 	# Preserve data in /home to be later copied to /sysroot/home by
 	#   sysroot generating procedure
 	mkdir -p usr/homedirs
@@ -122,7 +126,7 @@ IMAGE_CMD_ostree () {
 	cp ${DEPLOY_DIR_IMAGE}/${OSTREE_INITRAMFS_IMAGE}-${MACHINE}${RAMDISK_EXT} boot/initramfs-${checksum}
 
 	# Copy image manifest
-	cat ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.manifest | cut -d " " -f1,3 > usr/package.manifest
+	cat ${IMAGE_MANIFEST} | cut -d " " -f1,3 > usr/package.manifest
 
 	cd ${WORKDIR}
 
@@ -154,6 +158,7 @@ IMAGE_CMD_ostreepush () {
 	if [ ${OSTREE_PUSH_CREDENTIALS} ]; then
 		garage-push --repo=${OSTREE_REPO} \
 			    --ref=${OSTREE_BRANCHNAME} \
-			    --credentials=${OSTREE_PUSH_CREDENTIALS}
+			    --credentials=${OSTREE_PUSH_CREDENTIALS} \
+			    --cacert=${STAGING_ETCDIR_NATIVE}/ssl/certs/ca-certificates.crt
 	fi
 }

@@ -9,12 +9,9 @@
 
 inherit image
 
-IMAGE_DEPENDS_otaimg = "e2fsprogs-native:do_populate_sysroot"
-
-# For qemux86 u-boot is not included in any live image and is built separately
-IMAGE_DEPENDS_otaimg_append_qemux86 = " virtual/bootloader:do_deploy"
-IMAGE_DEPENDS_otaimg_append_qemux86-64 = " virtual/bootloader:do_deploy"
-IMAGE_DEPENDS_otaimg_append_corei7-64-intel-common = " virtual/bootloader:do_deploy"
+IMAGE_DEPENDS_otaimg = "e2fsprogs-native:do_populate_sysroot \
+			${@'grub:do_populate_sysroot' if d.getVar('OSTREE_BOOTLOADER', True) == 'grub' else ''} \
+			${@'virtual/bootloader:do_deploy' if d.getVar('OSTREE_BOOTLOADER', True) == 'u-boot' else ''}"
 
 calculate_size () {
 	BASE=$1
@@ -52,6 +49,7 @@ calculate_size () {
 export OSTREE_OSNAME
 export OSTREE_BRANCHNAME
 export OSTREE_REPO
+export OSTREE_BOOTLOADER
 
 IMAGE_CMD_otaimg () {
 	if ${@bb.utils.contains('IMAGE_FSTYPES', 'otaimg', 'true', 'false', d)}; then
@@ -76,31 +74,30 @@ IMAGE_CMD_otaimg () {
 		mkdir -p ${PHYS_SYSROOT}/boot/loader.0
 		ln -s loader.0 ${PHYS_SYSROOT}/boot/loader
 
-		touch ${PHYS_SYSROOT}/boot/loader/uEnv.txt
+		if [ "${OSTREE_BOOTLOADER}" = "grub" ]; then
+			mkdir -p ${PHYS_SYSROOT}/boot/grub2
+			touch ${PHYS_SYSROOT}/boot/grub2/grub.cfg
+		elif [ "${OSTREE_BOOTLOADER}" = "u-boot" ]; then
+			touch ${PHYS_SYSROOT}/boot/loader/uEnv.txt
+		else
+			bberror "Invalid bootloader: ${OSTREE_BOOTLOADER}"
+		fi;
 
 		ostree --repo=${PHYS_SYSROOT}/ostree/repo pull-local --remote=${OSTREE_OSNAME} ${OSTREE_REPO} ${OSTREE_BRANCHNAME}
-		ostree admin --sysroot=${PHYS_SYSROOT} deploy --os=${OSTREE_OSNAME} ${OSTREE_OSNAME}:${OSTREE_BRANCHNAME}
-		
-		# Copy deployment /home to sysroot
+		export OSTREE_BOOT_PARTITION="/boot"
+		kargs_list=""
+		for arg in ${OSTREE_KERNEL_ARGS}; do
+			kargs_list="${kargs_list} --karg-append=$arg"
+		done
+
+		ostree admin --sysroot=${PHYS_SYSROOT} deploy ${kargs_list} --os=${OSTREE_OSNAME} ${OSTREE_OSNAME}:${OSTREE_BRANCHNAME}
+
+		# Copy deployment /home and /var/sota to sysroot
 		HOME_TMP=`mktemp -d ${WORKDIR}/home-tmp-XXXXX`
-		tar --xattrs --xattrs-include='*' -C ${HOME_TMP} -xf ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2 ./usr/homedirs
-		mv ${HOME_TMP}/usr/homedirs/home ${PHYS_SYSROOT}/
+		tar --xattrs --xattrs-include='*' -C ${HOME_TMP} -xf ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2 ./usr/homedirs ./var/sota || true
+> 		mv ${HOME_TMP}/var/sota ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
+		mv ${HOME_TMP}/usr/homedirs/home ${PHYS_SYSROOT}/ || true
 		rm -rf ${HOME_TMP}
-
-		# Deploy device credentials
-		if [ -n "$SOTA_CREDENTIALS" ]; then
-			if [ -f "$SOTA_CREDENTIALS" ]; then
-				EXT=`basename $SOTA_CREDENTIALS | cut -d'.' -f2`
-				if [ "$EXT" != "toml" ]; then
-					bbwarn "File\'s extension is not \'toml\', make sure you have the correct file"
-				fi
-
-				cat $SOTA_CREDENTIALS | sed 's/^package_manager = .*$/package_manager = "ostree"/' > ${PHYS_SYSROOT}/boot/sota.toml
-				chmod 644 ${PHYS_SYSROOT}/boot/sota.toml
-			else
-                        	bberror "File $SOTA_CREDENTIALS does not exist"
-			fi
-		fi
 
 		# Calculate image type
 		OTA_ROOTFS_SIZE=$(calculate_size `du -ks $PHYS_SYSROOT | cut -f 1`  "${IMAGE_OVERHEAD_FACTOR}" "${IMAGE_ROOTFS_SIZE}" "${IMAGE_ROOTFS_MAXSIZE}" `expr ${IMAGE_ROOTFS_EXTRA_SPACE}` "${IMAGE_ROOTFS_ALIGNMENT}")
@@ -118,7 +115,7 @@ IMAGE_CMD_otaimg () {
 		rm -rf ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg
 		sync
 		dd if=/dev/zero of=${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg seek=$OTA_ROOTFS_SIZE count=$COUNT bs=1024
-		mkfs.ext4 ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg -d ${PHYS_SYSROOT}
+		mkfs.ext4 -O ^64bit ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg -d ${PHYS_SYSROOT}
 		rm -rf ${PHYS_SYSROOT}
 
 		rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg
