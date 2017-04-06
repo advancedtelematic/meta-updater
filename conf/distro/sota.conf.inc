@@ -6,8 +6,10 @@ IMAGE_INSTALL_append = " ostree os-release"
 # live image for OSTree-enabled systems
 IMAGE_CLASSES += "image_types_ostree image_types_ota"
 IMAGE_FSTYPES += "ostreepush otaimg wic"
-WKS_FILE = "sdimage-sota.wks"
+WKS_FILE ?= "sdimage-sota.wks"
 do_image_wic[depends] += "${IMAGE_BASENAME}:do_image_otaimg"
+
+EXTRA_IMAGEDEPENDS += " parted-native mtools-native dosfstools-native"
 
 # No working WKS for Raspberry Pi yet
 IMAGE_FSTYPES_remove_raspberrypi3 = "wic"
