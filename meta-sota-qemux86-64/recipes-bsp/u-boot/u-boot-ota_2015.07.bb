@@ -11,6 +11,7 @@ SRCREV = "baba2f57e8f4ed3fa67fe213d22da0de5e00f204"
 
 SRC_URI += "file://0001-Set-up-environment-for-OSTree-integration.patch \
 	    file://0002-Replace-wraps-with-built-in-code-to-remove-dependenc.patch \
+	    file://fix-build-error-under-gcc6.patch \
 	    "
 
 PV = "v2015.07+git${SRCPV}"
