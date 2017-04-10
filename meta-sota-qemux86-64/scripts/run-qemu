@@ -1,17 +1,119 @@
-DIR=tmp/deploy/images/qemux86-64
-IMAGE=$DIR/core-image-minimal-qemux86-64.otaimg
+#! /usr/bin/env python
 
-qemu-system-x86_64 \
-  -bios $DIR/u-boot-qemux86-64.rom \
-  -drive file=$IMAGE,format=raw \
-  -vga std -m 512 \
-  -serial stdio \
-  -serial tcp:127.0.0.1:8990,server,nowait \
-  -net user,hostfwd=tcp:0.0.0.0:2222-:22,restrict=off \
-  -net nic \
-  -usb \
-  -cpu core2duo \
-  -nographic \
-  -display none
+from argparse import ArgumentParser
+from subprocess import Popen
+from os.path import exists, join
+import random
+import sys
+import socket
 
-# -enable-kvm \
+DEFAULT_DIR = 'tmp/deploy/images/qemux86-64'
+
+
+def find_local_port(start_port):
+    """"
+    Find the next free TCP port after 'start_port'.
+    """
+
+    for port in range(start_port, start_port + 10):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.bind(('', port))
+            return port
+        except socket.error:
+            print("Skipping port %d" % port)
+        finally:
+            s.close()
+    raise Exception("Could not find a free TCP port")
+
+
+def random_mac():
+    """Return a random Ethernet MAC address
+    @link https://www.iana.org/assignments/ethernet-numbers/ethernet-numbers.xhtml#ethernet-numbers-2
+    """
+    head = "ca:fe:"
+    hex_digits = '0123456789abcdef'
+    tail = ':'.join([random.choice(hex_digits) + random.choice(hex_digits) for _ in range(4)])
+    return head + tail
+
+
+class QemuCommand(object):
+    def __init__(self, args):
+        self.uboot = join(args.dir, 'u-boot-qemux86-64.rom')
+        self.image = join(args.dir, args.imagename + '-qemux86-64.otaimg')
+        if args.mac:
+            self.mac_address = args.mac
+        else:
+            self.mac_address = random_mac()
+        self.serial_port = find_local_port(8990)
+        self.ssh_port = find_local_port(2222)
+        self.kvm = not args.no_kvm
+        self.gui = not args.no_gui
+        self.gdb = args.gdb
+        if not exists(self.uboot):
+            raise ValueError("U-Boot image %s does not exist" % self.uboot)
+        if not exists(self.image):
+            raise ValueError("OS image %s does not exist" % self.image)
+
+    def command_line(self):
+        netuser = 'user,hostfwd=tcp:0.0.0.0:%d-:22,restrict=off' % self.ssh_port
+        if self.gdb:
+            netuser += ',hostfwd=tcp:0.0.0.0:2159-:2159'
+        cmdline = [
+            "qemu-system-x86_64",
+            "-bios", self.uboot,
+            "-drive", "file=%s,if=ide,format=raw,snapshot=on" % self.image,
+            "-serial", "tcp:127.0.0.1:%d,server,nowait" % self.serial_port,
+            "-m", "1G",
+            "-usb",
+            "-usbdevice", "tablet",
+            "-show-cursor",
+            "-vga", "std",
+            "-net", netuser,
+            "-net", "nic,macaddr=%s,model=virtio" % self.mac_address
+        ]
+        if self.gui:
+            cmdline += ["-serial", "stdio"]
+        else:
+            cmdline.append('-nographic')
+        if self.kvm:
+            cmdline.append('-enable-kvm')
+        return cmdline
+
+
+def main():
+    parser = ArgumentParser(description='Run meta-updater image in qemu')
+    parser.add_argument('imagename', default='core-image-minimal', nargs='?')
+    parser.add_argument('mac', default=None, nargs='?')
+    parser.add_argument('--dir', default=DEFAULT_DIR,
+                        help='Path to build directory containing the image and u-boot-qemux86-64.rom')
+    parser.add_argument('--no-kvm', help='Disable KVM in QEMU', action='store_true')
+    parser.add_argument('--no-gui', help='Disable GUI', action='store_true')
+    parser.add_argument('--gdb', help='Export gdbserver port 2159 from the image', action='store_true')
+    parser.add_argument('-n', '--dry-run', help='Print qemu command line rather then run it', action='store_true')
+    args = parser.parse_args()
+    try:
+        qemu_command = QemuCommand(args)
+    except ValueError, e:
+        print(e.message)
+        sys.exit(1)
+
+    print("Launching %s with mac address %s" % (args.imagename, qemu_command.mac_address))
+    print("To connect via SSH:")
+    print(" ssh -o StrictHostKeyChecking=no root@localhost -p %d" % qemu_command.ssh_port)
+    print("To connect to the serial console:")
+    print(" nc localhost %d" % qemu_command.serial_port)
+
+    cmdline = qemu_command.command_line()
+    if args.dry_run:
+        print(" ".join(cmdline))
+    else:
+        s = Popen(cmdline)
+        try:
+            s.wait()
+        except KeyboardInterrupt:
+            pass
+
+
+if __name__ == '__main__':
+    main()
