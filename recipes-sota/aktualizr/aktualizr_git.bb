@@ -9,6 +9,7 @@ LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=9741c346eef56131163e13b9db1241b3"
 inherit cmake systemd
 
 S = "${WORKDIR}/git"
+PV = "1.0+git${SRCPV}"
 
 SRCREV = "f2275e9938f5c942c9e51a3966b1ad91acd65367"
 
