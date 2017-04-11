@@ -55,10 +55,9 @@ class OTAImagePlugin(SourcePlugin):
         Called to do the actual content population for a partition i.e. it
         'prepares' the partition to be incorporated into the image.
         """
+        bootimg_dir = get_bitbake_var("DEPLOY_DIR_IMAGE")
         if not bootimg_dir:
-            bootimg_dir = get_bitbake_var("DEPLOY_DIR_IMAGE")
-            if not bootimg_dir:
-                msger.error("Couldn't find DEPLOY_DIR_IMAGE, exiting\n")
+            msger.error("Couldn't find DEPLOY_DIR_IMAGE, exiting\n")
 
         msger.debug('Bootimg dir: %s' % bootimg_dir)
 
