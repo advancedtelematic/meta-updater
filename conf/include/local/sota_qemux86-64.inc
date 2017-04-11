@@ -1,5 +1,8 @@
 MACHINE = "qemux86-64"
 
+# See https://advancedtelematic.atlassian.net/browse/PRO-2693
+PREFERRED_VERSION_linux-yocto_qemux86-64_sota = "4.4%"
+
 # U-Boot support for SOTA
 PREFERRED_PROVIDER_virtual/bootloader_sota = "u-boot-ota"
 UBOOT_MACHINE_sota = "qemu-x86_defconfig"
