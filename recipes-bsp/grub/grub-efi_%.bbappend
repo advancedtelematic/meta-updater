@@ -1,0 +1,2 @@
+
+GRUB_BUILDIN += "configfile"

@@ -115,7 +115,7 @@ IMAGE_CMD_otaimg () {
 		rm -rf ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg
 		sync
 		dd if=/dev/zero of=${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg seek=$OTA_ROOTFS_SIZE count=$COUNT bs=1024
-		mkfs.ext4 -O ^64bit ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg -d ${PHYS_SYSROOT}
+		mkfs.ext4 -O ^64bit ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg -L otaroot -d ${PHYS_SYSROOT}
 		rm -rf ${PHYS_SYSROOT}
 
 		rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg
