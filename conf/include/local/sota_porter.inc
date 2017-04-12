@@ -8,5 +8,5 @@ IMAGE_CLASSES_append_sota = " image_types_uboot "
 IMAGE_BOOT_FILES_sota += "porter-bootfiles/*"
 
 OSTREE_BOOTLOADER ?= "u-boot"
-UBOOT_MACHINE_sota = "porter_vin_config"
+UBOOT_MACHINE_sota = "porter_config"
 
