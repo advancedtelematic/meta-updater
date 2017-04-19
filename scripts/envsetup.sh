@@ -49,5 +49,6 @@ else
 	cat ${METADIR}/meta-updater/conf/include/bblayers/sota_${MACHINE}.inc >> conf/bblayers.conf
 	echo "include conf/include/local/sota_${MACHINE}.inc" >> conf/local.conf
 	echo "include conf/distro/sota.conf.inc" >> conf/local.conf
+	echo "DISTRO = \"poky-sota-systemd\"" >> conf/local.conf
 fi
 

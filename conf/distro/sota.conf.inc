@@ -1,7 +1,7 @@
 DISTRO_FEATURES_append = " sota"
 OVERRIDES .= ":sota"
 
-IMAGE_INSTALL_append = " ostree os-release"
+IMAGE_INSTALL_append = " ostree os-release rvi-sota-client"
 
 # live image for OSTree-enabled systems
 IMAGE_CLASSES += "image_types_ostree image_types_ota"
@@ -24,3 +24,5 @@ OSTREE_BRANCHNAME ?= "ota-${MACHINE}"
 OSTREE_OSNAME ?= "poky"
 OSTREE_INITRAMFS_IMAGE ?= "initramfs-ostree-image"
 
+# Prelinking increases the size of downloads and causes build errors
+USER_CLASSES_remove = "image-prelink"
