@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+
+from subprocess import Popen, PIPE
+from glob import glob
+from os.path import dirname, join, abspath, exists
+from os import chdir
+import signal
+
+root = abspath(dirname(dirname(dirname(__file__))))
+print("Root dir is:" + root)
+
+args = ['bitbake', 'core-image-minimal']
+
+
+class Runner(object):
+    UNKNOWN = 'unknown'
+    PASS = 'pass'
+    FAIL = 'fail'
+    SKIP = 'skipped'
+
+    def __init__(self, dirs):
+        self._dirs = dirs
+        self._child = None
+        self._results = {}
+        for d in dirs:
+            self._results[d] = self.UNKNOWN
+
+    def run(self):
+        for d in self._dirs:
+            chdir(d)
+            if exists(join(d, '.qaskip')):
+                print("Skipping %s because of .qaskip file" % d)
+                self._results[d] = self.SKIP
+                continue
+            print("Building in " + d)
+            self._child = Popen(args=args, cwd=d, stdin=PIPE)
+            retcode = self._child.wait()
+            self._child = None
+            if retcode == 0:
+                self._results[d] = self.PASS
+            else:
+                self._results[d] = self.FAIL
+                print("Error, stopping qa script at %s" % d)
+                break
+        for d, result in self._results.items():
+            print("%20s %s" % (d, result))
+
+    def handle_signal(self, signo, stack_frame):
+        if self._child:
+            self._child
+
+
+def main():
+    dirs = glob(join(root, 'build*'))
+    runner = Runner(dirs)
+    signal.signal(signalnum=signal.SIGINT, handler=runner.handle_signal)
+    runner.run()
+
+if __name__ == "__main__":
+    main()
