@@ -24,3 +24,5 @@ OSTREE_BRANCHNAME ?= "ota-${MACHINE}"
 OSTREE_OSNAME ?= "poky"
 OSTREE_INITRAMFS_IMAGE ?= "initramfs-ostree-image"
 
+# Prelinking increases the size of downloads and causes build errors
+USER_CLASSES_remove = "image-prelink"
