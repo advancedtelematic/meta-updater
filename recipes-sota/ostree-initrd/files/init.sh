@@ -29,10 +29,11 @@ get_ostree_sysroot() {
 	for opt in `cat /proc/cmdline`; do
 		arg=`echo $opt | cut -d'=' -f1`
 		if [ $arg == "ostree_root" ]; then
-			echo $opt | cut -d'=' -f2
+			echo $opt | cut -d'=' -f2-
 			return
 		fi
 	done
+	echo "LABEL=otaroot"
 }
 
 export PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/lib/ostree

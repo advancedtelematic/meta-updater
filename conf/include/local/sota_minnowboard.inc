@@ -6,4 +6,4 @@ EFI_PROVIDER = "grub-efi"
 WKS_FILE = "efiimage-sota.wks"
 IMAGE_BOOT_FILES = ""
 
-OSTREE_KERNEL_ARGS ?= "ramdisk_size=16384 rw rootfstype=ext4 rootwait rootdelay=2 ostree_root=/dev/mmcblk2p2 console=ttyS0,115200 console=tty0"
+OSTREE_KERNEL_ARGS ?= "ramdisk_size=16384 rw rootfstype=ext4 rootwait rootdelay=2 console=ttyS0,115200 console=tty0"
