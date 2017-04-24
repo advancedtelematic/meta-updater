@@ -5,18 +5,15 @@ IMAGE_INSTALL_append = " ostree os-release rvi-sota-client"
 
 # live image for OSTree-enabled systems
 IMAGE_CLASSES += "image_types_ostree image_types_ota"
-IMAGE_FSTYPES += "ostreepush otaimg wic"
+IMAGE_FSTYPES += "ostreepush otaimg"
+
+# if don't build wic image unless IMAGE_BOOT_FILES is set. Prevents build from failing
+#   on machines that don't support updater yet
+IMAGE_FSTYPES += "${@' wic' if (d.getVar("IMAGE_BOOT_FILES", True)) else ''}"
 WKS_FILE ?= "sdimage-sota.wks"
 do_image_wic[depends] += "${IMAGE_BASENAME}:do_image_otaimg"
 
 EXTRA_IMAGEDEPENDS += " parted-native mtools-native dosfstools-native"
-
-# No working WKS for Raspberry Pi yet
-IMAGE_FSTYPES_remove_raspberrypi3 = "wic"
-IMAGE_FSTYPES_remove_raspberrypi2 = "wic"
-
-# QEMU emulation uses plain otaimg, no wic needed
-IMAGE_FSTYPES_remove_qemux86-64 = "wic"
 
 # Please redefine OSTREE_REPO in order to have a persistent OSTree repo
 OSTREE_REPO ?= "${DEPLOY_DIR_IMAGE}/ostree_repo"
