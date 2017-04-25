@@ -1,7 +1,7 @@
 DISTRO_FEATURES_append = " sota"
 OVERRIDES .= ":sota"
 
-IMAGE_INSTALL_append = " ostree os-release rvi-sota-client"
+IMAGE_INSTALL_append = " ostree os-release"
 
 # live image for OSTree-enabled systems
 IMAGE_CLASSES += "image_types_ostree image_types_ota"
