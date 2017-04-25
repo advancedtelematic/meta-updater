@@ -1,5 +1,3 @@
-MACHINE = "porter"
-
 # Commit united image to OSTree, not just uImage
 OSTREE_KERNEL = "uImage+dtb"
 
