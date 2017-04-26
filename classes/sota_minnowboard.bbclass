@@ -1,5 +1,3 @@
-MACHINE = "intel-corei7-64"
-
 OSTREE_BOOTLOADER ?= "grub"
 EFI_PROVIDER = "grub-efi"
 

@@ -35,11 +35,6 @@ fi
 SCRIPTDIR=$(cd $(dirname $BASH_SOURCE) && pwd -P)
 METADIR=$(cd $(dirname $BASH_SOURCE)/../.. && pwd -P)
 
-if ! [[ -e ${SCRIPTDIR}/../conf/include/local/sota_${MACHINE}.inc && -e ${SCRIPTDIR}/../conf/include/bblayers/sota_${MACHINE}.inc ]]; then
-	echo "Error: invalid machine: ${MACHINE}" >&2
-	return -1
-fi
-
 if [ -e ${BUILDDIR}/conf/local.conf ]; then
 	source $METADIR/poky/oe-init-build-env ${BUILDDIR}
 else
@@ -47,8 +42,7 @@ else
 	echo "METADIR  := \"\${@os.path.abspath('${METADIR}')}\"" >> conf/bblayers.conf
 	cat ${METADIR}/meta-updater/conf/include/bblayers/sota.inc >> conf/bblayers.conf
 	cat ${METADIR}/meta-updater/conf/include/bblayers/sota_${MACHINE}.inc >> conf/bblayers.conf
-	echo "include conf/include/local/sota_${MACHINE}.inc" >> conf/local.conf
-	echo "include conf/distro/sota.conf.inc" >> conf/local.conf
+	echo "MACHINE = \"${MACHINE}\"" >> conf/local.conf
 	echo "DISTRO = \"poky-sota-systemd\"" >> conf/local.conf
 fi
 

@@ -1,5 +1,3 @@
-MACHINE ?= "raspberrypi3"
-
 IMAGE_CLASSES += "${@bb.utils.contains('DISTRO_FEATURES', 'sota', 'image_types_uboot sdcard_image-rpi-ota', '', d)}"
 IMAGE_FSTYPES += "${@bb.utils.contains('DISTRO_FEATURES', 'sota', 'rpi-sdimg-ota', 'rpi-sdimg', d)}"
 
