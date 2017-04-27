@@ -1,2 +1,2 @@
 
-GRUB_BUILDIN += "configfile"
+GRUB_BUILDIN_append_sota = " configfile"
