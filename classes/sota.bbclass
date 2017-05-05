@@ -21,13 +21,12 @@ OSTREE_BRANCHNAME ?= "ota-${MACHINE}"
 OSTREE_OSNAME ?= "poky"
 OSTREE_INITRAMFS_IMAGE ?= "initramfs-ostree-image"
 
-# Prelinking increases the size of downloads and causes build errors
-USER_CLASSES_remove = "image-prelink"
-
 SOTA_MACHINE ?= "none"
 SOTA_MACHINE_raspberrypi = "raspberrypi"
 SOTA_MACHINE_raspberrypi3 = "raspberrypi"
 SOTA_MACHINE_porter = "porter"
 SOTA_MACHINE_intel-corei7-64 = "minnowboard"
 SOTA_MACHINE_qemux86-64 = "qemux86-64"
+SOTA_MACHINE_qemux86-64 = "qemux86-64"
+SOTA_MACHINE_am335x-evm = "am335x-evm-wifi"
 inherit sota_${SOTA_MACHINE}
