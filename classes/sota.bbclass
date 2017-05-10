@@ -1,11 +1,9 @@
 python __anonymous() {
     if bb.utils.contains('DISTRO_FEATURES', 'sota', True, False, d):
-        d.appendVar("OVERRIDES", ":sota")
-        #d.appendVar("IMAGE_INSTALL", " ostree os-release")
-
         d.appendVarFlag("do_image_wic", "depends", " %s:do_image_otaimg" % d.getVar("IMAGE_BASENAME", True))
-        #d.appendVar("EXTRA_IMAGEDEPENDS", " parted-native mtools-native dosfstools-native")
 }
+
+OVERRIDES .= "${@bb.utils.contains('DISTRO_FEATURES', 'sota', ':sota', '', d)}"
 
 IMAGE_INSTALL_append_sota = " ostree os-release"
 IMAGE_CLASSES += " image_types_ostree image_types_ota"
@@ -27,5 +25,6 @@ SOTA_MACHINE_rarpberrypi3 ?= "raspberrypi"
 SOTA_MACHINE_porter ?= "porter"
 SOTA_MACHINE_intel-corei7-64 ?= "minnowboard"
 SOTA_MACHINE_qemux86-64 ?= "qemux86-64"
+SOTA_MACHINE_am335x-evm ?= "am335x-evm-wifi"
 
 inherit sota_${SOTA_MACHINE}
