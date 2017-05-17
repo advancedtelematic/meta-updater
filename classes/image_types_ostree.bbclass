@@ -3,6 +3,7 @@
 inherit image
 
 IMAGE_DEPENDS_ostree = "ostree-native:do_populate_sysroot \ 
+			openssl-native:do_populate_sysroot \
 			virtual/kernel:do_deploy \
 			${OSTREE_INITRAMFS_IMAGE}:do_image_complete"
 
@@ -15,6 +16,36 @@ RAMDISK_EXT_arm ?= ".ext4.gz.u-boot"
 OSTREE_KERNEL ??= "${KERNEL_IMAGETYPE}"
 
 export SYSTEMD_USED = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', '', d)}"
+
+python () {
+    if d.getVar("SOTA_PACKED_CREDENTIALS", True):
+        if d.getVar("SOTA_AUTOPROVISION_CREDENTIALS", True):
+            bb.warn("SOTA_AUTOPROVISION_CREDENTIALS are overriden by those in SOTA_PACKED_CREDENTIALS")
+        if d.getVar("SOTA_AUTOPROVISION_URL", True):
+            bb.warn("SOTA_AUTOPROVISION_URL is overriden by one in SOTA_PACKED_CREDENTIALS")
+
+        if d.getVar("SOTA_AUTOPROVISION_URL_FILE", True):
+            bb.warn("SOTA_AUTOPROVISION_URL_FILE is overriden by one in SOTA_PACKED_CREDENTIALS")
+
+        if d.getVar("OSTREE_PUSH_CREDENTIALS", True):
+            bb.warn("OSTREE_PUSH_CREDENTIALS are overriden by those in SOTA_PACKED_CREDENTIALS")
+
+        d.setVar("SOTA_AUTOPROVISION_CREDENTIALS", "%s/sota_credentials/autoprov_credentials.p12" % d.getVar("DEPLOY_DIR_IMAGE", True))
+        d.setVar("SOTA_AUTOPROVISION_URL_FILE", "%s/sota_credentials/autoprov.url" % d.getVar("DEPLOY_DIR_IMAGE", True))
+        d.setVar("OSTREE_PUSH_CREDENTIALS", "%s/sota_credentials/treehub.json" % d.getVar("DEPLOY_DIR_IMAGE", True))
+}
+
+IMAGE_DEPENDS_osreecredunpack = "unzip-native:do_populate_sysroot"
+
+IMAGE_CMD_ostreecredunpack () {
+	if [ ${SOTA_PACKED_CREDENTIALS} ]; then
+		rm -rf ${DEPLOY_DIR_IMAGE}/sota_credentials
+
+		unzip ${SOTA_PACKED_CREDENTIALS} -d ${DEPLOY_DIR_IMAGE}/sota_credentials
+	fi
+}
+
+IMAGE_TYPEDEP_ostree = "ostreecredunpack"
 
 IMAGE_CMD_ostree () {
 	if [ -z "$OSTREE_REPO" ]; then
@@ -113,6 +144,23 @@ IMAGE_CMD_ostree () {
 		rm -rf root
 		ln -sf var/roothome root
 	fi
+
+	# deploy SOTA credentials
+	if [ -n "${SOTA_AUTOPROVISION_CREDENTIALS}" ]; then
+		EXPDATE=`openssl pkcs12 -in ${SOTA_AUTOPROVISION_CREDENTIALS} -password "pass:" -nodes 2>/dev/null | openssl x509 -noout -enddate | cut -f2 -d "="`
+
+		if [ `date +%s` -ge `date -d "${EXPDATE}" +%s` ]; then
+			bberror "Certificate ${SOTA_AUTOPROVISION_CREDENTIALS} has expired on ${EXPDATE}"
+		fi
+
+		mkdir -p var/sota
+		cp ${SOTA_AUTOPROVISION_CREDENTIALS} var/sota/sota_provisioning_credentials.p12
+		if [ -n "${SOTA_AUTOPROVISION_URL_FILE}" ]; then
+			export SOTA_AUTOPROVISION_URL=`cat ${SOTA_AUTOPROVISION_URL_FILE}`
+		fi
+		echo "SOTA_GATEWAY_URI=${SOTA_AUTOPROVISION_URL}" > var/sota/sota_provisioning_url.env
+	fi
+
 
 	# Creating boot directories is required for "ostree admin deploy"
 
