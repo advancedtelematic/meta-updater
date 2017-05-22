@@ -1,19 +1,17 @@
-DISTRO_FEATURES_append = " sota"
-OVERRIDES .= ":sota"
+python __anonymous() {
+    if bb.utils.contains('DISTRO_FEATURES', 'sota', True, False, d):
+        d.appendVarFlag("do_image_wic", "depends", " %s:do_image_otaimg" % d.getVar("IMAGE_BASENAME", True))
+}
 
-IMAGE_INSTALL_append = " ostree os-release"
+OVERRIDES .= "${@bb.utils.contains('DISTRO_FEATURES', 'sota', ':sota', '', d)}"
 
-# live image for OSTree-enabled systems
-IMAGE_CLASSES += "image_types_ostree image_types_ota"
-IMAGE_FSTYPES += "ostreepush otaimg"
+IMAGE_INSTALL_append_sota = " ostree os-release"
+IMAGE_CLASSES += " image_types_ostree image_types_ota"
+IMAGE_FSTYPES += "${@bb.utils.contains('DISTRO_FEATURES', 'sota', 'ostreepush otaimg wic', ' ', d)}"
 
-# if don't build wic image unless IMAGE_BOOT_FILES is set. Prevents build from failing
-#   on machines that don't support updater yet
-IMAGE_FSTYPES += "${@' wic' if (d.getVar("IMAGE_BOOT_FILES", True)) else ''}"
-WKS_FILE ?= "sdimage-sota.wks"
-do_image_wic[depends] += "${IMAGE_BASENAME}:do_image_otaimg"
+WKS_FILE_sota ?= "sdimage-sota.wks"
 
-EXTRA_IMAGEDEPENDS += " parted-native mtools-native dosfstools-native"
+EXTRA_IMAGEDEPENDS_append_sota = " parted-native mtools-native dosfstools-native"
 
 # Please redefine OSTREE_REPO in order to have a persistent OSTree repo
 OSTREE_REPO ?= "${DEPLOY_DIR_IMAGE}/ostree_repo"
@@ -21,12 +19,12 @@ OSTREE_BRANCHNAME ?= "ota-${MACHINE}"
 OSTREE_OSNAME ?= "poky"
 OSTREE_INITRAMFS_IMAGE ?= "initramfs-ostree-image"
 
-SOTA_MACHINE ?= "none"
-SOTA_MACHINE_raspberrypi = "raspberrypi"
-SOTA_MACHINE_raspberrypi3 = "raspberrypi"
-SOTA_MACHINE_porter = "porter"
-SOTA_MACHINE_intel-corei7-64 = "minnowboard"
-SOTA_MACHINE_qemux86-64 = "qemux86-64"
-SOTA_MACHINE_qemux86-64 = "qemux86-64"
-SOTA_MACHINE_am335x-evm = "am335x-evm-wifi"
+SOTA_MACHINE ??="none"
+SOTA_MACHINE_raspberrypi2 ?= "raspberrypi"
+SOTA_MACHINE_rarpberrypi3 ?= "raspberrypi"
+SOTA_MACHINE_porter ?= "porter"
+SOTA_MACHINE_intel-corei7-64 ?= "minnowboard"
+SOTA_MACHINE_qemux86-64 ?= "qemux86-64"
+SOTA_MACHINE_am335x-evm ?= "am335x-evm-wifi"
+
 inherit sota_${SOTA_MACHINE}
