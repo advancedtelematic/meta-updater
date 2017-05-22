@@ -11,14 +11,14 @@ inherit cmake systemd
 S = "${WORKDIR}/git"
 PV = "1.0+git${SRCPV}"
 
-SRCREV = "f2275e9938f5c942c9e51a3966b1ad91acd65367"
+SRCREV = "4e9344ae375a444f02b964dca52fe808010d17df"
 
 SRC_URI = "git://github.com/advancedtelematic/aktualizr"
 
-DEPENDS = "boost curl openssl jansson"
+DEPENDS = "boost curl openssl jansson libsodium ostree"
 RDEPENDS = ""
 
-EXTRA_OECMAKE = "-DWARNING_AS_ERROR=OFF -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF"
+EXTRA_OECMAKE = "-DWARNING_AS_ERROR=OFF -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF -DBUILD_OSTREE=ON"
 
 FILES_${PN} = " \
                 ${bindir}/aktualizr \
