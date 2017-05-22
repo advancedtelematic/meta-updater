@@ -3,12 +3,17 @@
 from argparse import ArgumentParser
 from subprocess import Popen
 from os.path import exists, join
+from os import listdir
 import random
 import sys
 import socket
 
-DEFAULT_DIR = 'tmp/deploy/images/qemux86-64'
+DEFAULT_DIR = 'tmp/deploy/images'
 
+EXTENSIONS = {
+    'intel-corei7-64': 'wic',
+    'qemux86-64': 'otaimg'
+}
 
 def find_local_port(start_port):
     """"
@@ -39,8 +44,25 @@ def random_mac():
 
 class QemuCommand(object):
     def __init__(self, args):
-        self.uboot = join(args.dir, 'u-boot-qemux86-64.rom')
-        self.image = join(args.dir, args.imagename + '-qemux86-64.otaimg')
+        if args.machine:
+            self.machine = args.machine
+        else:
+            machines = listdir(args.dir)
+            if len(machines) == 1:
+                self.machine = machines[0]
+            else:
+                raise ValueError("Could not autodetect machine type from %s" % args.dir)
+        if args.efi:
+            self.bios = 'OVMF.fd'
+        else:
+            uboot = join(args.dir, self.machine, 'u-boot-qemux86-64.rom')
+            if not exists(uboot):
+                raise ValueError("U-Boot image %s does not exist" % uboot)
+            self.bios = uboot
+        ext = EXTENSIONS.get(self.machine, 'wic')
+        self.image = join(args.dir, self.machine, '%s-%s.%s' % (args.imagename, self.machine, ext))
+        if not exists(self.image):
+            raise ValueError("OS image %s does not exist" % self.image)
         if args.mac:
             self.mac_address = args.mac
         else:
@@ -50,10 +72,6 @@ class QemuCommand(object):
         self.kvm = not args.no_kvm
         self.gui = not args.no_gui
         self.gdb = args.gdb
-        if not exists(self.uboot):
-            raise ValueError("U-Boot image %s does not exist" % self.uboot)
-        if not exists(self.image):
-            raise ValueError("OS image %s does not exist" % self.image)
 
     def command_line(self):
         netuser = 'user,hostfwd=tcp:0.0.0.0:%d-:22,restrict=off' % self.ssh_port
@@ -61,7 +79,7 @@ class QemuCommand(object):
             netuser += ',hostfwd=tcp:0.0.0.0:2159-:2159'
         cmdline = [
             "qemu-system-x86_64",
-            "-bios", self.uboot,
+            "-bios", self.bios,
             "-drive", "file=%s,if=ide,format=raw,snapshot=on" % self.image,
             "-serial", "tcp:127.0.0.1:%d,server,nowait" % self.serial_port,
             "-m", "1G",
@@ -70,7 +88,7 @@ class QemuCommand(object):
             "-show-cursor",
             "-vga", "std",
             "-net", netuser,
-            "-net", "nic,macaddr=%s,model=virtio" % self.mac_address
+            "-net", "nic,macaddr=%s" % self.mac_address
         ]
         if self.gui:
             cmdline += ["-serial", "stdio"]
@@ -87,6 +105,11 @@ def main():
     parser.add_argument('mac', default=None, nargs='?')
     parser.add_argument('--dir', default=DEFAULT_DIR,
                         help='Path to build directory containing the image and u-boot-qemux86-64.rom')
+    parser.add_argument('--efi',
+                        help='Boot using UEFI rather than U-Boot. This requires the image to be built with ' +
+                             'OSTREE_BOOTLOADER = "grub" and OVMF.fd firmware to be installed (try "apt install ovmf")',
+                        action='store_true')
+    parser.add_argument('--machine', default=None, help="Target MACHINE")
     parser.add_argument('--no-kvm', help='Disable KVM in QEMU', action='store_true')
     parser.add_argument('--no-gui', help='Disable GUI', action='store_true')
     parser.add_argument('--gdb', help='Export gdbserver port 2159 from the image', action='store_true')
@@ -94,7 +117,7 @@ def main():
     args = parser.parse_args()
     try:
         qemu_command = QemuCommand(args)
-    except ValueError, e:
+    except ValueError as e:
         print(e.message)
         sys.exit(1)
 
