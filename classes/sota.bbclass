@@ -21,7 +21,7 @@ OSTREE_INITRAMFS_IMAGE ?= "initramfs-ostree-image"
 
 SOTA_MACHINE ??="none"
 SOTA_MACHINE_raspberrypi2 ?= "raspberrypi"
-SOTA_MACHINE_rarpberrypi3 ?= "raspberrypi"
+SOTA_MACHINE_raspberrypi3 ?= "raspberrypi"
 SOTA_MACHINE_porter ?= "porter"
 SOTA_MACHINE_intel-corei7-64 ?= "minnowboard"
 SOTA_MACHINE_qemux86-64 ?= "qemux86-64"
