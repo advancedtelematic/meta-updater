@@ -98,6 +98,8 @@ IMAGE_CMD_otaimg () {
 		HOME_TMP=`mktemp -d ${WORKDIR}/home-tmp-XXXXX`
 		tar --xattrs --xattrs-include='*' -C ${HOME_TMP} -xf ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2 ./usr/homedirs ./var/sota || true
  		mv ${HOME_TMP}/var/sota ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
+		# Create /var/sota if it doesn't exist yet
+		mkdir -p ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota || true
 		mv ${HOME_TMP}/usr/homedirs/home ${PHYS_SYSROOT}/ || true
 		rm -rf ${HOME_TMP}
 
