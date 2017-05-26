@@ -35,7 +35,7 @@ python () {
         d.setVar("OSTREE_PUSH_CREDENTIALS", "%s/sota_credentials/treehub.json" % d.getVar("DEPLOY_DIR_IMAGE", True))
 }
 
-IMAGE_DEPENDS_osreecredunpack = "unzip-native:do_populate_sysroot"
+IMAGE_DEPENDS_ostreecredunpack = "unzip-native:do_populate_sysroot"
 
 IMAGE_CMD_ostreecredunpack () {
 	if [ ${SOTA_PACKED_CREDENTIALS} ]; then
