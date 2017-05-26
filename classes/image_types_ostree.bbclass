@@ -22,10 +22,10 @@ python () {
         if d.getVar("SOTA_AUTOPROVISION_CREDENTIALS", True):
             bb.warn("SOTA_AUTOPROVISION_CREDENTIALS are overriden by those in SOTA_PACKED_CREDENTIALS")
         if d.getVar("SOTA_AUTOPROVISION_URL", True):
-            bb.warn("SOTA_AUTOPROVISION_URL is overriden by one in SOTA_PACKED_CREDENTIALS")
+            bb.warn("SOTA_AUTOPROVISION_URL is overriden by the one in SOTA_PACKED_CREDENTIALS")
 
         if d.getVar("SOTA_AUTOPROVISION_URL_FILE", True):
-            bb.warn("SOTA_AUTOPROVISION_URL_FILE is overriden by one in SOTA_PACKED_CREDENTIALS")
+            bb.warn("SOTA_AUTOPROVISION_URL_FILE is overriden by the one in SOTA_PACKED_CREDENTIALS")
 
         if d.getVar("OSTREE_PUSH_CREDENTIALS", True):
             bb.warn("OSTREE_PUSH_CREDENTIALS are overriden by those in SOTA_PACKED_CREDENTIALS")
