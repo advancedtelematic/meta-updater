@@ -99,6 +99,8 @@ IMAGE_CMD_otaimg () {
 		tar --xattrs --xattrs-include='*' -C ${HOME_TMP} -xf ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2 ./usr/homedirs ./var/sota || true
  		mv ${HOME_TMP}/var/sota ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
 		mv ${HOME_TMP}/usr/homedirs/home ${PHYS_SYSROOT}/ || true
+		# Ensure that /var/local exists (AGL symlinks /usr/local to /var/local)
+		install -d ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/local
 		rm -rf ${HOME_TMP}
 
 		# Calculate image type

@@ -1,0 +1,13 @@
+[Unit]
+Description=Aktualizr SOTA Client
+Wants=network-online.target
+After=network.target network-online.target
+Requires=network-online.target
+
+[Service]
+RestartSec=10
+Restart=always
+ExecStart=/usr/bin/aktualizr --config /sysroot/boot/sota.toml --loglevel 2
+
+[Install]
+WantedBy=multi-user.target
