@@ -153,6 +153,7 @@ RDEPENDS_${PN} = " libcrypto \
                    python-json \
                    "
 
+export SOTA_PACKED_CREDENTIALS
 export SOTA_AUTOPROVISION_CREDENTIALS
 export SOTA_AUTOPROVISION_URL
 
@@ -171,7 +172,7 @@ do_install() {
 
   if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
     install -d ${D}/${systemd_unitdir}/system
-    if [ -n "$SOTA_AUTOPROVISION_CREDENTIALS" ]; then
+    if [ -n "$SOTA_AUTOPROVISION_CREDENTIALS" -o -n "$SOTA_PACKED_CREDENTIALS" ]; then
       install -c ${S}/run/sota_client_uptane_auto.service ${D}${systemd_unitdir}/system/sota_client.service
     else
       install -c ${S}/run/sota_client_ostree.service ${D}${systemd_unitdir}/system/sota_client.service
@@ -183,18 +184,5 @@ do_install() {
   echo `git log -1 --pretty=format:%H` > ${D}${sysconfdir}/sota_client.version
   install -c ${S}/run/sota_certificates ${D}${sysconfdir}
   ln -fs /lib ${D}/lib64
-
-  if [ -n "$SOTA_AUTOPROVISION_CREDENTIALS" ]; then
-    EXPDATE=`openssl pkcs12 -in $SOTA_AUTOPROVISION_CREDENTIALS -password "pass:" -nodes 2>/dev/null | openssl x509 -noout -enddate | cut -f2 -d "="`
-
-    if [ `date +%s` -ge `date -d "${EXPDATE}" +%s` ]; then
-      bberror "Certificate ${SOTA_AUTOPROVISION_CREDENTIALS} has expired on ${EXPDATE}"
-    fi
-
-    install -d ${D}/var
-    install -d ${D}/var/sota
-    install -m 0655 $SOTA_AUTOPROVISION_CREDENTIALS ${D}/var/sota/sota_provisioning_credentials.p12
-    echo "SOTA_GATEWAY_URI=$SOTA_AUTOPROVISION_URL" > ${D}/var/sota/sota_provisioning_url.env
-  fi
 
 }
