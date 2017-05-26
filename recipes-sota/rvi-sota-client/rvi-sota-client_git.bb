@@ -151,6 +151,7 @@ RDEPENDS_${PN} = " libcrypto \
                    python \
                    python-canonicaljson \
                    python-json \
+                   python-petname \
                    "
 
 export SOTA_PACKED_CREDENTIALS
