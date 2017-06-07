@@ -1,0 +1,18 @@
+[device]
+packages_dir = "/tmp/packages_dir"
+certificates_directory = "/var/sota"
+system_info = "system_info.sh"
+
+[tls]
+ca_file = "root.crt"
+client_certificate = "client.pem"
+pkey_file = "pkey.pem"
+
+[uptane]
+metadata_path = "/var/sota/metadata"
+private_key_path = "ecukey.der"
+public_key_path = "ecukey.pub"
+
+[provision]
+p12_path = "sota_provisioning_credentials.p12"
+
