@@ -6,6 +6,5 @@
 
 DISTRO_FEATURES_append = " sota"
 INHERIT += " sota"
-SOTA_CLIENT ?= "aktualizr"
 # Prelinking increases the size of downloads and causes build errors
 USER_CLASSES_remove = "image-prelink"
