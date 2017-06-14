@@ -13,3 +13,4 @@ RDEPENDS_${PN} = " python-setuptools \
                    python-argparse \
                    "
 
+FILES_${PN} = "${libdir} ${bindir}/petname"

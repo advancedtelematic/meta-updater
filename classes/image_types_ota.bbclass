@@ -92,7 +92,7 @@ IMAGE_CMD_otaimg () {
 			kargs_list="${kargs_list} --karg-append=$arg"
 		done
 
-		ostree admin --sysroot=${PHYS_SYSROOT} deploy ${kargs_list} --os=${OSTREE_OSNAME} ${OSTREE_OSNAME}:${OSTREE_BRANCHNAME}
+		ostree admin --sysroot=${PHYS_SYSROOT} deploy ${kargs_list} --os=${OSTREE_OSNAME} ${OSTREE_BRANCHNAME}
 
 		# Copy deployment /home and /var/sota to sysroot
 		HOME_TMP=`mktemp -d ${WORKDIR}/home-tmp-XXXXX`
