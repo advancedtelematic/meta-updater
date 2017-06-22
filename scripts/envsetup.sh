@@ -1,7 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 
 SCRIPT="envsetup.sh"
-
 MACHINE=$1
 
 if [ "$#" -lt 1 ]; then
@@ -32,8 +31,12 @@ if [ $SOURCED -ne 1 ]; then
     exit -1
 fi
 
-SCRIPTDIR=$(cd $(dirname $BASH_SOURCE) && pwd -P)
-METADIR=$(cd $(dirname $BASH_SOURCE)/../.. && pwd -P)
+if [ -n "$ZSH_VERSION" ]; then
+  SCRIPTDIR=$(cd $(dirname $0) && pwd -P)
+else
+  SCRIPTDIR=$(cd $(dirname $BASH_SOURCE) && pwd -P)
+fi
+METADIR="${SCRIPTDIR}/../.."
 
 if [ -e ${BUILDDIR}/conf/local.conf ]; then
 	source $METADIR/poky/oe-init-build-env ${BUILDDIR}
