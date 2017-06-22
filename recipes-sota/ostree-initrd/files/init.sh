@@ -56,7 +56,13 @@ grep -q smackfs /proc/filesystems && {
 mkdir -p /sysroot
 ostree_sysroot=$(get_ostree_sysroot)
 
-mount $ostree_sysroot /sysroot || bail_out "Unable to mount $ostree_sysroot as physical sysroot"
+mount "$ostree_sysroot" /sysroot || {
+	# The SD card in the R-Car M3 takes a bit of time to come up
+	# Retry the mount if it fails the first time
+	log_info "Mounting $ostree_sysroot failed, waiting 5s for the device to be available..."
+	sleep 5
+	mount "$ostree_sysroot" /sysroot || bail_out "Unable to mount $ostree_sysroot as physical sysroot"
+}
 ostree-prepare-root /sysroot
 
 # move mounted devices to new root
