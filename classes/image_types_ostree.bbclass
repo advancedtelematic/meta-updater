@@ -203,7 +203,7 @@ IMAGE_CMD_ostree () {
 IMAGE_TYPEDEP_ostreepush = "ostree"
 IMAGE_DEPENDS_ostreepush = "sota-tools-native:do_populate_sysroot"
 IMAGE_CMD_ostreepush () {
-	if [ ${OSTREE_PUSH_CREDENTIALS} ]; then
+	if [ -n "${OSTREE_PUSH_CREDENTIALS}" ]; then
 		garage-push --repo=${OSTREE_REPO} \
 			    --ref=${OSTREE_BRANCHNAME} \
 			    --credentials=${OSTREE_PUSH_CREDENTIALS} \
