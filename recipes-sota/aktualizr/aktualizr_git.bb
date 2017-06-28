@@ -5,6 +5,7 @@ SECTION = "base"
 LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=9741c346eef56131163e13b9db1241b3"
 DEPENDS = "boost curl openssl jansson libsodium ostree"
+RDEPENDS_${PN} = "lshw"
 
 SRC_URI = " \
   git://github.com/advancedtelematic/aktualizr \
@@ -12,7 +13,7 @@ SRC_URI = " \
   file://aktualizr-autoprovision.service \
   file://sota_autoprov.toml \
   "
-SRCREV = "33614fb9fc8f6c9ab5fae20c16d1dca0a330b07f"
+SRCREV = "7ca3af4e2f47ca7a3a67866023de3f8a97425991"
 PV = "1.0+git${SRCPV}"
 
 S = "${WORKDIR}/git"
