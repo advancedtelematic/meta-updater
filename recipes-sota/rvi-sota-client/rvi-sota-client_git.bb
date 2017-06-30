@@ -11,28 +11,29 @@ S = "${WORKDIR}/git"
 # When changing this, don't forget to:
 # 1) Update PV
 # 2) Check that Cargo.lock hasn't changed with git diff old..new Cargo.lock
-SRCREV = "d64be93cc5da9b5399c7d381fd7a0a6f1b13bc3c"
+SRCREV = "0f4d498f969b8d5df3140f8ba80b78b5b4024e72"
 
 # Generate with:
 #   git describe --tags | cut -b2-
 # or from the rvi_sota_client repo:
 #   make package-version
-PV = "0.2.32-192-gd64be93"
+PV = "0.2.33-30-g0f4d498"
 
 BBCLASSEXTEND = "native"
 
 FILES_${PN} = " \
-                /lib64 \
-                ${bindir}/canonical_json.py \
-                ${bindir}/sota_client \
-                ${bindir}/sota_sysinfo.sh \
-                ${bindir}/system_info.sh \
-                ${bindir}/sota_prov.sh \
-                ${sysconfdir}/sota_client.version \
-                ${sysconfdir}/sota_certificates \
-                ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '${systemd_unitdir}/system/sota_client_autoprovision.service', '', d)} \
-                ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '${systemd_unitdir}/system/sota_client.service', '', d)} \
-              "
+/lib64 \
+${bindir}/canonical_json.py \
+${bindir}/sota_client \
+${bindir}/sota_sysinfo.sh \
+${bindir}/system_info.sh \
+${bindir}/sota_provision.sh \
+${sysconfdir}/sota_client.version \
+${sysconfdir}/sota_certificates \
+${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '${systemd_unitdir}/system/sota-client.service', '', d)} \
+${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '${systemd_unitdir}/system/sota-client-autoprovision.service', '', d)} \
+"
+
 
 # list of dependencies can be generated from Cargo.lock by running
 #   cat Cargo.lock | sed -e '1,/metadata/ d' Cargo.lock | awk '{print "crate://crates.io/"$2 "/" $3" \\"}'
@@ -50,7 +51,7 @@ crate://crates.io/bytes/0.4.3 \
 crate://crates.io/cfg-if/0.1.0 \
 crate://crates.io/chan/0.1.19 \
 crate://crates.io/chan-signal/0.2.0 \
-crate://crates.io/chrono/0.3.1 \
+crate://crates.io/chrono/0.4.0 \
 crate://crates.io/crossbeam/0.2.10 \
 crate://crates.io/dbghelp-sys/0.2.0 \
 crate://crates.io/dbus/0.5.2 \
@@ -74,10 +75,12 @@ crate://crates.io/language-tags/0.2.2 \
 crate://crates.io/lazy_static/0.2.8 \
 crate://crates.io/libc/0.2.22 \
 crate://crates.io/log/0.3.7 \
+crate://crates.io/maplit/0.1.4 \
 crate://crates.io/matches/0.1.4 \
 crate://crates.io/memchr/1.0.1 \
 crate://crates.io/metadeps/1.1.1 \
 crate://crates.io/mime/0.2.3 \
+crate://crates.io/net2/0.2.29 \
 crate://crates.io/num/0.1.37 \
 crate://crates.io/num-integer/0.1.34 \
 crate://crates.io/num-iter/0.1.33 \
@@ -129,14 +132,18 @@ crate://crates.io/uuid/0.5.0 \
 crate://crates.io/void/1.0.2 \
 crate://crates.io/winapi/0.2.8 \
 crate://crates.io/winapi-build/0.1.1 \
+crate://crates.io/ws2_32-sys/0.2.1 \
 crate://crates.io/xattr/0.1.11 \
 git://github.com/advancedtelematic/rvi_sota_client \
+file://sota-client-autoprovision.service \
+file://sota-client-ostree.service \
+file://sota-client-uptane.service \
 "
 
 SRC_URI[index.md5sum] = "6a635e8a081b4d4ba4cebffd721c2d7d"
 SRC_URI[index.sha256sum] = "1913c41d4b8de89a931b6f9e418f83e70a083e12e6c247e8510ee932571ebae2"
 
-SYSTEMD_SERVICE_${PN} = "sota_client.service sota_client_autoprovision.service"
+SYSTEMD_SERVICE_${PN} = "sota-client.service sota-client-autoprovision.service"
 
 DEPENDS += " openssl openssl-native dbus "
 RDEPENDS_${PN} = " libcrypto \
@@ -164,22 +171,21 @@ do_install() {
   install -m 0755 target/${TARGET_SYS}/release/sota_client ${D}${bindir}
   install -m 0755 ${S}/run/sota_sysinfo.sh ${D}${bindir}
   ln -fs ${bindir}/sota_sysinfo.sh ${D}${bindir}/system_info.sh  # For compatibilty with old sota.toml files
-  install -m 0755 ${S}/run/sota_prov.sh ${D}${bindir}
+  install -m 0755 ${S}/run/sota_provision.sh ${D}${bindir}
   install -m 0755 ${S}/run/canonical_json.py ${D}${bindir}
 
   if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
     install -d ${D}/${systemd_unitdir}/system
     if [ -n "$SOTA_AUTOPROVISION_CREDENTIALS" -o -n "$SOTA_PACKED_CREDENTIALS" ]; then
-      install -c ${S}/run/sota_client_uptane_auto.service ${D}${systemd_unitdir}/system/sota_client.service
+      install -m 0644 ${WORKDIR}/sota-client-uptane.service ${D}/${systemd_unitdir}/system/sota-client.service
     else
-      install -c ${S}/run/sota_client_ostree.service ${D}${systemd_unitdir}/system/sota_client.service
+      install -m 0644 ${WORKDIR}/sota-client-ostree.service ${D}/${systemd_unitdir}/system/sota-client.service
     fi
-    install -c ${S}/run/sota_client_autoprovision.service ${D}${systemd_unitdir}/system/sota_client_autoprovision.service
+    install -m 0644 ${WORKDIR}/sota-client-autoprovision.service ${D}/${systemd_unitdir}/system/sota-client-autoprovision.service
   fi
 
   install -d ${D}${sysconfdir}
   echo `git log -1 --pretty=format:%H` > ${D}${sysconfdir}/sota_client.version
   install -c ${S}/run/sota_certificates ${D}${sysconfdir}
   ln -fs /lib ${D}/lib64
-
 }
