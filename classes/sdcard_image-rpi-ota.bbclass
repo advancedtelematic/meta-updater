@@ -61,7 +61,7 @@ IMAGE_DEPENDS_rpi-sdimg-ota = " \
 IMAGE_TYPEDEP_rpi-sdimg-ota = "otaimg"
 
 # SD card image name
-SDIMG_OTA = "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.rpi-sdimg-ota"
+SDIMG_OTA = "${IMGDEPLOYDIR}/${IMAGE_NAME}.rootfs.rpi-sdimg-ota"
 
 # Compression method to apply to SDIMG_OTA after it has been created. Supported
 # compression formats are "gzip", "bzip2" or "xz". The original .rpi-sdimg-ota file
@@ -165,9 +165,6 @@ IMAGE_CMD_rpi-sdimg-ota () {
 		dd if=${SDIMG_OTA_ROOTFS} of=${SDIMG_OTA} conv=notrunc seek=1 bs=$(expr 1024 \* ${BOOT_SPACE_ALIGNED} + ${IMAGE_ROOTFS_ALIGNMENT} \* 1024) && sync && sync
 	fi
 
-	rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rpi-sdimg-ota
-	ln -s ${IMAGE_NAME}.rootfs.rpi-sdimg-ota ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rpi-sdimg-ota
-
 	# Optionally apply compression
 	case "${SDIMG_OTA_COMPRESSION}" in
 	"gzip")
@@ -180,9 +177,6 @@ IMAGE_CMD_rpi-sdimg-ota () {
 		xz -k "${SDIMG_OTA}"
 		;;
 	esac
-
-	rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.rpi-sdimg-ota
-	ln -s ${IMAGE_NAME}.rootfs.rpi-sdimg-ota ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.rpi-sdimg-ota
 }
 
 ROOTFS_POSTPROCESS_COMMAND += " rpi_generate_sysctl_config ; "

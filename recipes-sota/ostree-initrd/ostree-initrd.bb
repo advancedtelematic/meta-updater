@@ -5,7 +5,7 @@ SRC_URI = "file://init.sh"
 
 S = "${WORKDIR}"
 
-PV = "2"
+PV = "3"
 
 do_install() {
 	install -dm 0755 ${D}/etc
