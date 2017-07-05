@@ -5,7 +5,8 @@ inherit image
 IMAGE_DEPENDS_ostree = "ostree-native:do_populate_sysroot \ 
 			openssl-native:do_populate_sysroot \
 			virtual/kernel:do_deploy \
-			${OSTREE_INITRAMFS_IMAGE}:do_image_complete"
+			${OSTREE_INITRAMFS_IMAGE}:do_image_complete \
+			unzip-native"
 
 export OSTREE_REPO
 export OSTREE_BRANCHNAME
