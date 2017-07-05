@@ -1,7 +1,7 @@
 IMAGE_CLASSES += "${@bb.utils.contains('DISTRO_FEATURES', 'sota', 'image_types_uboot sdcard_image-rpi-ota', '', d)}"
 IMAGE_FSTYPES += "${@bb.utils.contains('DISTRO_FEATURES', 'sota', 'rpi-sdimg-ota', 'rpi-sdimg', d)}"
 
-IMAGE_FSTYPES_remove = "${@bb.utils.contains('DISTRO_FEATURES', 'sota', 'wic rpi-sdimg', '', d)}"
+IMAGE_FSTYPES_remove = "${@bb.utils.contains('DISTRO_FEATURES', 'sota', 'wic rpi-sdimg rpi-sdimg.xz', '', d)}"
 
 KERNEL_IMAGETYPE_sota = "uImage"
 PREFERRED_PROVIDER_virtual/bootloader_sota ?= "u-boot"
