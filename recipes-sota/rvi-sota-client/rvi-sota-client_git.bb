@@ -30,8 +30,6 @@ FILES_${PN} = " \
                 ${bindir}/sota_prov.sh \
                 ${sysconfdir}/sota_client.version \
                 ${sysconfdir}/sota_certificates \
-                /var/sota/sota_provisioning_credentials.p12 \
-                /var/sota/sota_provisioning_url.env \
                 ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '${systemd_unitdir}/system/sota_client_autoprovision.service', '', d)} \
                 ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '${systemd_unitdir}/system/sota_client.service', '', d)} \
               "

@@ -5,6 +5,7 @@ python __anonymous() {
 
 OVERRIDES .= "${@bb.utils.contains('DISTRO_FEATURES', 'sota', ':sota', '', d)}"
 
+SOTA_CLIENT ??= "aktualizr"
 IMAGE_INSTALL_append_sota = " ostree os-release ${SOTA_CLIENT}"
 IMAGE_CLASSES += " image_types_ostree image_types_ota"
 IMAGE_FSTYPES += "${@bb.utils.contains('DISTRO_FEATURES', 'sota', 'ostreepush otaimg wic', ' ', d)}"
@@ -24,6 +25,7 @@ SOTA_MACHINE ??="none"
 SOTA_MACHINE_raspberrypi2 ?= "raspberrypi"
 SOTA_MACHINE_raspberrypi3 ?= "raspberrypi"
 SOTA_MACHINE_porter ?= "porter"
+SOTA_MACHINE_m3ulcb = "m3ulcb"
 SOTA_MACHINE_intel-corei7-64 ?= "minnowboard"
 SOTA_MACHINE_qemux86-64 ?= "qemux86-64"
 SOTA_MACHINE_am335x-evm ?= "am335x-evm-wifi"

@@ -4,13 +4,13 @@ This layer enables over-the-air updates (OTA) with https://github.com/ostreedev/
 
 https://github.com/ostreedev/ostree[OSTree] is a tool for atomic full file system upgrades with rollback capability. OSTree has several advantages over traditional dual-bank systems, but the most important one is that it minimizes network bandwidth and data storage footprint by sharing files with the same contents across file system deployments.
 
-https://github.com/advancedtelematic/rvi_sota_client[RVI SOTA client] adds authentication and provisioning capabilities to OTA and is integrated with OSTree. It connects to https://github.com/advancedtelematic/rvi_sota_server[RVI SOTA server].
+https://github.com/advancedtelematic/rvi_sota_client[RVI SOTA client] and/or https://github.com/advancedtelematic/aktualizr[aktualizr] add authentication and provisioning capabilities to OTA and are integrated with OSTree. You can connect with the open-source https://github.com/advancedtelematic/rvi_sota_server[RVI SOTA server] or sign up for a free account at https://app.atsgarage.com[ATS Garage] to get started.
 
 == Build
 
 === Quickstart
 
-If you don't already have a Yocto project that you want to add OTA to, you can use the https://github.com/advancedtelematic/garage-quickstart-rpi[ATS Garage Quickstart] project to rapidly get up and running on a Raspberry Pi. It takes a standard https://www.yoctoproject.org/tools-resources/projects/poky[poky] distribution, and adds OTA and OSTree capabilities. For a detailed getting started tutorial see the https://github.com/advancedtelematic/garage-quickstart-rpi/blob/master/README.adoc[README].
+If you don't already have a Yocto project that you want to add OTA to, you can use the https://docs.atsgarage.com/quickstarts/raspberry-pi.html[ATS Garage Quickstart] project to rapidly get up and running on a Raspberry Pi. It takes a standard https://www.yoctoproject.org/tools-resources/projects/poky[poky] distribution, and adds OTA and OSTree capabilities.
 
 === Adding meta-updater capabilities to your build
 
