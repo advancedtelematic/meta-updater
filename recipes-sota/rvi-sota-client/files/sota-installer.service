@@ -1,0 +1,12 @@
+[Unit]
+Description=SOTA Secondary ECU Installer
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+RestartSec=10
+Restart=always
+ExecStart=/usr/bin/sota-installer --level debug --oneshot --config /var/sota/installer.toml
+
+[Install]
+WantedBy=multi-user.target
