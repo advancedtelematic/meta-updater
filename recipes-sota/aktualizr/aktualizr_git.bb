@@ -13,7 +13,7 @@ SRC_URI = " \
   file://aktualizr-autoprovision.service \
   file://sota_autoprov.toml \
   "
-SRCREV = "207898e5b07f6333a14a7f6ff72665abf6e1dbb0"
+SRCREV = "c24f1fc9b600113cf9f2d3d7215e406cbbb70ac4"
 PV = "1.0+git${SRCPV}"
 
 S = "${WORKDIR}/git"
