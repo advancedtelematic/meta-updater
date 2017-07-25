@@ -1,0 +1,15 @@
+[Unit]
+Description=SOTA Client
+Requires=network-online.target
+After=network.target network-online.target
+Requires=sota-client-autoprovision
+After=sota-client-autoprovision
+
+[Service]
+RestartSec=5
+Restart=on-failure
+Environment="RUST_LOG=debug"
+ExecStart=/usr/bin/sota_client --config /var/sota/sota.toml --device-package-manager uptane
+
+[Install]
+WantedBy=multi-user.target
