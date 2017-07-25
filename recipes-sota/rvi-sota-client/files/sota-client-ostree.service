@@ -1,0 +1,13 @@
+[Unit]
+Description=SOTA Client
+Requires=network-online.target
+After=network.target network-online.target
+
+[Service]
+RestartSec=5
+Restart=on-failure
+Environment="RUST_LOG=debug"
+ExecStart=/usr/bin/sota_client --config /sysroot/boot/sota.toml --device-package-manager ostree
+
+[Install]
+WantedBy=multi-user.target
