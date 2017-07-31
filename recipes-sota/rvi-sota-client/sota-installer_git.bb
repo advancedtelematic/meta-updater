@@ -3,7 +3,7 @@ require rvi-sota-client.inc
 
 SYSTEMD_SERVICE_${PN} = "sota-installer.service"
 
-DEPENDS += " sota-client "
+DEPENDS += " rvi-sota-client "
 
 FILES_${PN} = " \
 ${bindir}/sota-installer \
