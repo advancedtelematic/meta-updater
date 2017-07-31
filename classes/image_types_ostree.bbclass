@@ -146,6 +146,8 @@ IMAGE_CMD_ostree () {
 	fi
 
 	# deploy SOTA credentials
+	mkdir -p var/sota
+
 	if [ -n "${SOTA_AUTOPROVISION_CREDENTIALS}" ]; then
 		EXPDATE=`openssl pkcs12 -in ${SOTA_AUTOPROVISION_CREDENTIALS} -password "pass:" -nodes 2>/dev/null | openssl x509 -noout -enddate | cut -f2 -d "="`
 
@@ -153,7 +155,6 @@ IMAGE_CMD_ostree () {
 			bberror "Certificate ${SOTA_AUTOPROVISION_CREDENTIALS} has expired on ${EXPDATE}"
 		fi
 
-		mkdir -p var/sota
 		cp ${SOTA_AUTOPROVISION_CREDENTIALS} var/sota/sota_provisioning_credentials.p12
 		if [ -n "${SOTA_AUTOPROVISION_URL_FILE}" ]; then
 			export SOTA_AUTOPROVISION_URL=`cat ${SOTA_AUTOPROVISION_URL_FILE}`
@@ -161,6 +162,9 @@ IMAGE_CMD_ostree () {
 		echo "SOTA_GATEWAY_URI=${SOTA_AUTOPROVISION_URL}" > var/sota/sota_provisioning_url.env
 	fi
 
+	if [ -n "${SOTA_SECONDARY_ECUS}" ]; then
+		cp ${SOTA_SECONDARY_ECUS} var/sota/ecus
+	fi
 
 	# Creating boot directories is required for "ostree admin deploy"
 
