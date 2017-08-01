@@ -22,6 +22,7 @@ libcrypto \
 libssl \
 lshw \
 jq \
+python-petname \
 "
 
 export SOTA_PACKED_CREDENTIALS
