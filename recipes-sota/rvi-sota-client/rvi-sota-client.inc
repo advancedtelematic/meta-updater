@@ -13,10 +13,11 @@ SRC_URI[index.md5sum] = "6a635e8a081b4d4ba4cebffd721c2d7d"
 SRC_URI[index.sha256sum] = "1913c41d4b8de89a931b6f9e418f83e70a083e12e6c247e8510ee932571ebae2"
 
 # also update PV and SRC_URI crates when updating SRCREV
-SRCREV = "b9170dfd92981505c77f8f6e51d477eb1ec57071"
+SRCREV = "5b335cd46c5848d8012ef03f06b50a63fdac4f7c"
+PR = "1"
 
 # generate with: `make package-version`
-PV = "0.2.33-61-gb9170df"
+PV = "0.2.33-66-g5b335cd"
 
 # generate with: `make yocto-version`
 SRC_URI = " \

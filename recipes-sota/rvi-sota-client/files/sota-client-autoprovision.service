@@ -6,7 +6,6 @@ After=network-online.target
 [Service]
 Type=oneshot
 WorkingDirectory=/var/sota
-EnvironmentFile=/var/sota/sota_provisioning_url.env
 Environment=SOTA_CERT_DIR=/var/sota
 ExecStart=/usr/bin/sota_provision.sh sota_provisioning_credentials
 RemainAfterExit=true

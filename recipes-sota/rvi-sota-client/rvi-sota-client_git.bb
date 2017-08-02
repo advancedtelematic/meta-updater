@@ -24,11 +24,10 @@ lshw \
 jq \
 python-petname \
 sota-launcher \
+zip \
 "
 
 export SOTA_PACKED_CREDENTIALS
-export SOTA_AUTOPROVISION_CREDENTIALS
-export SOTA_AUTOPROVISION_URL
 
 do_compile_prepend() {
   export SOTA_VERSION=$(make sota-version)
@@ -50,7 +49,7 @@ do_install() {
 
   if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
     install -d ${D}/${systemd_unitdir}/system
-    if [ -n "$SOTA_AUTOPROVISION_CREDENTIALS" -o -n "$SOTA_PACKED_CREDENTIALS" ]; then
+    if [ -n "$SOTA_PACKED_CREDENTIALS" ]; then
       install -m 0644 ${WORKDIR}/sota-client-uptane.service ${D}/${systemd_unitdir}/system/sota-client.service
     else
       install -m 0644 ${WORKDIR}/sota-client-ostree.service ${D}/${systemd_unitdir}/system/sota-client.service
