@@ -23,6 +23,7 @@ libssl \
 lshw \
 jq \
 python-petname \
+sota-launcher \
 "
 
 export SOTA_PACKED_CREDENTIALS
