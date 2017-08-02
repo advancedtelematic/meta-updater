@@ -1,7 +1,7 @@
 require rvi-sota-client.inc
 
 
-DEPENDS += " sota-client "
+DEPENDS += " rvi-sota-client "
 FILES_${PN} = "${bindir}/sota-launcher"
 
 
