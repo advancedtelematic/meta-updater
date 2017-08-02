@@ -6,6 +6,7 @@ system_info = "system_info.sh"
 [tls]
 ca_file = "root.crt"
 client_certificate = "client.pem"
+certificates_directory = "/var/sota"
 pkey_file = "pkey.pem"
 
 [uptane]
