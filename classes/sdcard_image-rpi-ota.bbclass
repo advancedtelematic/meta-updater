@@ -61,7 +61,7 @@ IMAGE_DEPENDS_rpi-sdimg-ota = " \
 IMAGE_TYPEDEP_rpi-sdimg-ota = "otaimg"
 
 # SD card image name
-SDIMG_OTA = "${IMGDEPLOYDIR}/${IMAGE_NAME}.rootfs.rpi-sdimg-ota"
+SDIMG_OTA = "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.rpi-sdimg-ota"
 
 # Compression method to apply to SDIMG_OTA after it has been created. Supported
 # compression formats are "gzip", "bzip2" or "xz". The original .rpi-sdimg-ota file
