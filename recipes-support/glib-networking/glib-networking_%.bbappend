@@ -1,1 +1,1 @@
-BBCLASSEXTEND = "native"
+BBCLASSEXTEND_append_sota = " native"

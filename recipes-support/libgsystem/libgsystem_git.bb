@@ -9,9 +9,10 @@ S = "${WORKDIR}/git"
 
 inherit autotools-brokensep gobject-introspection
 
-DEPENDS += "attr glib-2.0 pkgconfig libcap xz"
-
+DEPENDS += "attr glib-2.0 pkgconfig libcap gtk-doc-native gpgme"
+RDEPENDS_${PN} = "xz "
 RDEPENDS_${PN}_append = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', ' systemd', '', d)}"
+
 RDEPENDS_${PN}_remove_class-native = "systemd-native"
 
 BBCLASSEXTEND = "native"
@@ -20,7 +21,8 @@ export STAGING_INCDIR
 export STAGING_LIBDIR
 
 do_configure() {
- NOCONFIGURE=true ./autogen.sh
+ #NOCONFIGURE=true ./autogen.sh
+ autoreconf -vfi
  oe_runconf
 }
 

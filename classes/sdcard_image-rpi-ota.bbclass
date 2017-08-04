@@ -35,6 +35,7 @@ KERNEL_INITRAMFS ?= ""
 # Kernel image name
 SDIMG_OTA_KERNELIMAGE_raspberrypi  ?= "kernel.img"
 SDIMG_OTA_KERNELIMAGE_raspberrypi2 ?= "kernel7.img"
+SDIMG_OTA_KERNELIMAGE_raspberrypi3 ?= "kernel7.img"
 
 # Boot partition volume id
 BOOTDD_VOLUME_ID ?= "${MACHINE}"
@@ -72,6 +73,8 @@ SDIMG_OTA = "${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.rpi-sdimg-ota"
 # Additional files and/or directories to be copied into the vfat partition from the IMAGE_ROOTFS.
 FATPAYLOAD ?= ""
 
+IMAGEDATESTAMP = "${@time.strftime('%Y.%m.%d',time.gmtime())}"
+IMAGE_CMD_rpi-sdimg-ota[vardepsexclude] += "IMAGEDATESTAMP"
 IMAGE_CMD_rpi-sdimg-ota[vardepsexclude] += "DATETIME"
 
 IMAGE_CMD_rpi-sdimg-ota () {
@@ -123,8 +126,10 @@ IMAGE_CMD_rpi-sdimg-ota () {
 		# Copy device tree overlays to dedicated folder
 		mmd -i ${WORKDIR}/boot.img overlays
 		for DTB in ${DT_OVERLAYS}; do
-			DTB_BASE_NAME=`basename ${DTB} .dtb`
-			mcopy -i ${WORKDIR}/boot.img -s ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${DTB_BASE_NAME}.dtb ::overlays/${DTB_BASE_NAME}.dtbo
+			DTB_EXT=${DTB##*.}
+			DTB_BASE_NAME=`basename ${DTB} ."${DTB_EXT}"`
+
+			mcopy -i ${WORKDIR}/boot.img -s ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${DTB_BASE_NAME}.${DTB_EXT} ::overlays/${DTB_BASE_NAME}.${DTB_EXT}
 		done
 	fi
 
@@ -145,6 +150,10 @@ IMAGE_CMD_rpi-sdimg-ota () {
 		done
 	fi
 
+	# Add stamp file
+	echo "${IMAGE_NAME}-${IMAGEDATESTAMP}" > ${WORKDIR}/image-version-info
+	mcopy -i ${WORKDIR}/boot.img -v ${WORKDIR}//image-version-info ::
+
 	# Burn Partitions
 	sync
 	dd if=${WORKDIR}/boot.img of=${SDIMG_OTA} conv=notrunc seek=1 bs=$(expr ${IMAGE_ROOTFS_ALIGNMENT} \* 1024) && sync && sync
@@ -155,9 +164,6 @@ IMAGE_CMD_rpi-sdimg-ota () {
 	else
 		dd if=${SDIMG_OTA_ROOTFS} of=${SDIMG_OTA} conv=notrunc seek=1 bs=$(expr 1024 \* ${BOOT_SPACE_ALIGNED} + ${IMAGE_ROOTFS_ALIGNMENT} \* 1024) && sync && sync
 	fi
-
-	rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rpi-sdimg-ota
-	ln -s ${IMAGE_NAME}.rpi-sdimg-ota ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rpi-sdimg-ota
 
 	# Optionally apply compression
 	case "${SDIMG_OTA_COMPRESSION}" in

@@ -1,2 +1,2 @@
 # meta-oe/recipes-support/libssh2
-BBCLASSEXTEND = "native"
+BBCLASSEXTEND_append_sota = " native"

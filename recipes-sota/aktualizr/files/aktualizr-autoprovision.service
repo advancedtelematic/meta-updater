@@ -1,0 +1,14 @@
+[Unit]
+Description=Aktualizr SOTA Client
+Wants=network-online.target
+After=network.target network-online.target
+Requires=network-online.target
+
+[Service]
+RestartSec=10
+Restart=always
+EnvironmentFile=/var/sota/sota_provisioning_url.env
+ExecStart=/usr/bin/aktualizr --disable-keyid-validation --tls-server ${SOTA_GATEWAY_URI} --config /usr/lib/sota/sota.toml
+
+[Install]
+WantedBy=multi-user.target
