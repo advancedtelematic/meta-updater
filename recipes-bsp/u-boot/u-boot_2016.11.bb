@@ -1,5 +1,6 @@
 require recipes-bsp/u-boot/u-boot.inc
 
+LICENSE = "GPLv2+"
 DEPENDS += "dtc-native"
 
 SRCREV = "5ea3e51fc481613a8dee8c02848d1b42c81ad892"
