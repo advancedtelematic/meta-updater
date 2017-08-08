@@ -1,7 +1,3 @@
-[device]
-packages_dir = "/tmp/packages_dir"
-system_info = "system_info.sh"
-
 [tls]
 certificates_directory = "/var/sota/"
 ca_file = "root.crt"
