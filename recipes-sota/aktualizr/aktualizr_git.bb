@@ -13,8 +13,9 @@ SRC_URI = " \
   file://aktualizr-autoprovision.service \
   file://sota_autoprov.toml \
   "
-SRCREV = "c24f1fc9b600113cf9f2d3d7215e406cbbb70ac4"
+SRCREV = "1004efa3f86cef90c012b34620992b5762b741e3"
 PV = "1.0+git${SRCPV}"
+PR = "6"
 
 S = "${WORKDIR}/git"
 SYSTEMD_SERVICE_${PN} = "aktualizr.service"
@@ -23,11 +24,10 @@ inherit cmake systemd
 
 EXTRA_OECMAKE = "-DWARNING_AS_ERROR=OFF -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF -DBUILD_OSTREE=ON -DAKTUALIZR_VERSION=${PV}"
 
-export SOTA_AUTOPROVISION_CREDENTIALS
 export SOTA_PACKED_CREDENTIALS
 
 do_install_append() {
-    if [ -n "${SOTA_AUTOPROVISION_CREDENTIALS}" -o -n "${SOTA_PACKED_CREDENTIALS}" ]; then
+    if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
       install -d ${D}/${systemd_unitdir}/system
       install -m 0644 ${WORKDIR}/aktualizr-autoprovision.service ${D}/${systemd_unitdir}/system/aktualizr.service
       install -d ${D}/usr/lib/sota
