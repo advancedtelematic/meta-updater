@@ -4,6 +4,7 @@ inherit image
 
 IMAGE_DEPENDS_ostree = "ostree-native:do_populate_sysroot \ 
 			openssl-native:do_populate_sysroot \
+			zip-native:do_populate_sysroot \
 			virtual/kernel:do_deploy \
 			${OSTREE_INITRAMFS_IMAGE}:do_image_complete"
 
@@ -133,6 +134,8 @@ IMAGE_CMD_ostree () {
 	# deploy SOTA credentials
 	if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
 		cp ${SOTA_PACKED_CREDENTIALS} var/sota/sota_provisioning_credentials.zip
+		# Device should not be able to push data to treehub
+		zip -d var/sota/sota_provisioning_credentials.zip treehub.json
 	fi
 
 	if [ -n "${SOTA_SECONDARY_ECUS}" ]; then
