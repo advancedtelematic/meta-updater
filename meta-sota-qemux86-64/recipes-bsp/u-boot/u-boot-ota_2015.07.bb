@@ -9,12 +9,16 @@ LIC_FILES_CHKSUM = "file://Licenses/README;md5=0507cd7da8e7ad6d6701926ec9b84c95"
 # repo during parse
 SRCREV = "baba2f57e8f4ed3fa67fe213d22da0de5e00f204"
 
-SRC_URI += "file://0001-Set-up-environment-for-OSTree-integration.patch \
+SRC_URI=" \
+            git://git.denx.de/u-boot.git;branch=master \
+            file://0001-Set-up-environment-for-OSTree-integration.patch \
 	    file://0002-Replace-wraps-with-built-in-code-to-remove-dependenc.patch \
 	    file://fix-build-error-under-gcc6.patch \
 	    "
 
 PV = "v2015.07+git${SRCPV}"
+
+S = "${WORKDIR}/git"
 
 EXTRA_OEMAKE_append = " KCFLAGS=-fgnu89-inline BUILD_ROM=y"
 
