@@ -133,9 +133,11 @@ IMAGE_CMD_ostree () {
 
 	# deploy SOTA credentials
 	if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
-		cp ${SOTA_PACKED_CREDENTIALS} var/sota/sota_provisioning_credentials.zip
-		# Device should not be able to push data to treehub
-		zip -d var/sota/sota_provisioning_credentials.zip treehub.json
+                if [ -e ${SOTA_PACKED_CREDENTIALS} ]; then
+		        cp ${SOTA_PACKED_CREDENTIALS} var/sota/sota_provisioning_credentials.zip
+		        # Device should not be able to push data to treehub
+		        zip -d var/sota/sota_provisioning_credentials.zip treehub.json
+                fi
 	fi
 
 	if [ -n "${SOTA_SECONDARY_ECUS}" ]; then
@@ -183,10 +185,17 @@ IMAGE_CMD_ostree () {
 IMAGE_TYPEDEP_ostreepush = "ostree"
 IMAGE_DEPENDS_ostreepush = "sota-tools-native:do_populate_sysroot"
 IMAGE_CMD_ostreepush () {
+        # Print warnings if credetials are not set or if the file has not been found.
 	if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
-		garage-push --repo=${OSTREE_REPO} \
-			    --ref=${OSTREE_BRANCHNAME} \
-			    --credentials=${SOTA_PACKED_CREDENTIALS} \
-			    --cacert=${STAGING_ETCDIR_NATIVE}/ssl/certs/ca-certificates.crt
+                if [ -e ${SOTA_PACKED_CREDENTIALS} ]; then
+		        garage-push --repo=${OSTREE_REPO} \
+			            --ref=${OSTREE_BRANCHNAME} \
+			            --credentials=${SOTA_PACKED_CREDENTIALS} \
+			            --cacert=${STAGING_ETCDIR_NATIVE}/ssl/certs/ca-certificates.crt
+                else
+                        bbwarn "SOTA_PACKED_CREDENTIALS file does not exist."
+                fi
+        else
+                bbwarn "SOTA_PACKED_CREDENTIALS not set. Please add SOTA_PACKED_CREDENTIALS."
 	fi
 }
