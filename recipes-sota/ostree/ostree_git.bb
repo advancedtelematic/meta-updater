@@ -16,11 +16,11 @@ S = "${WORKDIR}/git"
 
 BBCLASSEXTEND = "native"
 
-DEPENDS += "attr libarchive glib-2.0 pkgconfig gpgme libgsystem fuse libsoup-2.4 e2fsprogs gtk-doc-native curl"
+DEPENDS += "attr libarchive glib-2.0 pkgconfig gpgme libgsystem fuse libsoup-2.4 e2fsprogs gtk-doc-native curl xz"
 DEPENDS_append = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', ' systemd', '', d)}"
 DEPENDS_remove_class-native = "systemd-native"
 
-RDEPENDS_${PN} = "python util-linux-libuuid util-linux-libblkid util-linux-libmount libcap xz bash"
+RDEPENDS_${PN} = "python util-linux-libuuid util-linux-libblkid util-linux-libmount libcap bash"
 RDEPENDS_${PN}_remove_class-native = "python-native"
 
 EXTRA_OECONF = "--with-libarchive --disable-gtk-doc --disable-gtk-doc-html --disable-gtk-doc-pdf --disable-man --with-smack --with-builtin-grub2-mkconfig --with-curl"
