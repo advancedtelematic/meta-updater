@@ -4,6 +4,7 @@ inherit image
 
 IMAGE_DEPENDS_ostree = "ostree-native:do_populate_sysroot \ 
 			openssl-native:do_populate_sysroot \
+			zip-native:do_populate_sysroot \
 			virtual/kernel:do_deploy \
 			${OSTREE_INITRAMFS_IMAGE}:do_image_complete \
 			unzip-native"
@@ -17,36 +18,6 @@ RAMDISK_EXT_arm ?= ".ext4.gz.u-boot"
 OSTREE_KERNEL ??= "${KERNEL_IMAGETYPE}"
 
 export SYSTEMD_USED = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', '', d)}"
-
-python () {
-    if d.getVar("SOTA_PACKED_CREDENTIALS", True):
-        if d.getVar("SOTA_AUTOPROVISION_CREDENTIALS", True):
-            bb.warn("SOTA_AUTOPROVISION_CREDENTIALS are overriden by those in SOTA_PACKED_CREDENTIALS")
-        if d.getVar("SOTA_AUTOPROVISION_URL", True):
-            bb.warn("SOTA_AUTOPROVISION_URL is overriden by the one in SOTA_PACKED_CREDENTIALS")
-
-        if d.getVar("SOTA_AUTOPROVISION_URL_FILE", True):
-            bb.warn("SOTA_AUTOPROVISION_URL_FILE is overriden by the one in SOTA_PACKED_CREDENTIALS")
-
-        if d.getVar("OSTREE_PUSH_CREDENTIALS", True):
-            bb.warn("OSTREE_PUSH_CREDENTIALS are overriden by those in SOTA_PACKED_CREDENTIALS")
-
-        d.setVar("SOTA_AUTOPROVISION_CREDENTIALS", "%s/sota_credentials/autoprov_credentials.p12" % d.getVar("DEPLOY_DIR_IMAGE", True))
-        d.setVar("SOTA_AUTOPROVISION_URL_FILE", "%s/sota_credentials/autoprov.url" % d.getVar("DEPLOY_DIR_IMAGE", True))
-        d.setVar("OSTREE_PUSH_CREDENTIALS", "%s/sota_credentials/treehub.json" % d.getVar("DEPLOY_DIR_IMAGE", True))
-}
-
-IMAGE_DEPENDS_ostreecredunpack = "unzip-native:do_populate_sysroot"
-
-IMAGE_CMD_ostreecredunpack () {
-	if [ ${SOTA_PACKED_CREDENTIALS} ]; then
-		rm -rf ${DEPLOY_DIR_IMAGE}/sota_credentials
-
-		unzip ${SOTA_PACKED_CREDENTIALS} -d ${DEPLOY_DIR_IMAGE}/sota_credentials
-	fi
-}
-
-IMAGE_TYPEDEP_ostree = "ostreecredunpack"
 
 IMAGE_CMD_ostree () {
 	if [ -z "$OSTREE_REPO" ]; then
@@ -146,22 +117,33 @@ IMAGE_CMD_ostree () {
 		ln -sf var/roothome root
 	fi
 
-	# deploy SOTA credentials
+	mkdir -p var/sota
+
 	if [ -n "${SOTA_AUTOPROVISION_CREDENTIALS}" ]; then
-		EXPDATE=`openssl pkcs12 -in ${SOTA_AUTOPROVISION_CREDENTIALS} -password "pass:" -nodes 2>/dev/null | openssl x509 -noout -enddate | cut -f2 -d "="`
+        bbwarn "SOTA_AUTOPROVISION_CREDENTIALS are ignored. Please use SOTA_PACKED_CREDENTIALS"
+    fi
+	if [ -n "${SOTA_AUTOPROVISION_URL}" ]; then
+        bbwarn "SOTA_AUTOPROVISION_URL is ignored. Please use SOTA_PACKED_CREDENTIALS"
+    fi
+	if [ -n "${SOTA_AUTOPROVISION_URL_FILE}" ]; then
+        bbwarn "SOTA_AUTOPROVISION_URL_FILE is ignored. Please use SOTA_PACKED_CREDENTIALS"
+    fi
+	if [ -n "${OSTREE_PUSH_CREDENTIALS}" ]; then
+        bbwarn "OSTREE_PUSH_CREDENTIALS is ignored. Please use SOTA_PACKED_CREDENTIALS"
+    fi
 
-		if [ `date +%s` -ge `date -d "${EXPDATE}" +%s` ]; then
-			bberror "Certificate ${SOTA_AUTOPROVISION_CREDENTIALS} has expired on ${EXPDATE}"
-		fi
-
-		mkdir -p var/sota
-		cp ${SOTA_AUTOPROVISION_CREDENTIALS} var/sota/sota_provisioning_credentials.p12
-		if [ -n "${SOTA_AUTOPROVISION_URL_FILE}" ]; then
-			export SOTA_AUTOPROVISION_URL=`cat ${SOTA_AUTOPROVISION_URL_FILE}`
-		fi
-		echo "SOTA_GATEWAY_URI=${SOTA_AUTOPROVISION_URL}" > var/sota/sota_provisioning_url.env
+	# deploy SOTA credentials
+	if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
+                if [ -e ${SOTA_PACKED_CREDENTIALS} ]; then
+		        cp ${SOTA_PACKED_CREDENTIALS} var/sota/sota_provisioning_credentials.zip
+		        # Device should not be able to push data to treehub
+		        zip -d var/sota/sota_provisioning_credentials.zip treehub.json
+                fi
 	fi
 
+	if [ -n "${SOTA_SECONDARY_ECUS}" ]; then
+		cp ${SOTA_SECONDARY_ECUS} var/sota/ecus
+	fi
 
 	# Creating boot directories is required for "ostree admin deploy"
 
@@ -204,10 +186,17 @@ IMAGE_CMD_ostree () {
 IMAGE_TYPEDEP_ostreepush = "ostree"
 IMAGE_DEPENDS_ostreepush = "sota-tools-native:do_populate_sysroot"
 IMAGE_CMD_ostreepush () {
-	if [ -n "${OSTREE_PUSH_CREDENTIALS}" ]; then
-		garage-push --repo=${OSTREE_REPO} \
-			    --ref=${OSTREE_BRANCHNAME} \
-			    --credentials=${OSTREE_PUSH_CREDENTIALS} \
-			    --cacert=${STAGING_ETCDIR_NATIVE}/ssl/certs/ca-certificates.crt
+        # Print warnings if credetials are not set or if the file has not been found.
+	if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
+                if [ -e ${SOTA_PACKED_CREDENTIALS} ]; then
+		        garage-push --repo=${OSTREE_REPO} \
+			            --ref=${OSTREE_BRANCHNAME} \
+			            --credentials=${SOTA_PACKED_CREDENTIALS} \
+			            --cacert=${STAGING_ETCDIR_NATIVE}/ssl/certs/ca-certificates.crt
+                else
+                        bbwarn "SOTA_PACKED_CREDENTIALS file does not exist."
+                fi
+        else
+                bbwarn "SOTA_PACKED_CREDENTIALS not set. Please add SOTA_PACKED_CREDENTIALS."
 	fi
 }
