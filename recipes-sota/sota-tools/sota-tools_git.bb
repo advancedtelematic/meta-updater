@@ -10,7 +10,7 @@ SRCREV = "216cb84db98e9b0f8c6c1c407f480c5dd0b3cf62"
 
 inherit cmake
 
-DEPENDS = "boost glib-2.0 curl"
+DEPENDS = "boost glib-2.0 curl libarchive"
 
 BBCLASSEXTEND = "native"
 
