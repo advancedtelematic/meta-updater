@@ -75,6 +75,7 @@ class QemuCommand(object):
         self.gui = not args.no_gui
         self.gdb = args.gdb
         self.pcap = args.pcap
+        self.overlay = args.overlay
 
     def command_line(self):
         netuser = 'user,hostfwd=tcp:0.0.0.0:%d-:22,restrict=off' % self.ssh_port
@@ -82,8 +83,11 @@ class QemuCommand(object):
             netuser += ',hostfwd=tcp:0.0.0.0:2159-:2159'
         cmdline = [
             "qemu-system-x86_64",
-            "-bios", self.bios,
-            "-drive", "file=%s,if=ide,format=raw,snapshot=on" % self.image,
+            "-bios", self.bios
+        ]
+        if not self.overlay:
+            cmdline += ["-drive", "file=%s,if=ide,format=raw,snapshot=on" % self.image]
+        cmdline += [
             "-serial", "tcp:127.0.0.1:%d,server,nowait" % self.serial_port,
             "-m", "1G",
             "-usb",
@@ -103,6 +107,16 @@ class QemuCommand(object):
             cmdline.append('-enable-kvm')
         else:
             cmdline += ['-cpu', 'Haswell']
+        if self.overlay:
+            cmdline.append(self.overlay)
+        return cmdline
+
+    def img_command_line(self):
+        cmdline = [
+        "qemu-img", "create",
+        "-o", "backing_file=%s" % self.image,
+        "-f", "qcow2",
+        self.overlay]
         return cmdline
 
 
@@ -121,6 +135,7 @@ def main():
     parser.add_argument('--no-gui', help='Disable GUI', action='store_true')
     parser.add_argument('--gdb', help='Export gdbserver port 2159 from the image', action='store_true')
     parser.add_argument('--pcap', default=None, help='Dump all network traffic')
+    parser.add_argument('-o', '--overlay', type=str, metavar='file.cow', help='Use an overlay storage image file. Will be created if it does not exist. This option lets you have a persistent image without modifying the underlying image file, permitting multiple different persistent machines.')
     parser.add_argument('-n', '--dry-run', help='Print qemu command line rather then run it', action='store_true')
     args = parser.parse_args()
     try:
@@ -136,6 +151,14 @@ def main():
     print(" nc localhost %d" % qemu_command.serial_port)
 
     cmdline = qemu_command.command_line()
+    if args.overlay and not exists(args.overlay):
+        print("Image file %s does not yet exist, creating." % args.overlay)
+        img_cmdline = qemu_command.img_command_line()
+        if args.dry_run:
+            print(" ".join(img_cmdline))
+        else:
+            Popen(img_cmdline)
+
     if args.dry_run:
         print(" ".join(cmdline))
     else:
