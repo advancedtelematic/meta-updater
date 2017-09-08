@@ -1,0 +1,86 @@
+From b6add28acb884b6006216e8422cc18504483c72e Mon Sep 17 00:00:00 2001
+From: Anton Gerasimov <anton@advancedtelematic.com>
+Date: Fri, 8 Sep 2017 15:08:40 +0200
+Subject: [PATCH] Cross-compilation tweaks
+
+---
+ m4/acx_openssl.m4      | 2 ++
+ m4/acx_openssl_ecc.m4  | 3 +++
+ m4/acx_openssl_fips.m4 | 2 ++
+ m4/acx_openssl_gost.m4 | 2 ++
+ 4 files changed, 9 insertions(+)
+
+diff --git a/m4/acx_openssl.m4 b/m4/acx_openssl.m4
+index e90c78f..9de6055 100644
+--- a/m4/acx_openssl.m4
++++ b/m4/acx_openssl.m4
+@@ -25,6 +25,7 @@ AC_DEFUN([ACX_OPENSSL],[
+ 	AC_CHECK_HEADERS([openssl/ssl.h],,[AC_MSG_ERROR([Can't find OpenSSL headers])])
+ 	AC_CHECK_LIB(crypto, BN_new,,[AC_MSG_ERROR([Can't find OpenSSL library])])
+ 
++	if test "$cross_compiling" != yes; then
+ 	AC_MSG_CHECKING([for OpenSSL version])
+ 	CHECK_OPENSSL_VERSION=m4_format(0x%02x%02x%02x000L, $1, $2, $3)
+ 	AC_LANG_PUSH([C])
+@@ -51,6 +52,7 @@ AC_DEFUN([ACX_OPENSSL],[
+ 		AC_MSG_ERROR([OpenSSL library too old ($1.$2.$3 or later required)])
+ 	],[])
+ 	AC_LANG_POP([C])
++	fi
+ 
+ 	CPPFLAGS=$tmp_CPPFLAGS
+ 	LIBS=$tmp_LIBS
+diff --git a/m4/acx_openssl_ecc.m4 b/m4/acx_openssl_ecc.m4
+index 612c505..ba2389d 100644
+--- a/m4/acx_openssl_ecc.m4
++++ b/m4/acx_openssl_ecc.m4
+@@ -1,4 +1,5 @@
+ AC_DEFUN([ACX_OPENSSL_ECC],[
++	if test "$cross_compiling" != yes; then
+ 	AC_MSG_CHECKING(for OpenSSL ECC support)
+ 
+ 	tmp_CPPFLAGS=$CPPFLAGS
+@@ -32,6 +33,8 @@ AC_DEFUN([ACX_OPENSSL_ECC],[
+ 	],[])
+ 	AC_LANG_POP([C])
+ 
++	fi
++
+ 	CPPFLAGS=$tmp_CPPFLAGS
+ 	LIBS=$tmp_LIBS
+ ])
+diff --git a/m4/acx_openssl_fips.m4 b/m4/acx_openssl_fips.m4
+index 0491397..896cdbf 100644
+--- a/m4/acx_openssl_fips.m4
++++ b/m4/acx_openssl_fips.m4
+@@ -1,4 +1,5 @@
+ AC_DEFUN([ACX_OPENSSL_FIPS],[
++	if test "$cross_compiling" != yes; then
+ 	AC_MSG_CHECKING(for OpenSSL FIPS capable library)
+ 
+ 	tmp_CPPFLAGS=$CPPFLAGS
+@@ -47,4 +48,5 @@ AC_DEFUN([ACX_OPENSSL_FIPS],[
+ 
+ 	CPPFLAGS=$tmp_CPPFLAGS
+ 	LIBS=$tmp_LIBS
++	fi
+ ])
+diff --git a/m4/acx_openssl_gost.m4 b/m4/acx_openssl_gost.m4
+index dca489b..34c39d8 100644
+--- a/m4/acx_openssl_gost.m4
++++ b/m4/acx_openssl_gost.m4
+@@ -1,4 +1,5 @@
+ AC_DEFUN([ACX_OPENSSL_GOST],[
++	if test "$cross_compiling" != yes; then
+ 	AC_MSG_CHECKING(for OpenSSL GOST support)
+ 
+ 	tmp_CPPFLAGS=$CPPFLAGS
+@@ -62,4 +63,5 @@ AC_DEFUN([ACX_OPENSSL_GOST],[
+ 
+ 	CPPFLAGS=$tmp_CPPFLAGS
+ 	LIBS=$tmp_LIBS
++	fi
+ ])
+-- 
+2.7.4
+

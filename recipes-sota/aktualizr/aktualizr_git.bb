@@ -7,6 +7,11 @@ LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=9741c346eef56131163e13b9db1241b3"
 DEPENDS = "boost curl openssl jansson libsodium ostree"
 RDEPENDS_${PN} = "lshw"
 
+DEPENDS_append = "${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', ' libp11', '', d)}"
+
+RDEPENDS_${PN}_append = "${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', ' engine-pkcs11', '', d)}"
+RDEPENDS_${PN}_append = "${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm-test', ' softhsm softhsm-testtoken', '', d)}"
+
 SRC_URI = " \
   git://github.com/advancedtelematic/aktualizr \
   "
