@@ -82,6 +82,12 @@ IMAGE_CMD_ostree () {
 		ln -sf var/rootdirs/home home
 	fi
 
+    # Move cron jobs if exist
+    if [ -d "var/spool/cron" ] && [ "$(ls -A var/spool/cron)" ] &&
+        [ -d "usr/share/cronie-spool" ] ; then
+        mv var/spool/cron/* usr/share/cronie-spool/
+    fi
+
 	# Move persistent directories to /var
 	dirs="opt mnt media srv"
 
