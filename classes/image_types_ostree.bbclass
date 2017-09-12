@@ -146,6 +146,25 @@ IMAGE_CMD_ostree () {
 		cp ${SOTA_SECONDARY_ECUS} var/sota/ecus
 	fi
 
+	# Deploy client certificate and key.
+	if [ -n "${SOTA_CLIENT_CERTIFICATE}" ]; then
+		if [ -e ${SOTA_CLIENT_CERTIFICATE} ]; then
+			mkdir -p var/sota/token
+			cp ${SOTA_CLIENT_CERTIFICATE} var/sota/token/
+		fi
+	fi
+	if [ -n "${SOTA_CLIENT_KEY}" ]; then
+		if [ -e ${SOTA_CLIENT_KEY} ]; then
+			mkdir -p var/sota/token
+			cp ${SOTA_CLIENT_KEY} var/sota/token/
+		fi
+	fi
+	if [ -n "${SOTA_ROOT_CA}" ]; then
+		if [ -e ${SOTA_ROOT_CA} ]; then
+			cp ${SOTA_ROOT_CA} var/sota/
+		fi
+	fi
+
 	# Creating boot directories is required for "ostree admin deploy"
 
 	mkdir -p boot/loader.0
