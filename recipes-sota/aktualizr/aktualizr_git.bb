@@ -13,9 +13,11 @@ RDEPENDS_${PN}_append = "${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', ' e
 RDEPENDS_${PN}_append = "${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm-test', ' softhsm softhsm-testtoken', '', d)}"
 
 SRC_URI = " \
-  git://github.com/advancedtelematic/aktualizr \
+  git://github.com/advancedtelematic/aktualizr;branch=${BRANCH} \
   "
 SRCREV = "1004efa3f86cef90c012b34620992b5762b741e3"
+BRANCH ?= "master"
+
 PV = "1.0+git${SRCPV}"
 PR = "7"
 
