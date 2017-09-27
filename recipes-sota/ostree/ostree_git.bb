@@ -8,9 +8,9 @@ INHERIT_remove_class-native = "systemd"
 
 SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master"
 
-SRCREV="3b09620c2738bce4ed45e099cf2e4c5df7671d39"
+SRCREV="e3c3ec5dd91492e82c79223052443d038c60f41c"
 
-PV = "2017.3-31-g3b09620c"
+PV = "v2017.11-20-ge3c3ec5d"
 
 S = "${WORKDIR}/git"
 
@@ -79,6 +79,9 @@ FILES_${PN} += " \
     ${datadir}/gir-1.0/OSTree-1.0.gir \
     ${libdir}/girepository-1.0 \
     ${libdir}/girepository-1.0/OSTree-1.0.typelib \
+    ${libdir}/tmpfiles.d/ostree-tmpfiles.conf \
+    ${datadir}/bash-completion/completions/ostree \
+    ${systemd_unitdir}/system-generators/ostree-system-generator \
 "
 
 PACKAGES =+ "${PN}-switchroot"

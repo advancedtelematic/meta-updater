@@ -1,0 +1,17 @@
+[tls]
+certificates_directory = "/var/sota/"
+ca_file = "/var/sota/token/root.crt"
+client_certificate = "01"
+cert_source = "pkcs11"
+pkey_file = "02"
+pkey_source = "pkcs11"
+
+[p11]
+module = "/usr/lib/softhsm/libsofthsm2.so"
+pass = "1234"
+
+[uptane]
+metadata_path = "/var/sota/metadata"
+private_key_path = "ecukey.der"
+public_key_path = "ecukey.pub"
+
