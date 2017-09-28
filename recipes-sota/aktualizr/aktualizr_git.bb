@@ -1,31 +1,20 @@
-SUMMARY = "Aktualizr SOTA Client"
-DESCRIPTION = "SOTA Client application written in C++"
-HOMEPAGE = "https://github.com/advancedtelematic/aktualizr"
-SECTION = "base"
-LICENSE = "MPL-2.0"
-LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=9741c346eef56131163e13b9db1241b3"
-DEPENDS = "boost curl openssl jansson libsodium ostree"
+require aktualizr_common.inc
+
+DEPENDS = "boost curl jansson openssl libarchive libsodium ostree"
 RDEPENDS_${PN} = "lshw"
 
 DEPENDS_append = "${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', ' libp11', '', d)}"
-
 RDEPENDS_${PN}_append = "${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', ' engine-pkcs11', '', d)}"
 RDEPENDS_${PN}_append = "${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm-test', ' softhsm softhsm-testtoken', '', d)}"
 
-SRC_URI = " \
-  git://github.com/advancedtelematic/aktualizr;branch=${BRANCH} \
-  "
-SRCREV = "1004efa3f86cef90c012b34620992b5762b741e3"
-BRANCH ?= "master"
-
-PV = "1.0+git${SRCPV}"
-PR = "7"
-
-S = "${WORKDIR}/git"
-
-inherit cmake systemd
+inherit systemd
 
 EXTRA_OECMAKE = "-DWARNING_AS_ERROR=OFF -DCMAKE_BUILD_TYPE=Release -DBUILD_OSTREE=ON -DAKTUALIZR_VERSION=${PV}"
+
+do_install_append () {
+    rm ${D}${bindir}/aktualizr_cert_provider
+    rm ${D}${bindir}/aktualizr_implicit_writer
+}
 
 FILES_${PN} = " \
                 ${bindir}/aktualizr \

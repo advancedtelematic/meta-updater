@@ -20,6 +20,8 @@ OSTREE_KERNEL ??= "${KERNEL_IMAGETYPE}"
 
 export SYSTEMD_USED = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', '', d)}"
 
+SOTA_IMPLICIT_PROV = "${@bb.utils.contains('DISTRO_FEATURES', 'implicit-prov', 'true', '', d)}"
+
 IMAGE_CMD_ostree () {
     if [ -z "$OSTREE_REPO" ]; then
         bbfatal "OSTREE_REPO should be set in your local.conf"
@@ -134,7 +136,7 @@ IMAGE_CMD_ostree () {
     fi
 
     # deploy SOTA credentials
-    if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
+    if [ -n "${SOTA_PACKED_CREDENTIALS}" -a -z "${SOTA_IMPLICIT_PROV}" ]; then
         if [ -e ${SOTA_PACKED_CREDENTIALS} ]; then
             cp ${SOTA_PACKED_CREDENTIALS} var/sota/sota_provisioning_credentials.zip
             # Device should not be able to push data to treehub
