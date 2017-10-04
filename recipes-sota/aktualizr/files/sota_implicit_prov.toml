@@ -1,6 +1,6 @@
 [tls]
 certificates_directory = "/var/sota/"
-ca_file = "root.crt"
+ca_file = "/usr/lib/sota/root.crt"
 client_certificate = "client.pem"
 pkey_file = "pkey.pem"
 

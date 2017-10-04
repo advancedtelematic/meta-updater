@@ -32,5 +32,5 @@ do_install() {
 FILES_${PN} = " \
                 ${systemd_unitdir}/system/aktualizr.service \
                 /usr/lib/sota/sota.toml \
-                /var/sota/root.crt \
+                /usr/lib/sota/root.crt \
                 "
