@@ -19,8 +19,6 @@ SYSTEMD_SERVICE_${PN} = "aktualizr.service"
 
 inherit systemd
 
-export SOTA_PACKED_CREDENTIALS
-
 do_install() {
     install -d ${D}/${systemd_unitdir}/system
     install -m 0644 ${WORKDIR}/aktualizr-autoprovision.service ${D}/${systemd_unitdir}/system/aktualizr.service
