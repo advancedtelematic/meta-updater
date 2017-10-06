@@ -1,0 +1,11 @@
+[tls]
+certificates_directory = "/var/sota/"
+ca_file = "/usr/lib/sota/root.crt"
+client_certificate = "client.pem"
+pkey_file = "pkey.pem"
+
+[uptane]
+metadata_path = "/var/sota/metadata"
+private_key_path = "ecukey.der"
+public_key_path = "ecukey.pub"
+
