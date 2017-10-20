@@ -14,6 +14,7 @@ EXTRA_OECMAKE = "-DWARNING_AS_ERROR=OFF -DCMAKE_BUILD_TYPE=Release -DBUILD_OSTRE
 do_install_append () {
     rm ${D}${bindir}/aktualizr_cert_provider
     rm ${D}${bindir}/aktualizr_implicit_writer
+    rm ${D}${bindir}/garage-deploy
 }
 
 FILES_${PN} = " \
