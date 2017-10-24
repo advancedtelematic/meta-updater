@@ -159,7 +159,7 @@ IMAGE_CMD_ostree () {
 }
 
 IMAGE_TYPEDEP_ostreepush = "ostree"
-IMAGE_DEPENDS_ostreepush = "sota-tools-native:do_populate_sysroot"
+IMAGE_DEPENDS_ostreepush = "aktualizr-native:do_populate_sysroot"
 IMAGE_CMD_ostreepush () {
     # Print warnings if credetials are not set or if the file has not been found.
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
