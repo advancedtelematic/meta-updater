@@ -6,7 +6,7 @@ LICENSE = "CLOSED"
 LIC_FILES_CHKSUM = "file://${S}/docs/LICENSE;md5=3025e77db7bd3f1d616b3ffd11d54c94"
 DEPENDS = ""
 
-PV = "0.2.0-5-g29532a5"
+PV = "0.2.0-6-g6af6ecd"
 
 SRC_URI = " \
   https://ats-tuf-cli-releases.s3-eu-central-1.amazonaws.com/cli-${PV}.tgz \
