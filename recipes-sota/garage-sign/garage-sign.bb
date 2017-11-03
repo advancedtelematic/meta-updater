@@ -26,3 +26,9 @@ do_install() {
     install -m "0644" -t ${D}${libdir} ${S}/lib/*
 }
 
+FILES_${PN} = " \
+  /usr/bin \
+  /usr/bin/garage-sign.bat \
+  /usr/bin/garage-sign \
+  /usr/lib/* \
+  "
