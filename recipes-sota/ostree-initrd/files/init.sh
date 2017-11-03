@@ -67,7 +67,7 @@ ostree-prepare-root /sysroot
 
 # move mounted devices to new root
 cd /sysroot
-for x in dev proc; do
+for x in dev proc run; do
 	log_info "Moving /$x to new rootfs"
 	mount -o move "/$x" "$x"
 done
