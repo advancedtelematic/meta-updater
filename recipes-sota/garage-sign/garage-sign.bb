@@ -12,8 +12,8 @@ SRC_URI = " \
   https://ats-tuf-cli-releases.s3-eu-central-1.amazonaws.com/cli-${PV}.tgz \
   "
 
-SRC_URI[md5sum] = "496ee983f03218f3e3f8d4f56c5d8d8d"
-SRC_URI[sha256sum] = "1ab296d7abadc40f5ad851ae62a7dff8423bd7167fa9fdc1972c88c5fe90dd40"
+SRC_URI[md5sum] = "39941607ddef3a93476e267ad7bf6280"
+SRC_URI[sha256sum] = "fbd2ea56f21341146844b02837377b08e63a3e361079e2c65142c2ed881c3b5d"
 
 S = "${WORKDIR}/${BPN}"
 
@@ -26,3 +26,9 @@ do_install() {
     install -m "0644" -t ${D}${libdir} ${S}/lib/*
 }
 
+FILES_${PN} = " \
+  /usr/bin \
+  /usr/bin/garage-sign.bat \
+  /usr/bin/garage-sign \
+  /usr/lib/* \
+  "
