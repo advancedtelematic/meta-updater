@@ -39,8 +39,8 @@ do_install_append() {
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         install -d ${D}/${systemd_unitdir}/system
         install -m 0644 ${WORKDIR}/aktualizr-autoprovision.service ${D}/${systemd_unitdir}/system/aktualizr.service
-        install -d ${D}/usr/lib/sota
-        install -m "0644" ${WORKDIR}/sota_autoprov.toml ${D}/usr/lib/sota/sota.toml
+        install -d ${D}${libdir}/sota
+        install -m "0644" ${WORKDIR}/sota_autoprov.toml ${D}${libdir}/sota/sota.toml
 
       # deploy SOTA credentials
       if [ -e ${SOTA_PACKED_CREDENTIALS} ]; then
@@ -57,6 +57,6 @@ do_install_append() {
 
 FILES_${PN} = " \
                 ${systemd_unitdir}/system/aktualizr.service \
-                /usr/lib/sota/sota.toml \
+                ${libdir}/sota/sota.toml \
                 /var/sota/sota_provisioning_credentials.zip \
                 "
