@@ -10,6 +10,7 @@ DEPENDS_append_class-target = "jansson ostree ${@bb.utils.contains('SOTA_CLIENT_
 DEPENDS_append_class-native = "glib-2.0-native "
 
 RDEPENDS_${PN}_class-target = "lshw "
+RDEPENDS_${PN}_class-native = "ca-certificates-native "
 RDEPENDS_${PN}_append_class-target = "${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', ' engine-pkcs11', '', d)} "
 RDEPENDS_${PN}_append_class-target = "${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm-test', ' softhsm softhsm-testtoken', '', d)} "
 
