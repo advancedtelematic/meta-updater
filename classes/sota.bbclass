@@ -35,3 +35,5 @@ SOTA_MACHINE_qemux86-64 ?= "qemux86-64"
 SOTA_MACHINE_am335x-evm ?= "am335x-evm-wifi"
 
 inherit sota_${SOTA_MACHINE}
+
+inherit image_repo_manifest
