@@ -1,4 +1,4 @@
-from os.path import exists, join, realpath
+from os.path import exists, join, realpath, abspath
 from os import listdir
 import random
 import socket
@@ -49,7 +49,7 @@ class QemuCommand(object):
         if args.efi:
             self.bios = 'OVMF.fd'
         else:
-            uboot = join(args.dir, self.machine, 'u-boot-qemux86-64.rom')
+            uboot = abspath(join(args.dir, self.machine, 'u-boot-qemux86-64.rom'))
             if not exists(uboot):
                 raise ValueError("U-Boot image %s does not exist" % uboot)
             self.bios = uboot

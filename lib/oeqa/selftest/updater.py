@@ -4,6 +4,9 @@ import logging
 
 from oeqa.selftest.base import oeSelfTest
 from oeqa.utils.commands import runCmd, bitbake, get_bb_var
+import subprocess
+from oeqa.selftest.qemucommand import QemuCommand
+import time
 
 class UpdaterTests(oeSelfTest):
 
@@ -39,3 +42,33 @@ class UpdaterTests(oeSelfTest):
     def test_hsm(self):
         self.write_config('SOTA_CLIENT_FEATURES="hsm hsm-test"')
         bitbake('core-image-minimal')
+
+    def test_qemu(self):
+        print('')
+        # Create empty object.
+        args = type('', (), {})()
+        args.imagename = 'core-image-minimal'
+        args.mac = None
+        args.dir = 'tmp/deploy/images'
+        args.efi = False
+        args.machine = None
+        args.no_kvm = False
+        args.no_gui = True
+        args.gdb = False
+        args.pcap = None
+        args.overlay = None
+        args.dry_run = False
+
+        qemu_command = QemuCommand(args)
+        cmdline = qemu_command.command_line()
+        print('Booting image with run-qemu-ota...')
+        s = subprocess.Popen(cmdline)
+        time.sleep(10)
+        print('Machine name (hostname) of device is:')
+        ssh_cmd = ['ssh', '-q', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', 'root@localhost', '-p', str(qemu_command.ssh_port), 'hostname']
+        s2 = subprocess.Popen(ssh_cmd)
+        time.sleep(5)
+        try:
+            s.terminate()
+        except KeyboardInterrupt:
+            pass
