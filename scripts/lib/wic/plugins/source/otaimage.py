@@ -19,34 +19,17 @@ import logging
 import os
 import sys
 
-from wic.pluginbase import SourcePlugin
+from wic.plugins.source.rawcopy import RawCopyPlugin
 from wic.utils.misc import get_bitbake_var
 
-class OTAImagePlugin(SourcePlugin):
+logger = logging.getLogger('wic')
+
+class OTAImagePlugin(RawCopyPlugin):
     """
     Add an already existing filesystem image to the partition layout.
     """
 
     name = 'otaimage'
-
-    @classmethod
-    def do_install_disk(cls, disk, disk_name, cr, workdir, oe_builddir,
-                        bootimg_dir, kernel_dir, native_sysroot):
-        """
-        Called after all partitions have been prepared and assembled into a
-        disk image. Do nothing.
-        """
-        pass
-
-    @classmethod
-    def do_configure_partition(cls, part, source_params, cr, cr_workdir,
-                               oe_builddir, bootimg_dir, kernel_dir,
-                               native_sysroot):
-        """
-        Called before do_prepare_partition(). Possibly prepare
-        configuration files of some sort.
-        """
-        pass
 
     @classmethod
     def do_prepare_partition(cls, part, source_params, cr, cr_workdir,
@@ -65,5 +48,10 @@ class OTAImagePlugin(SourcePlugin):
         src = bootimg_dir + "/" + get_bitbake_var("IMAGE_LINK_NAME") + ".otaimg"
 
         logger.debug('Preparing partition using image %s' % (src))
-        part.prepare_rootfs_from_fs_image(cr_workdir, src, "")
+        source_params['file'] = src
+
+        super(OTAImagePlugin, cls).do_prepare_partition(part, source_params,
+                                                         cr, cr_workdir, oe_builddir,
+                                                         bootimg_dir, kernel_dir,
+                                                         rootfs_dir, native_sysroot)
 

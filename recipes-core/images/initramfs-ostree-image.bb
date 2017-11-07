@@ -15,7 +15,6 @@ LICENSE = "MIT"
 
 IMAGE_FSTYPES = "ext4.gz"
 IMAGE_FSTYPES_append_arm = " ext4.gz.u-boot"
-IMAGE_CLASSES_append_arm = " image_types_uboot"
 
 inherit core-image
 
