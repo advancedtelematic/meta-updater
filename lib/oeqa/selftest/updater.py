@@ -5,13 +5,12 @@ import logging
 from oeqa.selftest.base import oeSelfTest
 from oeqa.utils.commands import runCmd, bitbake, get_bb_var
 
-class GaragePushTests(oeSelfTest):
+class UpdaterTests(oeSelfTest):
 
     @classmethod
     def setUpClass(cls):
-        # Ensure we have the right data in pkgdata
         logger = logging.getLogger("selftest")
-        logger.info('Running bitbake to build aktualizr-native tools')
+        logger.info('Running bitbake to build aktualizr-native tools and garage-sign-native')
         bitbake('aktualizr-native garage-sign-native')
 
     def test_help(self):
