@@ -161,7 +161,7 @@ def main():
         if args.dry_run:
             print(" ".join(img_cmdline))
         else:
-            Popen(img_cmdline)
+            Popen(img_cmdline).wait()
 
     if args.dry_run:
         print(" ".join(cmdline))
