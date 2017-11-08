@@ -36,6 +36,9 @@ do_install_append() {
       install -d ${D}/${systemd_unitdir}/system
       install -m 0644 ${WORKDIR}/aktualizr-manual-provision.service ${D}/${systemd_unitdir}/system/aktualizr.service
     fi
+
+    rm -f ${D}${bindir}/aktualizr_cert_provider
+    rm -f ${D}${bindir}/aktualizr_implicit_writer
 }
 
 FILES_${PN} = " \
