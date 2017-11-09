@@ -1,0 +1,1 @@
+SYSROOT_DIRS += "/etc"
