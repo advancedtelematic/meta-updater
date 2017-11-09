@@ -6,14 +6,14 @@ LICENSE = "CLOSED"
 LIC_FILES_CHKSUM = "file://${S}/docs/LICENSE;md5=3025e77db7bd3f1d616b3ffd11d54c94"
 DEPENDS = ""
 
-PV = "0.2.0-6-g6af6ecd"
+PV = "0.2.0-29-gf6f095a"
 
 SRC_URI = " \
   https://ats-tuf-cli-releases.s3-eu-central-1.amazonaws.com/cli-${PV}.tgz \
   "
 
-SRC_URI[md5sum] = "39941607ddef3a93476e267ad7bf6280"
-SRC_URI[sha256sum] = "fbd2ea56f21341146844b02837377b08e63a3e361079e2c65142c2ed881c3b5d"
+SRC_URI[md5sum] = "49ee4389570992f0cebb16d5943e4405"
+SRC_URI[sha256sum] = "59f902e6507adec3176bdf470fe5dea31996810a6300bd61583638d4ffe37ab3"
 
 S = "${WORKDIR}/${BPN}"
 
