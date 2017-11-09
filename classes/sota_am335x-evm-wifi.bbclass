@@ -1,5 +1,3 @@
-IMAGE_CLASSES += "image_types_uboot"
-
 KERNEL_IMAGETYPE_sota = "uImage"
 
 OSTREE_BOOTLOADER ?= "u-boot"
