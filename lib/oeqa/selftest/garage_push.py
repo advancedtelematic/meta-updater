@@ -37,3 +37,6 @@ class GaragePushTests(oeSelfTest):
         self.write_config('IMAGE_INSTALL_append = " man "')
         bitbake('core-image-minimal')
 
+    def test_hsm(self):
+        self.write_config('SOTA_CLIENT_FEATURES="hsm hsm-test"')
+        bitbake('core-image-minimal')
