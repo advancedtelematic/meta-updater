@@ -19,7 +19,7 @@ PR = "7"
 SRC_URI = " \
   git://github.com/advancedtelematic/aktualizr;branch=${BRANCH} \
   "
-SRCREV = "67c4f44c4136d16871726449502e3926098e8524"
+SRCREV = "f043191ae622a96cf2f4d48f9073d5cfa9f16e3f"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -34,7 +34,6 @@ EXTRA_OECMAKE_append_class-native = "-DBUILD_SOTA_TOOLS=ON -DBUILD_OSTREE=OFF "
 
 do_install_append () {
     rm -f ${D}${bindir}/aktualizr_cert_provider
-    rm -f ${D}${bindir}/garage-deploy
 }
 do_install_append_class-target () {
     rm -f ${D}${bindir}/aktualizr_implicit_writer
