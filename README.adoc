@@ -122,3 +122,19 @@ garage-push --repo=/path/to/ostree-repo --ref=mybranch --credentials=/path/to/cr
 ....
 
 You can set SOTA_PACKED_CREDENTIALS in your local.conf to make your build results be automatically synchronized with a remote server. Credentials are stored in the JSON format described in the https://github.com/advancedtelematic/aktualizr/blob/master/README.sotatools.adoc[garage-push README]. This JSON file can be optionally stored inside a zip file, although if it is stored this way, the JSON file must be named treehub.json.
+
+=== QA
+
+This layer relies on the test framework oe-selftest for quality assurance. Follow the steps below to run the tests:
+
+* Append the line below to conf/local.conf
+
+```
+SANITY_TESTED_DISTROS=""
+```
+
+* Run oe-selftest:
+
+```
+oe-selftest --run-tests garage_push
+```
