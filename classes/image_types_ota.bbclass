@@ -7,8 +7,6 @@
 # boot scripts, kernel and initramfs images
 #
 
-inherit image
-
 OSTREE_BOOTLOADER ??= 'u-boot'
 
 do_image_otaimg[depends] += "e2fsprogs-native:do_populate_sysroot \
