@@ -3,7 +3,7 @@ import os
 import logging
 
 from oeqa.selftest.base import oeSelfTest
-from oeqa.utils.commands import runCmd, bitbake, get_bb_var
+from oeqa.utils.commands import runCmd, bitbake, get_bb_var, get_bb_vars
 import subprocess
 from oeqa.selftest.qemucommand import QemuCommand
 import time
@@ -17,10 +17,10 @@ class UpdaterTests(oeSelfTest):
         bitbake('aktualizr-native garage-sign-native')
 
     def test_help(self):
-        image_dir = get_bb_var("D", "aktualizr-native")
-        bin_dir = get_bb_var("bindir", "aktualizr-native")
-        gp_path = os.path.join(image_dir, bin_dir[1:], 'garage-push')
-        result = runCmd('%s --help' % gp_path, ignore_status=True)
+        bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'bindir'], 'aktualizr-native')
+        p = bb_vars['SYSROOT_DESTDIR'] + bb_vars['bindir'] + "/" + "garage-push"
+        self.assertTrue(os.path.isfile(p), msg = "No garage-push found (%s)" % p)
+        result = runCmd('%s --help' % p, ignore_status=True)
         self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
 
     def test_java(self):
@@ -28,10 +28,10 @@ class UpdaterTests(oeSelfTest):
         self.assertEqual(result.status, 0, "Java not found.")
 
     def test_sign(self):
-        image_dir = get_bb_var("D", "garage-sign-native")
-        bin_dir = get_bb_var("bindir", "garage-sign-native")
-        gs_path = os.path.join(image_dir, bin_dir[1:], 'garage-sign')
-        result = runCmd('%s --help' % gs_path, ignore_status=True)
+        bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'bindir'], 'garage-sign-native')
+        p = bb_vars['SYSROOT_DESTDIR'] + bb_vars['bindir'] + "/" + "garage-sign"
+        self.assertTrue(os.path.isfile(p), msg = "No garage-sign found (%s)" % p)
+        result = runCmd('%s --help' % p, ignore_status=True)
         self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
 
     def test_push(self):
