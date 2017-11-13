@@ -57,6 +57,14 @@ class HsmTests(oeSelfTest):
 
 class GeneralTests(oeSelfTest):
 
+    def test_feature_sota(self):
+        result = get_bb_var('DISTRO_FEATURES').find('sota')
+        self.assertNotEqual(result, -1, 'Feature "sota" not set at DISTRO_FEATURES');
+
+    def test_feature_systemd(self):
+        result = get_bb_var('DISTRO_FEATURES').find('systemd')
+        self.assertNotEqual(result, -1, 'Feature "systemd" not set at DISTRO_FEATURES');
+
     def test_java(self):
         result = runCmd('which java', ignore_status=True)
         self.assertEqual(result.status, 0, "Java not found.")
