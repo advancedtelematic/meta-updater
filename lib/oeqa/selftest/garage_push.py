@@ -40,3 +40,11 @@ class GaragePushTests(oeSelfTest):
     def test_hsm(self):
         self.write_config('SOTA_CLIENT_FEATURES="hsm hsm-test"')
         bitbake('core-image-minimal')
+
+    def test_feature_sota(self):
+        result = get_bb_var('DISTRO_FEATURES').find('sota')
+        self.assertNotEqual(result, -1, 'Feature "sota" not set at DISTRO_FEATURES');
+
+    def test_feature_systemd(self):
+        result = get_bb_var('DISTRO_FEATURES').find('systemd')
+        self.assertNotEqual(result, -1, 'Feature "systemd" not set at DISTRO_FEATURES');
