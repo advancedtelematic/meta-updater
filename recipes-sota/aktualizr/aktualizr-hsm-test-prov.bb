@@ -23,12 +23,12 @@ inherit systemd
 do_install() {
     install -d ${D}/${systemd_unitdir}/system
     install -m 0644 ${WORKDIR}/aktualizr-autoprovision.service ${D}/${systemd_unitdir}/system/aktualizr.service
-    install -d ${D}/usr/lib/sota
+    install -d ${D}${libdir}/sota
     aktualizr_implicit_writer -c ${SOTA_PACKED_CREDENTIALS} --no-root-ca \
-        -i ${WORKDIR}/sota_hsm_test.toml -o ${D}/usr/lib/sota/sota.toml -p ${D}
+        -i ${WORKDIR}/sota_hsm_test.toml -o ${D}${libdir}/sota/sota.toml -p ${D}
 }
 
 FILES_${PN} = " \
                 ${systemd_unitdir}/system/aktualizr.service \
-                /usr/lib/sota/sota.toml \
+                ${libdir}/sota/sota.toml \
                 "
