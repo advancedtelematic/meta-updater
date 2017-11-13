@@ -5,11 +5,13 @@ python __anonymous() {
 
 OVERRIDES .= "${@bb.utils.contains('DISTRO_FEATURES', 'sota', ':sota', '', d)}"
 
+HOSTTOOLS_NONFATAL += "java"
+
 SOTA_CLIENT ??= "aktualizr"
 SOTA_CLIENT_PROV ??= "aktualizr-auto-prov"
 IMAGE_INSTALL_append_sota = " ostree os-release ${SOTA_CLIENT} ${SOTA_CLIENT_PROV}"
 IMAGE_CLASSES += " image_types_ostree image_types_ota"
-IMAGE_FSTYPES += "${@bb.utils.contains('DISTRO_FEATURES', 'sota', 'ostreepush otaimg wic', ' ', d)}"
+IMAGE_FSTYPES += "${@bb.utils.contains('DISTRO_FEATURES', 'sota', 'ostreepush garagesign otaimg wic', ' ', d)}"
 
 PACKAGECONFIG_append_pn-curl = "${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', " ssl", " ", d)}"
 PACKAGECONFIG_remove_pn-curl = "${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', " gnutls", " ", d)}"
@@ -24,6 +26,11 @@ OSTREE_REPO ?= "${DEPLOY_DIR_IMAGE}/ostree_repo"
 OSTREE_BRANCHNAME ?= "${MACHINE}"
 OSTREE_OSNAME ?= "poky"
 OSTREE_INITRAMFS_IMAGE ?= "initramfs-ostree-image"
+
+
+GARAGE_SIGN_REPO ?= "${DEPLOY_DIR_IMAGE}/garage_sign_repo"
+GARAGE_SIGN_KEYNAME ?= "garage-key"
+GARAGE_TARGET_NAME ?= "${OSTREE_BRANCHNAME}"
 
 SOTA_MACHINE ??="none"
 SOTA_MACHINE_raspberrypi2 ?= "raspberrypi"

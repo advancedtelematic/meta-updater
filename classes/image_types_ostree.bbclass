@@ -5,6 +5,7 @@ inherit image
 IMAGE_DEPENDS_ostree = "ostree-native:do_populate_sysroot \
                         openssl-native:do_populate_sysroot \
                         coreutils-native:do_populate_sysroot \
+                        unzip-native:do_populate_sysroot \
                         virtual/kernel:do_deploy \
                         ${OSTREE_INITRAMFS_IMAGE}:do_image_complete"
 
@@ -104,6 +105,7 @@ IMAGE_CMD_ostree () {
     if [ -d root ] && [ ! -L root ]; then
         if [ "$(ls -A root)" ]; then
             bberror "Data in /root directory is not preserved by OSTree."
+            exit 1
         fi
 
         if [ -n "$SYSTEMD_USED" ]; then
@@ -170,6 +172,60 @@ IMAGE_CMD_ostreepush () {
                         --cacert=${STAGING_ETCDIR_NATIVE}/ssl/certs/ca-certificates.crt
         else
             bbwarn "SOTA_PACKED_CREDENTIALS file does not exist."
+        fi
+    else
+        bbwarn "SOTA_PACKED_CREDENTIALS not set. Please add SOTA_PACKED_CREDENTIALS."
+    fi
+}
+
+IMAGE_TYPEDEP_garagesign = "ostreepush"
+IMAGE_DEPENDS_garagesign = "garage-sign-native:do_populate_sysroot"
+IMAGE_CMD_garagesign () {
+    if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
+        # if credentials are issued by a server that doesn't support offline signing, exit silently
+        unzip -p ${SOTA_PACKED_CREDENTIALS} root.json targets.pub targets.sec 2>&1 >/dev/null || exit 0
+
+        java_version=$( java -version 2>&1 | awk -F '"' '/version/ {print $2}' )
+        if [ "${java_version}" = "" ]; then
+            bberror "Java is required for synchronization with update backend, but is not installed on the host machine"
+            exit 1
+        elif [ "${java_version}" \< "1.8" ]; then
+            bberror "Java version >= 8 is required for synchronization with update backend"
+            exit 1
+        fi
+
+	if [ ! -d "${GARAGE_SIGN_REPO}" ]; then
+            garage-sign init --repo ${GARAGE_SIGN_REPO} --home-dir ${GARAGE_SIGN_REPO} --credentials ${SOTA_PACKED_CREDENTIALS}
+        fi
+
+        if [ -n "${GARAGE_SIGN_REPOSERVER}" ]; then
+            reposerver_args="--reposerver ${GARAGE_SIGN_REPOSERVER}"
+        else
+            reposerver_args=""
+        fi
+
+        ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME})
+
+        # Push may fail due to race condition when multiple build machines try to push simultaneously
+        #   in which case targets.json should be pulled again and the whole procedure repeated
+        push_success=0
+        for push_retries in $( seq 3 ); do
+            garage-sign targets pull --repo ${GARAGE_SIGN_REPO} --home-dir ${GARAGE_SIGN_REPO} ${reposerver_args}
+            garage-sign targets add --repo ${GARAGE_SIGN_REPO} --home-dir ${GARAGE_SIGN_REPO} --name ${OSTREE_BRANCHNAME} --format OSTREE --version ${OSTREE_BRANCHNAME} --length 0 --url "https://example.com/" --sha256 ${ostree_target_hash} --hardwareids ${MACHINE}
+            garage-sign targets sign --repo ${GARAGE_SIGN_REPO} --home-dir ${GARAGE_SIGN_REPO} --key-name=targets
+            errcode=0
+            garage-sign targets push --repo ${GARAGE_SIGN_REPO} --home-dir ${GARAGE_SIGN_REPO} ${reposerver_args} || errcode=$?
+            if [ "$errcode" -eq "0" ]; then
+                push_success=1
+                break
+            else
+                bbwarn "Push to garage repository has failed, retrying"
+            fi
+        done
+
+        if [ "$push_success" -ne "1" ]; then
+            bberror "Couldn't push to garage repository"
+            exit 1
         fi
     else
         bbwarn "SOTA_PACKED_CREDENTIALS not set. Please add SOTA_PACKED_CREDENTIALS."
