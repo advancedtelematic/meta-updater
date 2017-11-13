@@ -8,13 +8,13 @@ import subprocess
 from oeqa.selftest.qemucommand import QemuCommand
 import time
 
-class UpdaterTests(oeSelfTest):
+class SotaToolsTests(oeSelfTest):
 
     @classmethod
     def setUpClass(cls):
         logger = logging.getLogger("selftest")
-        logger.info('Running bitbake to build aktualizr-native tools and garage-sign-native')
-        bitbake('aktualizr-native garage-sign-native')
+        logger.info('Running bitbake to build aktualizr-native tools')
+        bitbake('aktualizr-native')
 
     def test_help(self):
         bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'bindir'], 'aktualizr-native')
@@ -23,25 +23,40 @@ class UpdaterTests(oeSelfTest):
         result = runCmd('%s --help' % p, ignore_status=True)
         self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
 
-    def test_java(self):
-        result = runCmd('which java', ignore_status=True)
-        self.assertEqual(result.status, 0, "Java not found.")
+    def test_push(self):
+        bitbake('core-image-minimal')
+        self.write_config('IMAGE_INSTALL_append = " man "')
+        bitbake('core-image-minimal')
 
-    def test_sign(self):
+
+class GarageSignTests(oeSelfTest):
+
+    @classmethod
+    def setUpClass(cls):
+        logger = logging.getLogger("selftest")
+        logger.info('Running bitbake to build garage-sign-native')
+        bitbake('garage-sign-native')
+
+    def test_help(self):
         bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'bindir'], 'garage-sign-native')
         p = bb_vars['SYSROOT_DESTDIR'] + bb_vars['bindir'] + "/" + "garage-sign"
         self.assertTrue(os.path.isfile(p), msg = "No garage-sign found (%s)" % p)
         result = runCmd('%s --help' % p, ignore_status=True)
         self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
 
-    def test_push(self):
-        bitbake('core-image-minimal')
-        self.write_config('IMAGE_INSTALL_append = " man "')
-        bitbake('core-image-minimal')
+
+class HsmTests(oeSelfTest):
 
     def test_hsm(self):
         self.write_config('SOTA_CLIENT_FEATURES="hsm hsm-test"')
         bitbake('core-image-minimal')
+
+
+class GeneralTests(oeSelfTest):
+
+    def test_java(self):
+        result = runCmd('which java', ignore_status=True)
+        self.assertEqual(result.status, 0, "Java not found.")
 
     def test_qemu(self):
         print('')
@@ -72,3 +87,4 @@ class UpdaterTests(oeSelfTest):
             s.terminate()
         except KeyboardInterrupt:
             pass
+
