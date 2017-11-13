@@ -19,10 +19,17 @@ class SotaToolsTests(oeSelfTest):
         logger.info('Running bitbake to build aktualizr-native tools')
         bitbake('aktualizr-native')
 
-    def test_help(self):
+    def test_push_help(self):
         bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'bindir'], 'aktualizr-native')
         p = bb_vars['SYSROOT_DESTDIR'] + bb_vars['bindir'] + "/" + "garage-push"
         self.assertTrue(os.path.isfile(p), msg = "No garage-push found (%s)" % p)
+        result = runCmd('%s --help' % p, ignore_status=True)
+        self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
+
+    def test_deploy_help(self):
+        bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'bindir'], 'aktualizr-native')
+        p = bb_vars['SYSROOT_DESTDIR'] + bb_vars['bindir'] + "/" + "garage-deploy"
+        self.assertTrue(os.path.isfile(p), msg = "No garage-deploy found (%s)" % p)
         result = runCmd('%s --help' % p, ignore_status=True)
         self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
 
