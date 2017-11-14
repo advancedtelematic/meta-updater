@@ -1,0 +1,30 @@
+From 0aa919fbfb91d7ea433f790b10351654acfb52d9 Mon Sep 17 00:00:00 2001
+From: Anton Gerasimov <anton@advancedtelematic.com>
+Date: Fri, 10 Nov 2017 18:41:02 +0100
+Subject: [PATCH] Move Cache-As-RAM memory from area mapped to ROM in QEMU
+
+ROM has been made read-only in qemu recently (namely commit
+208fa0e43645edd0b0d8f838857dfc79daff40a8), so this patch restores
+compatibility between u-boot and qemu.
+
+Signed-off-by: Anton Gerasimov <anton@advancedtelematic.com>
+---
+ arch/x86/cpu/qemu/Kconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/x86/cpu/qemu/Kconfig b/arch/x86/cpu/qemu/Kconfig
+index 6808c9a6b9..f4b9922a34 100644
+--- a/arch/x86/cpu/qemu/Kconfig
++++ b/arch/x86/cpu/qemu/Kconfig
+@@ -11,7 +11,7 @@ if QEMU
+ 
+ config SYS_CAR_ADDR
+ 	hex
+-	default 0xd0000
++	default 0x10000
+ 
+ config SYS_CAR_SIZE
+ 	hex
+-- 
+2.14.1
+

@@ -1,29 +1,33 @@
-From ab0d7e270d89f6eb99582197d2d58bf60c9c3d26 Mon Sep 17 00:00:00 2001
-From: Anton Gerasimov <anton@advancedtelematic.com>
-Date: Thu, 15 Sep 2016 16:49:32 +0200
-Subject: [PATCH 2/2] Replace wraps with built-in code to remove dependency on
+From ee87fe6e5b2dca342d7fe3efc2be285eb4179571 Mon Sep 17 00:00:00 2001
+From: Anton Gerasimov <anton.gerasimov@openmailbox.org>
+Date: Tue, 31 Oct 2017 21:03:38 +0100
+Subject: [PATCH] Replace wraps with built in code to remove dependency on
  multilib
 
 ---
- arch/x86/config.mk |   2 --
+ arch/x86/config.mk |   3 --
  arch/x86/lib/gcc.c | 104 ++++++++++++++++++++++++++++++++++++++++++++---------
- 2 files changed, 87 insertions(+), 19 deletions(-)
+ 2 files changed, 87 insertions(+), 20 deletions(-)
 
 diff --git a/arch/x86/config.mk b/arch/x86/config.mk
-index 999143e..139576e 100644
+index 8835dcf36f..472ada5490 100644
 --- a/arch/x86/config.mk
 +++ b/arch/x86/config.mk
-@@ -22,5 +22,3 @@ PLATFORM_RELFLAGS += -ffunction-sections -fvisibility=hidden
- PLATFORM_LDFLAGS += --emit-relocs -Bsymbolic -Bsymbolic-functions -m elf_i386
+@@ -34,9 +34,6 @@ PLATFORM_RELFLAGS += -ffunction-sections -fvisibility=hidden
+ PLATFORM_LDFLAGS += -Bsymbolic -Bsymbolic-functions
+ PLATFORM_LDFLAGS += -m $(if $(IS_32BIT),elf_i386,elf_x86_64)
  
- LDFLAGS_FINAL += --gc-sections -pie
 -LDFLAGS_FINAL += --wrap=__divdi3 --wrap=__udivdi3
 -LDFLAGS_FINAL += --wrap=__moddi3 --wrap=__umoddi3
+-
+ # This is used in the top-level Makefile which does not include
+ # PLATFORM_LDFLAGS
+ LDFLAGS_EFI_PAYLOAD := -Bsymbolic -Bsymbolic-functions -shared --no-undefined
 diff --git a/arch/x86/lib/gcc.c b/arch/x86/lib/gcc.c
-index 497ad75..c321b11 100644
+index 3c70d790d4..2aae611879 100644
 --- a/arch/x86/lib/gcc.c
 +++ b/arch/x86/lib/gcc.c
-@@ -19,22 +19,92 @@
+@@ -8,22 +8,92 @@
  
  #ifdef __GNUC__
  
@@ -134,5 +138,5 @@ index 497ad75..c321b11 100644
  
  #endif
 -- 
-2.9.3
+2.14.2
 
