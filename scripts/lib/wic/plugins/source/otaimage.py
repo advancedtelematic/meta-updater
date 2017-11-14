@@ -20,7 +20,7 @@ import os
 import sys
 
 from wic.plugins.source.rawcopy import RawCopyPlugin
-from wic.utils.misc import get_bitbake_var
+from wic.misc import get_bitbake_var
 
 logger = logging.getLogger('wic')
 
