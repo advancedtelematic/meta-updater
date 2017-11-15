@@ -47,5 +47,6 @@ FILES_${PN}_class-target = " \
                 "
 FILES_${PN}_class-native = " \
                 ${bindir}/aktualizr_implicit_writer \
+                ${bindir}/garage-deploy \
                 ${bindir}/garage-push \
                 "
