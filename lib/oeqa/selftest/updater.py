@@ -8,8 +8,6 @@ from oeqa.selftest.base import oeSelfTest
 from oeqa.utils.commands import runCmd, bitbake, get_bb_var, get_bb_vars
 from oeqa.selftest.qemucommand import QemuCommand
 
-DEFAULT_DIR = 'tmp/deploy/images'
-
 
 class SotaToolsTests(oeSelfTest):
 
@@ -65,8 +63,9 @@ class GeneralTests(oeSelfTest):
 
     def test_add_package(self):
         print('')
-        machine = get_bb_var('MACHINE', 'core-image-minimal')
-        image_path = DEFAULT_DIR + '/' + machine + '/core-image-minimal-' + machine + '.otaimg'
+        deploydir = get_bb_var('DEPLOY_DIR_IMAGE')
+        imagename = get_bb_var('IMAGE_LINK_NAME', 'core-image-minimal')
+        image_path = deploydir + '/' + imagename + '.otaimg'
         logger = logging.getLogger("selftest")
 
         logger.info('Running bitbake with man in the image package list')
@@ -98,7 +97,9 @@ class GeneralTests(oeSelfTest):
         args = type('', (), {})()
         args.imagename = 'core-image-minimal'
         args.mac = None
-        args.dir = DEFAULT_DIR
+        # Could use DEPLOY_DIR_IMAGE her but it's already in the machine
+        # subdirectory.
+        args.dir = 'tmp/deploy/images'
         args.efi = False
         args.machine = None
         args.no_kvm = False
