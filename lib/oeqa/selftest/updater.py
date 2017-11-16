@@ -57,6 +57,28 @@ class HsmTests(oeSelfTest):
 
 class GeneralTests(oeSelfTest):
 
+    def test_feature_sota(self):
+        result = get_bb_var('DISTRO_FEATURES').find('sota')
+        self.assertNotEqual(result, -1, 'Feature "sota" not set at DISTRO_FEATURES');
+
+    def test_feature_systemd(self):
+        result = get_bb_var('DISTRO_FEATURES').find('systemd')
+        self.assertNotEqual(result, -1, 'Feature "systemd" not set at DISTRO_FEATURES');
+
+    def test_credentials(self):
+        bitbake('core-image-minimal')
+        credentials = get_bb_var('SOTA_PACKED_CREDENTIALS')
+        # skip the test if the variable SOTA_PACKED_CREDENTIALS is not set
+        if credentials is None:
+            raise unittest.SkipTest("Variable 'SOTA_PACKED_CREDENTIALS' not set.")
+        # Check if the file exists
+        self.assertTrue(os.path.isfile(credentials), "File %s does not exist" % credentials)
+        deploydir = get_bb_var('DEPLOY_DIR_IMAGE')
+        imagename = get_bb_var('IMAGE_LINK_NAME', 'core-image-minimal')
+        # Check if the credentials are included in the output image
+        result = runCmd('tar -jtvf %s/%s.tar.bz2 | grep sota_provisioning_credentials.zip' % (deploydir, imagename), ignore_status=True)
+        self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
+
     def test_java(self):
         result = runCmd('which java', ignore_status=True)
         self.assertEqual(result.status, 0, "Java not found.")
