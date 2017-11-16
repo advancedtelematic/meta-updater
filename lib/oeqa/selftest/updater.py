@@ -121,56 +121,59 @@ class QemuTests(oeSelfTest):
         logger = logging.getLogger("selftest")
         logger.info('Running bitbake to build core-image-minimal')
         bitbake('core-image-minimal')
+        # Create empty object.
+        args = type('', (), {})()
+        args.imagename = 'core-image-minimal'
+        args.mac = None
+        # Could use DEPLOY_DIR_IMAGE here but it's already in the machine
+        # subdirectory.
+        args.dir = 'tmp/deploy/images'
+        args.efi = False
+        args.machine = None
+        args.kvm = None  # Autodetect
+        args.no_gui = True
+        args.gdb = False
+        args.pcap = None
+        args.overlay = None
+        args.dry_run = False
+
+        cls.qemu = QemuCommand(args)
+        cmdline = cls.qemu.command_line()
+        print('Booting image with run-qemu-ota...')
+        cls.s = subprocess.Popen(cmdline)
+        time.sleep(10)
+
+    @classmethod
+    def tearDownClass(cls):
+        try:
+            cls.s.terminate()
+        except KeyboardInterrupt:
+            pass
+
+    def run_test_qemu(self, command):
+        command = ['ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@localhost -p ' +
+                   str(self.qemu.ssh_port) + ' "' + command + '"']
+        s2 = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        value, err = s2.communicate()
+        return value, err
 
     def test_hostname(self):
-        value, err = run_test_qemu('hostname', False, 'Checking machine name (hostname) of device:')
+        print('')
+        print('Checking machine name (hostname) of device:')
+        value, err = self.run_test_qemu('hostname')
         machine = get_bb_var('MACHINE', 'core-image-minimal')
         self.assertEqual(err, b'', 'Error: ' + err.decode())
         # Strip off line ending.
         value_str = value.decode()[:-1]
-        self.assertEqual(value_str, machine, 'MACHINE does not match hostname: ' + machine + ', ' + value_str)
-        print('hostname: ' + value_str)
+        self.assertEqual(value_str, machine,
+                         'MACHINE does not match hostname: ' + machine + ', ' + value_str)
+        print(value_str)
 
     def test_var_sota(self):
-        value, err = run_test_qemu('ls /var/sota', True, 'Checking contents of /var/sota:')
+        print('')
+        print('Checking contents of /var/sota:')
+        value, err = self.run_test_qemu('ls /var/sota')
         self.assertEqual(err, b'', 'Error: ' + err.decode())
         print(value.decode())
 
-
-def run_test_qemu(command, use_shell, message):
-    print('')
-    # Create empty object.
-    args = type('', (), {})()
-    args.imagename = 'core-image-minimal'
-    args.mac = None
-    # Could use DEPLOY_DIR_IMAGE here but it's already in the machine
-    # subdirectory.
-    args.dir = 'tmp/deploy/images'
-    args.efi = False
-    args.machine = None
-    args.kvm = None  # Autodetect
-    args.no_gui = True
-    args.gdb = False
-    args.pcap = None
-    args.overlay = None
-    args.dry_run = False
-
-    qemu_command = QemuCommand(args)
-    cmdline = qemu_command.command_line()
-    print('Booting image with run-qemu-ota...')
-    s = subprocess.Popen(cmdline)
-    time.sleep(10)
-    print(message)
-    if not use_shell:
-        command = ['ssh', '-q', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', 'root@localhost', '-p', str(qemu_command.ssh_port), '"' + command + '"']
-    else:
-        command = 'ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@localhost -p ' + str(qemu_command.ssh_port) + ' "' + command + '"'
-    s2 = subprocess.Popen(command, shell=use_shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    value, err = s2.communicate()
-    time.sleep(5)
-    try:
-        s.terminate()
-    except KeyboardInterrupt:
-        pass
-    return value, err
 
