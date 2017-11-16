@@ -119,12 +119,12 @@ class GeneralTests(oeSelfTest):
         args = type('', (), {})()
         args.imagename = 'core-image-minimal'
         args.mac = None
-        # Could use DEPLOY_DIR_IMAGE her but it's already in the machine
+        # Could use DEPLOY_DIR_IMAGE here but it's already in the machine
         # subdirectory.
         args.dir = 'tmp/deploy/images'
         args.efi = False
         args.machine = None
-        args.no_kvm = False
+        args.kvm = None  # Autodetect
         args.no_gui = True
         args.gdb = False
         args.pcap = None

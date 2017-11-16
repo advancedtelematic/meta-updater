@@ -2,7 +2,7 @@
 
 from argparse import ArgumentParser
 from subprocess import Popen
-from os.path import exists, join
+from os.path import exists
 import sys
 from qemucommand import QemuCommand
 
@@ -21,11 +21,18 @@ def main():
                              'OSTREE_BOOTLOADER = "grub" and OVMF.fd firmware to be installed (try "apt install ovmf")',
                         action='store_true')
     parser.add_argument('--machine', default=None, help="Target MACHINE")
-    parser.add_argument('--no-kvm', help='Disable KVM in QEMU', action='store_true')
+    kvm_group = parser.add_argument_group()
+    kvm_group.add_argument('--force-kvm', help='Force use of KVM (default is to autodetect)',
+                           dest='kvm', action='store_true', default=None)
+    kvm_group.add_argument('--no-kvm', help='Disable KVM in QEMU',
+                           dest='kvm', action='store_false')
     parser.add_argument('--no-gui', help='Disable GUI', action='store_true')
     parser.add_argument('--gdb', help='Export gdbserver port 2159 from the image', action='store_true')
     parser.add_argument('--pcap', default=None, help='Dump all network traffic')
-    parser.add_argument('-o', '--overlay', type=str, metavar='file.cow', help='Use an overlay storage image file. Will be created if it does not exist. This option lets you have a persistent image without modifying the underlying image file, permitting multiple different persistent machines.')
+    parser.add_argument('-o', '--overlay', type=str, metavar='file.cow',
+                        help='Use an overlay storage image file. Will be created if it does not exist. ' +
+                             'This option lets you have a persistent image without modifying the underlying image ' +
+                             'file, permitting multiple different persistent machines.')
     parser.add_argument('-n', '--dry-run', help='Print qemu command line rather then run it', action='store_true')
     args = parser.parse_args()
     try:
