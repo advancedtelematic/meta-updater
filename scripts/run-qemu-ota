@@ -21,7 +21,11 @@ def main():
                              'OSTREE_BOOTLOADER = "grub" and OVMF.fd firmware to be installed (try "apt install ovmf")',
                         action='store_true')
     parser.add_argument('--machine', default=None, help="Target MACHINE")
-    parser.add_argument('--no-kvm', help='Disable KVM in QEMU', action='store_true')
+    kvm_group = parser.add_argument_group()
+    kvm_group.add_argument('--force-kvm', help='Force use of KVM (default is to autodetect)',
+                           dest='kvm', action='store_true', default=None)
+    kvm_group.add_argument('--no-kvm', help='Disable KVM in QEMU',
+                           dest='kvm', action='store_false')
     parser.add_argument('--no-gui', help='Disable GUI', action='store_true')
     parser.add_argument('--gdb', help='Export gdbserver port 2159 from the image', action='store_true')
     parser.add_argument('--pcap', default=None, help='Dump all network traffic')

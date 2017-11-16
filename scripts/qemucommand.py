@@ -2,6 +2,7 @@ from os.path import exists, join, realpath, abspath
 from os import listdir
 import random
 import socket
+from subprocess import check_output, CalledProcessError
 
 EXTENSIONS = {
     'intel-corei7-64': 'wic',
@@ -67,7 +68,15 @@ class QemuCommand(object):
             self.mac_address = random_mac()
         self.serial_port = find_local_port(8990)
         self.ssh_port = find_local_port(2222)
-        self.kvm = not args.no_kvm
+        if args.kvm is None:
+            # Autodetect KVM using 'kvm-ok'
+            try:
+                check_output(['kvm-ok'])
+                self.kvm = True
+            except CalledProcessError:
+                self.kvm = False
+        else:
+            self.kvm = args.kvm
         self.gui = not args.no_gui
         self.gdb = args.gdb
         self.pcap = args.pcap
