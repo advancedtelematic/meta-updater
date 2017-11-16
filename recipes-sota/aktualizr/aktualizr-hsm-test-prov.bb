@@ -6,7 +6,7 @@ LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://${WORKDIR}/LICENSE;md5=9741c346eef56131163e13b9db1241b3"
 
 DEPENDS = "aktualizr-native"
-RDEPENDS_${PN} = "aktualizr"
+RDEPENDS_${PN} = "aktualizr softhsm softhsm-testtoken"
 
 SRC_URI = " \
   file://LICENSE \
