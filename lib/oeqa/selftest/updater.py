@@ -118,7 +118,7 @@ class QemuTests(oeSelfTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.qemu, cls.s = qemu_launch()
+        cls.qemu, cls.s = qemu_launch(machine='qemux86-64')
 
     @classmethod
     def tearDownClass(cls):
@@ -143,8 +143,39 @@ class QemuTests(oeSelfTest):
         self.assertEqual(err, b'', 'Error: ' + err.decode())
         print(value.decode())
 
+class GrubTests(oeSelfTest):
 
-def qemu_launch():
+    def setUpLocal(self):
+        # This is a bit of a hack but I can't see a better option.
+        path = os.path.abspath(os.path.dirname(__file__))
+        metadir = path + "/../../../../"
+        grub_config = 'OSTREE_BOOTLOADER = "grub"\nMACHINE = "intel-corei7-64"'
+        self.append_config(grub_config)
+        self.meta_intel = metadir + "meta-intel"
+        self.meta_minnow = metadir + "meta-updater-minnowboard"
+        runCmd('bitbake-layers add-layer "%s"' % self.meta_intel)
+        runCmd('bitbake-layers add-layer "%s"' % self.meta_minnow)
+        self.qemu, self.s = qemu_launch(efi=True, machine='intel-corei7-64')
+
+    def tearDownLocal(self):
+        qemu_terminate(self.s)
+        runCmd('bitbake-layers remove-layer "%s"' % self.meta_intel, ignore_status=True)
+        runCmd('bitbake-layers remove-layer "%s"' % self.meta_minnow, ignore_status=True)
+
+    def test_grub(self):
+        print('')
+        print('Checking machine name (hostname) of device:')
+        value, err = qemu_send_command(self.qemu.ssh_port, 'hostname')
+        machine = get_bb_var('MACHINE', 'core-image-minimal')
+        self.assertEqual(err, b'', 'Error: ' + err.decode())
+        # Strip off line ending.
+        value_str = value.decode()[:-1]
+        self.assertEqual(value_str, machine,
+                         'MACHINE does not match hostname: ' + machine + ', ' + value_str)
+        print(value_str)
+
+
+def qemu_launch(efi=False, machine=None):
     logger = logging.getLogger("selftest")
     logger.info('Running bitbake to build core-image-minimal')
     bitbake('core-image-minimal')
@@ -155,8 +186,8 @@ def qemu_launch():
     # Could use DEPLOY_DIR_IMAGE here but it's already in the machine
     # subdirectory.
     args.dir = 'tmp/deploy/images'
-    args.efi = False
-    args.machine = None
+    args.efi = efi
+    args.machine = machine
     args.kvm = None  # Autodetect
     args.no_gui = True
     args.gdb = False
