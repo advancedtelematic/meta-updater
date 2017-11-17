@@ -1,7 +1,5 @@
 # OSTree deployment
 
-inherit image
-
 do_image_ostree[depends] += "ostree-native:do_populate_sysroot \
                         openssl-native:do_populate_sysroot \
                         coreutils-native:do_populate_sysroot \
