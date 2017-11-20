@@ -10,8 +10,7 @@ IMAGE_DEPENDS_ostree = "ostree-native:do_populate_sysroot \
 export OSTREE_REPO
 export OSTREE_BRANCHNAME
 
-RAMDISK_EXT ?= ".ext4.gz"
-RAMDISK_EXT_arm ?= ".ext4.gz.u-boot"
+RAMDISK_EXT ?= ".${INITRAMFS_FSTYPES}"
 
 OSTREE_KERNEL ??= "${KERNEL_IMAGETYPE}"
 

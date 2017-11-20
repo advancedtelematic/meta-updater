@@ -13,8 +13,7 @@ IMAGE_LINGUAS = ""
 
 LICENSE = "MIT"
 
-IMAGE_FSTYPES = "ext4.gz"
-IMAGE_FSTYPES_append_arm = " ext4.gz.u-boot"
+IMAGE_FSTYPES = "${INITRAMFS_FSTYPES}"
 
 inherit core-image
 

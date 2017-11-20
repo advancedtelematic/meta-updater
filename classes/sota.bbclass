@@ -20,13 +20,15 @@ WKS_FILE_sota ?= "sdimage-sota.wks"
 
 EXTRA_IMAGEDEPENDS_append_sota = " parted-native mtools-native dosfstools-native"
 
+INITRAMFS_FSTYPES = "${@oe.utils.ifelse(d.getVar('OSTREE_BOOTLOADER', True) == 'u-boot', 'ext4.gz.u-boot', 'ext4.gz')}"
+
 # Please redefine OSTREE_REPO in order to have a persistent OSTree repo
 OSTREE_REPO ?= "${DEPLOY_DIR_IMAGE}/ostree_repo"
 # For UPTANE operation, OSTREE_BRANCHNAME must start with "${MACHINE}-"
 OSTREE_BRANCHNAME ?= "${MACHINE}"
 OSTREE_OSNAME ?= "poky"
 OSTREE_INITRAMFS_IMAGE ?= "initramfs-ostree-image"
-
+OSTREE_BOOTLOADER ??= 'u-boot'
 
 GARAGE_SIGN_REPO ?= "${DEPLOY_DIR_IMAGE}/garage_sign_repo"
 GARAGE_SIGN_KEYNAME ?= "garage-key"
