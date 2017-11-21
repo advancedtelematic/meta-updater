@@ -183,7 +183,7 @@ IMAGE_DEPENDS_garagesign = "garage-sign-native:do_populate_sysroot"
 IMAGE_CMD_garagesign () {
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         # if credentials are issued by a server that doesn't support offline signing, exit silently
-        unzip -p ${SOTA_PACKED_CREDENTIALS} root.json targets.pub targets.sec 2>&1 >/dev/null || exit 0
+        unzip -p ${SOTA_PACKED_CREDENTIALS} root.json targets.pub targets.sec repo.url 2>&1 >/dev/null || exit 0
 
         java_version=$( java -version 2>&1 | awk -F '"' '/version/ {print $2}' )
         if [ "${java_version}" = "" ]; then
@@ -227,9 +227,20 @@ IMAGE_CMD_garagesign () {
             bberror "Couldn't push to garage repository"
             exit 1
         fi
-    else
-        bbwarn "SOTA_PACKED_CREDENTIALS not set. Please add SOTA_PACKED_CREDENTIALS."
     fi
 }
 
+IMAGE_TYPEDEP_garagecheck = "ostreepush garagesign"
+IMAGE_DEPENDS_garagecheck = "aktualizr-native:do_populate_sysroot"
+IMAGE_CMD_garagecheck () {
+    if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
+        # if credentials are issued by a server that doesn't support offline signing, exit silently
+        unzip -p ${SOTA_PACKED_CREDENTIALS} root.json targets.pub targets.sec repo.url 2>&1 >/dev/null || exit 0
+        ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME})
+
+        garage-check --ref=${ostree_target_hash} \
+                     --credentials=${SOTA_PACKED_CREDENTIALS} \
+                     --cacert=${STAGING_ETCDIR_NATIVE}/ssl/certs/ca-certificates.crt
+    fi
+}
 # vim:set ts=4 sw=4 sts=4 expandtab:
