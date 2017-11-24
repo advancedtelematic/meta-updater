@@ -183,7 +183,7 @@ IMAGE_DEPENDS_garagesign = "garage-sign-native:do_populate_sysroot"
 IMAGE_CMD_garagesign () {
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         # if credentials are issued by a server that doesn't support offline signing, exit silently
-        unzip -p ${SOTA_PACKED_CREDENTIALS} root.json targets.pub targets.sec repo.url 2>&1 >/dev/null || exit 0
+        unzip -p ${SOTA_PACKED_CREDENTIALS} root.json targets.pub targets.sec tufrepo.url 2>&1 >/dev/null || exit 0
 
         java_version=$( java -version 2>&1 | awk -F '"' '/version/ {print $2}' )
         if [ "${java_version}" = "" ]; then
@@ -198,11 +198,7 @@ IMAGE_CMD_garagesign () {
             garage-sign init --repo ${GARAGE_SIGN_REPO} --home-dir ${GARAGE_SIGN_REPO} --credentials ${SOTA_PACKED_CREDENTIALS}
         fi
 
-        if [ -n "${GARAGE_SIGN_REPOSERVER}" ]; then
-            reposerver_args="--reposerver ${GARAGE_SIGN_REPOSERVER}"
-        else
-            reposerver_args=""
-        fi
+        reposerver_args="--reposerver $( unzip -p ${SOTA_PACKED_CREDENTIALS} tufrepo.url )"
 
         ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME})
 
@@ -235,7 +231,7 @@ IMAGE_DEPENDS_garagecheck = "aktualizr-native:do_populate_sysroot"
 IMAGE_CMD_garagecheck () {
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         # if credentials are issued by a server that doesn't support offline signing, exit silently
-        unzip -p ${SOTA_PACKED_CREDENTIALS} root.json targets.pub targets.sec repo.url 2>&1 >/dev/null || exit 0
+        unzip -p ${SOTA_PACKED_CREDENTIALS} root.json targets.pub targets.sec tufrepo.url 2>&1 >/dev/null || exit 0
         ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME})
 
         garage-check --ref=${ostree_target_hash} \
