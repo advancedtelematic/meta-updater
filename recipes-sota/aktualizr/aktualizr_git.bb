@@ -39,10 +39,12 @@ do_install_append_class-target () {
 }
 do_install_append_class-native () {
     rm -f ${D}${bindir}/aktualizr
+    rm -f ${D}${bindir}/aktualizr-info
 }
 
 FILES_${PN}_class-target = " \
                 ${bindir}/aktualizr \
+                ${bindir}/aktualizr-info \
                 "
 FILES_${PN}_class-native = " \
                 ${bindir}/aktualizr_implicit_writer \
