@@ -18,7 +18,7 @@ PR = "7"
 SRC_URI = " \
   git://github.com/advancedtelematic/aktualizr;branch=${BRANCH} \
   "
-SRCREV = "31d5954aaa16d1e1a14a1872b136e94ec4f79479"
+SRCREV = "860553a1c98513bf43f6ce98491bf65addcf7e48"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -39,10 +39,12 @@ do_install_append_class-target () {
 }
 do_install_append_class-native () {
     rm -f ${D}${bindir}/aktualizr
+    rm -f ${D}${bindir}/aktualizr-info
 }
 
 FILES_${PN}_class-target = " \
                 ${bindir}/aktualizr \
+                ${bindir}/aktualizr-info \
                 "
 FILES_${PN}_class-native = " \
                 ${bindir}/aktualizr_implicit_writer \
