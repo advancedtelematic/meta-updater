@@ -10,7 +10,7 @@ RDEPENDS_${PN} = "aktualizr softhsm softhsm-testtoken"
 
 SRC_URI = " \
   file://LICENSE \
-  file://aktualizr-autoprovision.service \
+  file://aktualizr.service \
   file://sota_hsm_test.toml \
   "
 PV = "1.0"
@@ -22,7 +22,7 @@ inherit systemd
 
 do_install() {
     install -d ${D}/${systemd_unitdir}/system
-    install -m 0644 ${WORKDIR}/aktualizr-autoprovision.service ${D}/${systemd_unitdir}/system/aktualizr.service
+    install -m 0644 ${WORKDIR}/aktualizr.service ${D}/${systemd_unitdir}/system/aktualizr.service
     install -d ${D}${libdir}/sota
     aktualizr_implicit_writer -c ${SOTA_PACKED_CREDENTIALS} --no-root-ca \
         -i ${WORKDIR}/sota_hsm_test.toml -o ${D}${libdir}/sota/sota.toml -p ${D}
