@@ -11,8 +11,7 @@ PR = "6"
 
 SRC_URI = " \
   file://LICENSE \
-  file://aktualizr-manual-provision.service \
-  file://aktualizr-autoprovision.service \
+  file://aktualizr.service \
   file://sota_autoprov.toml \
   "
 
@@ -38,7 +37,7 @@ do_install_append() {
 
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         install -d ${D}/${systemd_unitdir}/system
-        install -m 0644 ${WORKDIR}/aktualizr-autoprovision.service ${D}/${systemd_unitdir}/system/aktualizr.service
+        install -m 0644 ${WORKDIR}/aktualizr.service ${D}/${systemd_unitdir}/system/aktualizr.service
         install -d ${D}${libdir}/sota
         install -m "0644" ${WORKDIR}/sota_autoprov.toml ${D}${libdir}/sota/sota.toml
 
@@ -51,7 +50,7 @@ do_install_append() {
       fi
     else
         install -d ${D}/${systemd_unitdir}/system
-        install -m 0644 ${WORKDIR}/aktualizr-manual-provision.service ${D}/${systemd_unitdir}/system/aktualizr.service
+        install -m 0644 ${WORKDIR}/aktualizr.service ${D}/${systemd_unitdir}/system/aktualizr.service
     fi
 }
 
