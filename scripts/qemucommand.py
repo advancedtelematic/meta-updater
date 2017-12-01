@@ -46,7 +46,7 @@ class QemuCommand(object):
             if len(machines) == 1:
                 self.machine = machines[0]
             else:
-                raise ValueError("Could not autodetect machine type from %s" % args.dir)
+                raise ValueError("Could not autodetect machine type. More than one entry in %s. Maybe --machine qemux86-64?" % args.dir)
         if args.efi:
             self.bios = 'OVMF.fd'
         else:
@@ -118,10 +118,9 @@ class QemuCommand(object):
 
     def img_command_line(self):
         cmdline = [
-        "qemu-img", "create",
-        "-o", "backing_file=%s" % self.image,
-        "-f", "qcow2",
-        self.overlay]
+            "qemu-img", "create",
+            "-o", "backing_file=%s" % self.image,
+            "-f", "qcow2",
+            self.overlay]
         return cmdline
-
 
