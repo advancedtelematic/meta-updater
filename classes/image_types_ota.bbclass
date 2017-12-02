@@ -7,8 +7,6 @@
 # boot scripts, kernel and initramfs images
 #
 
-OSTREE_BOOTLOADER ??= 'u-boot'
-
 do_image_otaimg[depends] += "e2fsprogs-native:do_populate_sysroot \
                              ${@'grub:do_populate_sysroot' if d.getVar('OSTREE_BOOTLOADER', True) == 'grub' else ''} \
                              ${@'virtual/bootloader:do_deploy' if d.getVar('OSTREE_BOOTLOADER', True) == 'u-boot' else ''}"
