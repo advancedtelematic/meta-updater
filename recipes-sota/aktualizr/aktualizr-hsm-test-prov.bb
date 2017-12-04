@@ -20,6 +20,8 @@ SYSTEMD_SERVICE_${PN} = "aktualizr.service"
 
 inherit systemd
 
+require environment.inc
+
 do_install() {
     install -d ${D}/${systemd_unitdir}/system
     install -m 0644 ${WORKDIR}/aktualizr.service ${D}/${systemd_unitdir}/system/aktualizr.service

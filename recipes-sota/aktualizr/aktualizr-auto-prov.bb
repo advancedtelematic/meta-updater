@@ -19,6 +19,8 @@ SYSTEMD_SERVICE_${PN} = "aktualizr.service"
 
 inherit systemd
 
+require environment.inc
+
 export SOTA_PACKED_CREDENTIALS
 
 do_install_append() {
