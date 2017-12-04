@@ -12,7 +12,6 @@ PR = "1"
 SRC_URI = " \
   file://LICENSE \
   file://aktualizr.service \
-  file://sota_implicit_prov.toml \
   "
 
 SYSTEMD_SERVICE_${PN} = "aktualizr.service"
@@ -24,7 +23,7 @@ do_install() {
     install -m 0644 ${WORKDIR}/aktualizr.service ${D}/${systemd_unitdir}/system/aktualizr.service
     install -d ${D}${libdir}/sota
     aktualizr_implicit_writer -c ${SOTA_PACKED_CREDENTIALS} \
-        -i ${WORKDIR}/sota_implicit_prov.toml -o ${D}${libdir}/sota/sota.toml -p ${D}
+        -i ${STAGING_DIR_NATIVE}/${libdir}/sota/sota_implicit_prov.toml -o ${D}${libdir}/sota/sota.toml -p ${D}
 }
 
 FILES_${PN} = " \

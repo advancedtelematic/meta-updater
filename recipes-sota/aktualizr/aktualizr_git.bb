@@ -18,7 +18,7 @@ PR = "7"
 SRC_URI = " \
   git://github.com/advancedtelematic/aktualizr;branch=${BRANCH} \
   "
-SRCREV = "860553a1c98513bf43f6ce98491bf65addcf7e48"
+SRCREV = "1fb258b13547e229043113380e4a69d404756524"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -40,6 +40,10 @@ do_install_append_class-target () {
 do_install_append_class-native () {
     rm -f ${D}${bindir}/aktualizr
     rm -f ${D}${bindir}/aktualizr-info
+    install -d ${D}${libdir}/sota
+    install -m 0644 ${S}/config/sota_autoprov.toml ${D}/${libdir}/sota/sota_autoprov.toml
+    install -m 0644 ${S}/config/sota_hsm_test.toml ${D}/${libdir}/sota/sota_hsm_test.toml
+    install -m 0644 ${S}/config/sota_implicit_prov.toml ${D}/${libdir}/sota/sota_implicit_prov.toml
 }
 
 FILES_${PN}_class-target = " \
@@ -50,4 +54,5 @@ FILES_${PN}_class-native = " \
                 ${bindir}/aktualizr_implicit_writer \
                 ${bindir}/garage-deploy \
                 ${bindir}/garage-push \
+                ${libdir}/sota/* \
                 "

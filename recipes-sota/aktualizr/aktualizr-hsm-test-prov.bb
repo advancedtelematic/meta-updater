@@ -11,7 +11,6 @@ RDEPENDS_${PN} = "aktualizr softhsm softhsm-testtoken"
 SRC_URI = " \
   file://LICENSE \
   file://aktualizr.service \
-  file://sota_hsm_test.toml \
   "
 PV = "1.0"
 PR = "6"
@@ -25,7 +24,7 @@ do_install() {
     install -m 0644 ${WORKDIR}/aktualizr.service ${D}/${systemd_unitdir}/system/aktualizr.service
     install -d ${D}${libdir}/sota
     aktualizr_implicit_writer -c ${SOTA_PACKED_CREDENTIALS} --no-root-ca \
-        -i ${WORKDIR}/sota_hsm_test.toml -o ${D}${libdir}/sota/sota.toml -p ${D}
+        -i ${STAGING_DIR_NATIVE}/${libdir}/sota/sota_hsm_test.toml -o ${D}${libdir}/sota/sota.toml -p ${D}
 }
 
 FILES_${PN} = " \
