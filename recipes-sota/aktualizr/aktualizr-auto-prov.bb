@@ -36,15 +36,15 @@ do_install() {
         bbwarn "OSTREE_PUSH_CREDENTIALS is ignored. Please use SOTA_PACKED_CREDENTIALS"
     fi
 
+    install -d ${D}${libdir}/sota
+    install -d ${D}${localstatedir}/sota
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         install -d ${D}/${systemd_unitdir}/system
         install -m 0644 ${WORKDIR}/aktualizr.service ${D}/${systemd_unitdir}/system/aktualizr.service
-        install -d ${D}${libdir}/sota
         install -m "0644" ${STAGING_DIR_NATIVE}/${libdir}/sota/sota_autoprov.toml ${D}${libdir}/sota/sota.toml
 
       # deploy SOTA credentials
       if [ -e ${SOTA_PACKED_CREDENTIALS} ]; then
-          mkdir -p ${D}/var/sota
           cp ${SOTA_PACKED_CREDENTIALS} ${D}/var/sota/sota_provisioning_credentials.zip
           # Device should not be able to push data to treehub
           zip -d ${D}/var/sota/sota_provisioning_credentials.zip treehub.json
@@ -58,5 +58,5 @@ do_install() {
 FILES_${PN} = " \
                 ${systemd_unitdir}/system/aktualizr.service \
                 ${libdir}/sota/sota.toml \
-                /var/sota/sota_provisioning_credentials.zip \
+                ${localstatedir}/sota/sota_provisioning_credentials.zip \
                 "
