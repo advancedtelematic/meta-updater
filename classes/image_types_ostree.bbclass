@@ -207,7 +207,7 @@ IMAGE_CMD_garagesign () {
         push_success=0
         for push_retries in $( seq 3 ); do
             garage-sign targets pull --repo ${GARAGE_SIGN_REPO} --home-dir ${GARAGE_SIGN_REPO} ${reposerver_args}
-            garage-sign targets add --repo ${GARAGE_SIGN_REPO} --home-dir ${GARAGE_SIGN_REPO} --name ${OSTREE_BRANCHNAME} --format OSTREE --version ${OSTREE_BRANCHNAME} --length 0 --url "https://example.com/" --sha256 ${ostree_target_hash} --hardwareids ${MACHINE}
+            garage-sign targets add --repo ${GARAGE_SIGN_REPO} --home-dir ${GARAGE_SIGN_REPO} --name ${OSTREE_BRANCHNAME} --format OSTREE --version ${ostree_target_hash} --length 0 --url "https://example.com/" --sha256 ${ostree_target_hash} --hardwareids ${MACHINE}
             garage-sign targets sign --repo ${GARAGE_SIGN_REPO} --home-dir ${GARAGE_SIGN_REPO} --key-name=targets
             errcode=0
             garage-sign targets push --repo ${GARAGE_SIGN_REPO} --home-dir ${GARAGE_SIGN_REPO} ${reposerver_args} || errcode=$?
