@@ -18,9 +18,11 @@ SYSTEMD_SERVICE_${PN} = "aktualizr.service"
 
 inherit systemd
 
+require environment.inc
+
 export SOTA_PACKED_CREDENTIALS
 
-do_install_append() {
+do_install() {
     if [ -n "${SOTA_AUTOPROVISION_CREDENTIALS}" ]; then
         bbwarn "SOTA_AUTOPROVISION_CREDENTIALS are ignored. Please use SOTA_PACKED_CREDENTIALS"
     fi
