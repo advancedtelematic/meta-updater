@@ -28,7 +28,7 @@ calculate_size () {
 	fi
 
 	if [ "$SIZE" -lt "$MIN" ]; then
-		$SIZE=$MIN
+		SIZE=$MIN
 	fi
 
 	SIZE=`expr $SIZE \+ $EXTRA`
