@@ -39,9 +39,7 @@ do_install() {
     install -d ${D}${libdir}/sota
     install -d ${D}${localstatedir}/sota
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
-        install -d ${D}/${systemd_unitdir}/system
-        install -m 0644 ${WORKDIR}/aktualizr.service ${D}/${systemd_unitdir}/system/aktualizr.service
-        install -m "0644" ${STAGING_DIR_NATIVE}/${libdir}/sota/sota_autoprov.toml ${D}${libdir}/sota/sota.toml
+      install -m 0644 ${STAGING_DIR_NATIVE}/${libdir}/sota/sota_autoprov.toml ${D}${libdir}/sota/sota.toml
 
       # deploy SOTA credentials
       if [ -e ${SOTA_PACKED_CREDENTIALS} ]; then
@@ -49,14 +47,14 @@ do_install() {
           # Device should not be able to push data to treehub
           zip -d ${D}/var/sota/sota_provisioning_credentials.zip treehub.json
       fi
-    else
-        install -d ${D}/${systemd_unitdir}/system
-        install -m 0644 ${WORKDIR}/aktualizr.service ${D}/${systemd_unitdir}/system/aktualizr.service
     fi
+    install -d ${D}/${systemd_unitdir}/system
+    install -m 0644 ${WORKDIR}/aktualizr.service ${D}/${systemd_unitdir}/system/aktualizr.service
 }
 
 FILES_${PN} = " \
                 ${systemd_unitdir}/system/aktualizr.service \
                 ${libdir}/sota/sota.toml \
+                ${localstatedir}/sota \
                 ${localstatedir}/sota/sota_provisioning_credentials.zip \
                 "
