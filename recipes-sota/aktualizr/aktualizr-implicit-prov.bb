@@ -33,3 +33,5 @@ FILES_${PN} = " \
                 ${libdir}/sota/sota.toml \
                 ${libdir}/sota/root.crt \
                 "
+
+# vim:set ts=4 sw=4 sts=4 expandtab:

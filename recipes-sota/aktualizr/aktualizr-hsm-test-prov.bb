@@ -33,3 +33,5 @@ FILES_${PN} = " \
                 ${systemd_unitdir}/system/aktualizr.service \
                 ${libdir}/sota/sota.toml \
                 "
+
+# vim:set ts=4 sw=4 sts=4 expandtab:

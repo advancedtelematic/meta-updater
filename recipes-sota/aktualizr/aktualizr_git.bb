@@ -56,3 +56,5 @@ FILES_${PN}_class-native = " \
                 ${bindir}/garage-push \
                 ${libdir}/sota/* \
                 "
+
+# vim:set ts=4 sw=4 sts=4 expandtab:
