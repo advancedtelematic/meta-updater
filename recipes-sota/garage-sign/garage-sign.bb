@@ -27,8 +27,7 @@ do_install() {
 }
 
 FILES_${PN} = " \
-  /usr/bin \
-  /usr/bin/garage-sign.bat \
-  /usr/bin/garage-sign \
-  /usr/lib/* \
+  ${bindir}/garage-sign.bat \
+  ${bindir}/garage-sign \
+  ${libdir}/* \
   "

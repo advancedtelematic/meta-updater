@@ -21,11 +21,11 @@ inherit systemd
 require environment.inc
 
 do_install() {
-    install -d ${D}/${systemd_unitdir}/system
-    install -m 0644 ${WORKDIR}/aktualizr.service ${D}/${systemd_unitdir}/system/aktualizr.service
+    install -d ${D}${systemd_unitdir}/system
+    install -m 0644 ${WORKDIR}/aktualizr.service ${D}${systemd_unitdir}/system/aktualizr.service
     install -d ${D}${libdir}/sota
     aktualizr_implicit_writer -c ${SOTA_PACKED_CREDENTIALS} \
-        -i ${STAGING_DIR_NATIVE}/${libdir}/sota/sota_implicit_prov.toml -o ${D}${libdir}/sota/sota.toml -p ${D}
+        -i ${STAGING_DIR_NATIVE}${libdir}/sota/sota_implicit_prov.toml -o ${D}${libdir}/sota/sota.toml -p ${D}
 }
 
 FILES_${PN} = " \

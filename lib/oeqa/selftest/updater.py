@@ -51,7 +51,7 @@ class GarageSignTests(oeSelfTest):
 class HsmTests(oeSelfTest):
 
     def test_hsm(self):
-        self.write_config('SOTA_CLIENT_FEATURES="hsm hsm-test"')
+        self.write_config('SOTA_CLIENT_FEATURES="hsm"')
         bitbake('core-image-minimal')
 
 

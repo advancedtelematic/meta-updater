@@ -43,13 +43,13 @@ do_install() {
 
       # deploy SOTA credentials
       if [ -e ${SOTA_PACKED_CREDENTIALS} ]; then
-          cp ${SOTA_PACKED_CREDENTIALS} ${D}/var/sota/sota_provisioning_credentials.zip
+          cp ${SOTA_PACKED_CREDENTIALS} ${D}${localstatedir}/sota/sota_provisioning_credentials.zip
           # Device should not be able to push data to treehub
-          zip -d ${D}/var/sota/sota_provisioning_credentials.zip treehub.json
+          zip -d ${D}${localstatedir}/sota/sota_provisioning_credentials.zip treehub.json
       fi
     fi
-    install -d ${D}/${systemd_unitdir}/system
-    install -m 0644 ${WORKDIR}/aktualizr.service ${D}/${systemd_unitdir}/system/aktualizr.service
+    install -d ${D}${systemd_unitdir}/system
+    install -m 0644 ${WORKDIR}/aktualizr.service ${D}${systemd_unitdir}/system/aktualizr.service
 }
 
 FILES_${PN} = " \
