@@ -85,14 +85,16 @@ IMAGE_CMD_otaimg () {
 			bberror "Invalid bootloader: ${OSTREE_BOOTLOADER}"
 		fi;
 
-		ostree --repo=${PHYS_SYSROOT}/ostree/repo pull-local --remote=${OSTREE_OSNAME} ${OSTREE_REPO} ${OSTREE_BRANCHNAME}
+		ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME})
+
+		ostree --repo=${PHYS_SYSROOT}/ostree/repo pull-local --remote=${OSTREE_OSNAME} ${OSTREE_REPO} ${ostree_target_hash}
 		export OSTREE_BOOT_PARTITION="/boot"
 		kargs_list=""
 		for arg in ${OSTREE_KERNEL_ARGS}; do
 			kargs_list="${kargs_list} --karg-append=$arg"
 		done
 
-		ostree admin --sysroot=${PHYS_SYSROOT} deploy ${kargs_list} --os=${OSTREE_OSNAME} ${OSTREE_BRANCHNAME}
+		ostree admin --sysroot=${PHYS_SYSROOT} deploy ${kargs_list} --os=${OSTREE_OSNAME} ${ostree_target_hash}
 
 		# Copy deployment /home and /var/sota to sysroot
 		HOME_TMP=`mktemp -d ${WORKDIR}/home-tmp-XXXXX`
