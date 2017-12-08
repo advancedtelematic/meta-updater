@@ -39,14 +39,14 @@ do_install() {
     install -d ${D}${libdir}/sota
     install -d ${D}${localstatedir}/sota
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
-      install -m 0644 ${STAGING_DIR_NATIVE}/${libdir}/sota/sota_autoprov.toml ${D}${libdir}/sota/sota.toml
+        install -m 0644 ${STAGING_DIR_NATIVE}${libdir}/sota/sota_autoprov.toml ${D}${libdir}/sota/sota.toml
 
-      # deploy SOTA credentials
-      if [ -e ${SOTA_PACKED_CREDENTIALS} ]; then
-          cp ${SOTA_PACKED_CREDENTIALS} ${D}${localstatedir}/sota/sota_provisioning_credentials.zip
-          # Device should not be able to push data to treehub
-          zip -d ${D}${localstatedir}/sota/sota_provisioning_credentials.zip treehub.json
-      fi
+        # deploy SOTA credentials
+        if [ -e ${SOTA_PACKED_CREDENTIALS} ]; then
+            cp ${SOTA_PACKED_CREDENTIALS} ${D}${localstatedir}/sota/sota_provisioning_credentials.zip
+            # Device should not be able to push data to treehub
+            zip -d ${D}${localstatedir}/sota/sota_provisioning_credentials.zip treehub.json
+        fi
     fi
     install -d ${D}${systemd_unitdir}/system
     install -m 0644 ${WORKDIR}/aktualizr.service ${D}${systemd_unitdir}/system/aktualizr.service
@@ -58,3 +58,5 @@ FILES_${PN} = " \
                 ${localstatedir}/sota \
                 ${localstatedir}/sota/sota_provisioning_credentials.zip \
                 "
+
+# vim:set ts=4 sw=4 sts=4 expandtab:
