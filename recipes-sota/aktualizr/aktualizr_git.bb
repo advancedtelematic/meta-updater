@@ -36,6 +36,7 @@ do_install_append () {
 }
 do_install_append_class-target () {
     rm -f ${D}${bindir}/aktualizr_implicit_writer
+    ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'secondary-example', '', 'rm -f ${D}${bindir}/example-interface', d)}
 }
 do_install_append_class-native () {
     rm -f ${D}${bindir}/aktualizr
@@ -50,8 +51,8 @@ do_install_append_class-native () {
 FILES_${PN}_class-target = " \
                 ${bindir}/aktualizr \
                 ${bindir}/aktualizr-info \
-                ${bindir}/example-interface \
                 "
+FILES_${PN}_append_class-target = " ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'secondary-example', '${bindir}/example-interface', '', d)} "
 FILES_${PN}_class-native = " \
                 ${bindir}/aktualizr_implicit_writer \
                 ${bindir}/garage-deploy \
