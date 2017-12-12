@@ -19,6 +19,7 @@ SYSTEMD_SERVICE_${PN} = "aktualizr.service"
 inherit systemd
 
 require environment.inc
+require credentials.inc
 
 export SOTA_PACKED_CREDENTIALS
 
