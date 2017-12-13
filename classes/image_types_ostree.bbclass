@@ -179,7 +179,7 @@ IMAGE_CMD_ostreepush () {
 }
 
 IMAGE_TYPEDEP_garagesign = "ostreepush"
-IMAGE_DEPENDS_garagesign = "garage-sign-native:do_populate_sysroot"
+IMAGE_DEPENDS_garagesign = "aktualizr-native:do_populate_sysroot"
 IMAGE_CMD_garagesign () {
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         # if credentials are issued by a server that doesn't support offline signing, exit silently
@@ -194,11 +194,8 @@ IMAGE_CMD_garagesign () {
             exit 1
         fi
 
-	if [ ! -d "${GARAGE_SIGN_REPO}" ]; then
-            garage-sign init --repo ${GARAGE_SIGN_REPO} --home-dir ${GARAGE_SIGN_REPO} --credentials ${SOTA_PACKED_CREDENTIALS}
-        fi
-
-        reposerver_args="--reposerver $( unzip -p ${SOTA_PACKED_CREDENTIALS} tufrepo.url )"
+        rm -rf ${GARAGE_SIGN_REPO}
+        garage-sign init --repo ${GARAGE_SIGN_REPO} --home-dir ${GARAGE_SIGN_REPO} --credentials ${SOTA_PACKED_CREDENTIALS}
 
         ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME})
 
@@ -206,11 +203,11 @@ IMAGE_CMD_garagesign () {
         #   in which case targets.json should be pulled again and the whole procedure repeated
         push_success=0
         for push_retries in $( seq 3 ); do
-            garage-sign targets pull --repo ${GARAGE_SIGN_REPO} --home-dir ${GARAGE_SIGN_REPO} ${reposerver_args}
+            garage-sign targets pull --repo ${GARAGE_SIGN_REPO} --home-dir ${GARAGE_SIGN_REPO}
             garage-sign targets add --repo ${GARAGE_SIGN_REPO} --home-dir ${GARAGE_SIGN_REPO} --name ${OSTREE_BRANCHNAME} --format OSTREE --version ${ostree_target_hash} --length 0 --url "https://example.com/" --sha256 ${ostree_target_hash} --hardwareids ${MACHINE}
             garage-sign targets sign --repo ${GARAGE_SIGN_REPO} --home-dir ${GARAGE_SIGN_REPO} --key-name=targets
             errcode=0
-            garage-sign targets push --repo ${GARAGE_SIGN_REPO} --home-dir ${GARAGE_SIGN_REPO} ${reposerver_args} || errcode=$?
+            garage-sign targets push --repo ${GARAGE_SIGN_REPO} --home-dir ${GARAGE_SIGN_REPO} || errcode=$?
             if [ "$errcode" -eq "0" ]; then
                 push_success=1
                 break
