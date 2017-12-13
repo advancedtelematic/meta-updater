@@ -14,9 +14,9 @@ HOSTTOOLS_NONFATAL += " repo "
 # Write build information to target filesystem
 buildinfo () {
   if [ $(which repo) ]; then
-    repo manifest --revision-as-HEAD -o ${IMAGE_ROOTFS}${sysconfdir}/manifest.xml
+    repo manifest --revision-as-HEAD -o ${IMAGE_ROOTFS}${sysconfdir}/manifest.xml || bbwarn "Android repo tool failed to run; manifest not copied"
   else
-    echo "Android repo tool not food; manifest not copied."
+    bbwarn "Android repo tool not food; manifest not copied."
   fi
 }
 
