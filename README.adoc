@@ -1,10 +1,10 @@
 = meta-updater
 
-This layer enables over-the-air updates (OTA) with https://github.com/ostreedev/ostree[OSTree] and https://github.com/advancedtelematic/rvi_sota_client[RVI SOTA client].
+This layer enables over-the-air updates (OTA) with https://github.com/ostreedev/ostree[OSTree] and https://github.com/advancedtelematic/aktualizr[Aktualizr].
 
 https://github.com/ostreedev/ostree[OSTree] is a tool for atomic full file system upgrades with rollback capability. OSTree has several advantages over traditional dual-bank systems, but the most important one is that it minimizes network bandwidth and data storage footprint by sharing files with the same contents across file system deployments.
 
-https://github.com/advancedtelematic/rvi_sota_client[RVI SOTA client] and/or https://github.com/advancedtelematic/aktualizr[aktualizr] add authentication and provisioning capabilities to OTA and are integrated with OSTree. You can connect with the open-source https://github.com/advancedtelematic/rvi_sota_server[RVI SOTA server] or sign up for a free account at https://app.atsgarage.com[ATS Garage] to get started.
+https://github.com/advancedtelematic/aktualizr[Aktualizr] (and https://github.com/advancedtelematic/rvi_sota_client[RVI SOTA client]) add authentication and provisioning capabilities to OTA and are integrated with OSTree. You can connect with the open-source https://github.com/advancedtelematic/rvi_sota_server[RVI SOTA server] or sign up for a free account at https://app.atsgarage.com[ATS Garage] to get started.
 
 == Build
 
@@ -21,8 +21,6 @@ If you already have a Yocto-based project and you want to add atomic filesystem 
 3.  Set up your https://www.yoctoproject.org/docs/2.1/ref-manual/ref-manual.html#var-DISTRO[distro]. If you are using "poky", the default distro in Yocto, you can change it in your conf/local.conf to "poky-sota". Alternatively, if you are using your own or third party distro configuration, you can add 'INHERIT += " sota"' to it, thus combining capabilities of your distro with meta-updater features.
 
 You can then build your image as usual, with bitbake. After building the root file system, bitbake will then create an https://ostree.readthedocs.io/en/latest/manual/adapting-existing/[OSTree-enabled version] of it, commit it to your local OSTree repo and (optionally) push it to a remote server. Additionally, a live disk image will be created (normally named $\{IMAGE_NAME}.-sdimg-ota e.g. core-image-raspberrypi3.rpi-sdimg-ota). You can control this behaviour through <<variables in your local.conf,OSTree-related variables in your local.conf>>.
-
-=== Build with OpenIVI
 
 === Build in AGL
 
@@ -67,11 +65,16 @@ Although we have used U-Boot so far, other boot loaders can be configured work w
 
 == SOTA-related variables in local.conf
 
-* OSTREE_REPO - path to your OSTree repository. Defaults to "$\{DEPLOY_DIR_IMAGE}/ostree_repo"
-* OSTREE_BRANCHNAME - the branch your rootfs will be committed to. Defaults to "ota"
-* OSTREE_OSNAME - OS deployment name on your target device. For more information about deployments and osnames see the https://ostree.readthedocs.io/en/latest/manual/deployment/[OSTree documentation]. Defaults to "poky".
-* OSTREE_INITRAMFS_IMAGE - initramfs/initrd image that is used as a proxy while booting into OSTree deployment. Do not change this setting unless you are sure that your initramfs can serve as such a proxy.
-* SOTA_PACKED_CREDENTIALS - when set, your ostree commit will be pushed to a remote repo as a bitbake step. This should be the path to a JSON credentials file in https://github.com/advancedtelematic/sota-tools#credentials[the format accepted by garage-push].
+* `OSTREE_REPO` - path to your OSTree repository. Defaults to `$\{DEPLOY_DIR_IMAGE}/ostree_repo`
+* `OSTREE_BRANCHNAME` - the branch your rootfs will be committed to. Defaults to the same value as `MACHINE`.
+* `OSTREE_OSNAME` - OS deployment name on your target device. For more information about deployments and osnames see the https://ostree.readthedocs.io/en/latest/manual/deployment/[OSTree documentation]. Defaults to "poky".
+* `OSTREE_INITRAMFS_IMAGE` - initramfs/initrd image that is used as a proxy while booting into OSTree deployment. Do not change this setting unless you are sure that your initramfs can serve as such a proxy.
+* `SOTA_PACKED_CREDENTIALS` - when set, your ostree commit will be pushed to a remote repo as a bitbake step. This should be the path to a zipped credentials file in https://github.com/advancedtelematic/aktualizr/blob/master/docs/credentials.adoc[the format accepted by garage-push].
+* `SOTA_CLIENT_PROV` - which provisioning method to use. Valid options are https://github.com/advancedtelematic/aktualizr/blob/master/docs/automatic-provisioning.adoc[`aktualizr-auto-prov`], https://github.com/advancedtelematic/aktualizr/blob/master/docs/implicit-provisioning.adoc[`aktualizr-implicit-prov`], and `aktualizr-hsm-test-prov`. The default is `aktualizr-auto-prov`. This can also be set to an empty string to avoid using a provisioning recipe.
+* `SOTA_CLIENT_FEATURES` - extensions to aktualizr. Multiple can be specified if separated by spaces. Valid options are `hsm` (to build with HSM support) and `secondary-example` (to install an example https://github.com/advancedtelematic/aktualizr/blob/master/docs/legacysecondary.adoc[legacy secondary interface] in the image).
+* `SOTA_LEGACY_SECONDARY_INTERFACE` - path to a legacy secondary interface installed on the device. To use the example interface from the Aktualizr repo, use `/usr/bin/example-interface` and make sure `SOTA_CLIENT_FEATURES = "secondary-example"`.
+* `SOTA_SECONDARY_ECUS` - a list of paths separated by spaces of JSON configuration files for virtual secondaries on the host. These will be installed into `/var/sota/ecus` on the device.
+* `SOTA_VIRTUAL_SECONDARIES` - a list of paths separated by spaces of JSON configuration files for virtual secondaries installed on the device. If `SOTA_SECONDARY_ECUS` is used to install them, then you can expect them to be installed in `/var/sota/ecus`.
 
 == Usage
 

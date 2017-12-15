@@ -119,6 +119,7 @@ IMAGE_CMD_ostree () {
     fi
 
     if [ -n "${SOTA_SECONDARY_ECUS}" ]; then
+        mkdir -p var/sota/ecus
         cp ${SOTA_SECONDARY_ECUS} var/sota/ecus
     fi
 
