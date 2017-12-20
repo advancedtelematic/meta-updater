@@ -31,22 +31,12 @@ class SotaToolsTests(oeSelfTest):
         result = runCmd('%s --help' % p, ignore_status=True)
         self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
 
-
-class GarageSignTests(oeSelfTest):
-
-    @classmethod
-    def setUpClass(cls):
-        logger = logging.getLogger("selftest")
-        logger.info('Running bitbake to build garage-sign-native')
-        bitbake('garage-sign-native')
-
-    def test_help(self):
-        bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'bindir'], 'garage-sign-native')
+    def test_garagesign_help(self):
+        bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'bindir'], 'aktualizr-native')
         p = bb_vars['SYSROOT_DESTDIR'] + bb_vars['bindir'] + "/" + "garage-sign"
         self.assertTrue(os.path.isfile(p), msg = "No garage-sign found (%s)" % p)
         result = runCmd('%s --help' % p, ignore_status=True)
         self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
-
 
 class HsmTests(oeSelfTest):
 

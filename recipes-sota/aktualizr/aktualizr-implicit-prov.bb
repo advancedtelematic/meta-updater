@@ -27,7 +27,7 @@ do_install() {
     install -d ${D}${libdir}/sota
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         aktualizr_implicit_writer -c ${SOTA_PACKED_CREDENTIALS} \
-            -i ${STAGING_DIR_NATIVE}${libdir}/sota/sota_implicit_prov.toml -o ${D}${libdir}/sota/sota.toml -p ${D}
+            -i ${STAGING_DIR_NATIVE}${libdir}/sota/sota_implicit_prov.toml -o ${D}${libdir}/sota/sota.toml -p ${D} --no-root-ca
     fi
 }
 

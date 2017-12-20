@@ -18,7 +18,7 @@ PR = "7"
 SRC_URI = " \
   git://github.com/advancedtelematic/aktualizr;branch=${BRANCH} \
   "
-SRCREV = "5bf2975aee4af667a1af17381bf68c34a00f03a3"
+SRCREV = "eb6c0b43c2b8b32f66f228c1c3f590b5c16ad448"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
