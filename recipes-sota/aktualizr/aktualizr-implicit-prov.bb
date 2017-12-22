@@ -1,4 +1,4 @@
-SUMMARY = "Aktualizr systemd service and configurations"
+SUMMARY = "Aktualizr configuration for implicit provisioning"
 DESCRIPTION = "Systemd service and configurations for implicitly provisioning Aktualizr, the SOTA Client application written in C++"
 HOMEPAGE = "https://github.com/advancedtelematic/aktualizr"
 SECTION = "base"
@@ -11,19 +11,13 @@ PR = "1"
 
 SRC_URI = " \
   file://LICENSE \
-  file://aktualizr.service \
   "
 
-SYSTEMD_SERVICE_${PN} = "aktualizr.service"
-
-inherit systemd
 
 require environment.inc
 require credentials.inc
 
 do_install() {
-    install -d ${D}${systemd_unitdir}/system
-    install -m 0644 ${WORKDIR}/aktualizr.service ${D}${systemd_unitdir}/system/aktualizr.service
     install -d ${D}${libdir}/sota
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         aktualizr_implicit_writer -c ${SOTA_PACKED_CREDENTIALS} \
@@ -32,7 +26,6 @@ do_install() {
 }
 
 FILES_${PN} = " \
-                ${systemd_unitdir}/system/aktualizr.service \
                 ${libdir}/sota/sota.toml \
                 ${libdir}/sota/root.crt \
                 "

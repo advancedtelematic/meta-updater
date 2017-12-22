@@ -1,4 +1,4 @@
-SUMMARY = "Aktualizr systemd service and configurations"
+SUMMARY = "Aktualizr configuration for autoprovisioning"
 DESCRIPTION = "Systemd service and configurations for autoprovisioning Aktualizr, the SOTA Client application written in C++"
 HOMEPAGE = "https://github.com/advancedtelematic/aktualizr"
 SECTION = "base"
@@ -11,12 +11,7 @@ PR = "6"
 
 SRC_URI = " \
   file://LICENSE \
-  file://aktualizr.service \
   "
-
-SYSTEMD_SERVICE_${PN} = "aktualizr.service"
-
-inherit systemd
 
 require environment.inc
 require credentials.inc
@@ -49,12 +44,9 @@ do_install() {
             zip -d ${D}${localstatedir}/sota/sota_provisioning_credentials.zip treehub.json
         fi
     fi
-    install -d ${D}${systemd_unitdir}/system
-    install -m 0644 ${WORKDIR}/aktualizr.service ${D}${systemd_unitdir}/system/aktualizr.service
 }
 
 FILES_${PN} = " \
-                ${systemd_unitdir}/system/aktualizr.service \
                 ${libdir}/sota/sota.toml \
                 ${localstatedir}/sota \
                 ${localstatedir}/sota/sota_provisioning_credentials.zip \
