@@ -4,7 +4,7 @@ PREFERRED_VERSION_linux-yocto_qemux86-64_sota = "4.4%"
 IMAGE_FSTYPES_remove = "wic"
 
 # U-Boot support for SOTA
-PREFERRED_PROVIDER_virtual/bootloader_sota = "u-boot"
+PREFERRED_PROVIDER_virtual/bootloader_sota = "u-boot-ota"
 UBOOT_MACHINE_sota = "qemu-x86_defconfig"
 OSTREE_BOOTLOADER ?= "u-boot"
 
