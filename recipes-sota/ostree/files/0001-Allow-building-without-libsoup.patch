@@ -1,0 +1,26 @@
+From 666e80acda17680e20d363ddc6fcf0a63f9c1dde Mon Sep 17 00:00:00 2001
+From: Anton Gerasimov <anton.gerasimov@openmailbox.org>
+Date: Thu, 21 Dec 2017 22:36:06 +0100
+Subject: [PATCH] Allow building without libsoup
+
+---
+ configure.ac | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 92248af8..baf66e4f 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -182,9 +182,6 @@ AM_COND_IF(BUILDOPT_TRIVIAL_HTTPD,
+   [AC_DEFINE([BUILDOPT_ENABLE_TRIVIAL_HTTPD_CMDLINE], 1, [Define if we are enabling ostree trivial-httpd entrypoint])]
+ )
+ 
+-AS_IF([test x$with_curl = xyes && test x$with_soup = xno], [
+-  AC_MSG_ERROR([Curl enabled, but libsoup is not; libsoup is needed for tests])
+-])
+ AM_CONDITIONAL(USE_CURL_OR_SOUP, test x$with_curl != xno || test x$with_soup != xno)
+ AS_IF([test x$with_curl != xno || test x$with_soup != xno],
+             [AC_DEFINE([HAVE_LIBCURL_OR_LIBSOUP], 1, [Define if we have soup or curl])])
+-- 
+2.15.0
+
