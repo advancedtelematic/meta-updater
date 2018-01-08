@@ -6,7 +6,8 @@ inherit autotools-brokensep pkgconfig systemd gobject-introspection
 
 INHERIT_remove_class-native = "systemd"
 
-SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master"
+SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master \
+           file://0001-Allow-building-without-libsoup.patch"
 
 SRCREV="ae61321046ad7f4148a5884c8c6c8b2594ff840e"
 
@@ -16,14 +17,14 @@ S = "${WORKDIR}/git"
 
 BBCLASSEXTEND = "native"
 
-DEPENDS += "attr libarchive glib-2.0 pkgconfig gpgme libgsystem fuse libsoup-2.4 e2fsprogs gtk-doc-native curl xz"
+DEPENDS += "attr libarchive glib-2.0 pkgconfig gpgme libgsystem fuse e2fsprogs gtk-doc-native curl xz"
 DEPENDS_append = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', ' systemd', '', d)}"
 DEPENDS_remove_class-native = "systemd-native"
 
 RDEPENDS_${PN} = "python util-linux-libuuid util-linux-libblkid util-linux-libmount libcap bash"
 RDEPENDS_${PN}_remove_class-native = "python-native"
 
-EXTRA_OECONF = "--with-libarchive --disable-gtk-doc --disable-gtk-doc-html --disable-gtk-doc-pdf --disable-man --with-smack --with-builtin-grub2-mkconfig --with-curl"
+EXTRA_OECONF = "CFLAGS='-Wno-error=missing-prototypes' --with-libarchive --disable-gtk-doc --disable-gtk-doc-html --disable-gtk-doc-pdf --disable-man --with-smack --with-builtin-grub2-mkconfig --with-curl --without-soup"
 EXTRA_OECONF_append_class-native = " --enable-wrpseudo-compat"
 
 # Path to ${prefix}/lib/ostree/ostree-grub-generator is hardcoded on the
