@@ -24,15 +24,7 @@ fi
 METADIR="${SOURCEDIR}/../.."
 
 if [[ ! -f "${BUILDDIR}/conf/local.conf" ]]; then
-  if [ -z "$TEMPLATECONF" ] && [ -d ${METADIR}/meta-updater-${MACHINE}/conf ]; then
-    # Use the template configurations for the specified machine
-    TEMPLATECONF=${METADIR}/meta-updater-${MACHINE}/conf
-    source "$METADIR/poky/oe-init-build-env" "$BUILDDIR"
-    unset TEMPLATECONF
-  else
-    # Use the default configurations or TEMPLATECONF set by the user
-    source "$METADIR/poky/oe-init-build-env" "$BUILDDIR"
-  fi
+  source "$METADIR/poky/oe-init-build-env" "$BUILDDIR"
   echo "METADIR  := \"\${@os.path.abspath('${METADIR}')}\"" >> conf/bblayers.conf
   cat "${METADIR}/meta-updater/conf/include/bblayers/sota.inc" >> conf/bblayers.conf
   cat "${METADIR}/meta-updater/conf/include/bblayers/sota_${MACHINE}.inc" >> conf/bblayers.conf
