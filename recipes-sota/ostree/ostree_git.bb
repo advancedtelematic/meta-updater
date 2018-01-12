@@ -6,10 +6,9 @@ inherit autotools-brokensep pkgconfig systemd gobject-introspection
 
 INHERIT_remove_class-native = "systemd"
 
-SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master \
-           file://0001-Allow-building-without-libsoup.patch"
+SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master"
 
-SRCREV="ae61321046ad7f4148a5884c8c6c8b2594ff840e"
+SRCREV="854a823e05d6fe8b610c02c2a71eaeb2bf1e98a6"
 
 PV = "v2017.13"
 
