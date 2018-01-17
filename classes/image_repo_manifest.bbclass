@@ -16,7 +16,7 @@ buildinfo () {
   if [ $(which repo) ]; then
     repo manifest --revision-as-HEAD -o ${IMAGE_ROOTFS}${sysconfdir}/manifest.xml || bbwarn "Android repo tool failed to run; manifest not copied"
   else
-    bbwarn "Android repo tool not food; manifest not copied."
+    bbwarn "Android repo tool not found; manifest not copied."
   fi
 }
 
