@@ -21,7 +21,7 @@ SRC_URI = " \
   file://aktualizr.service \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "e1f27b92ec9eaffab4a2091a5aeecb0b4c540c58"
+SRCREV = "37fbf0dfd88d42d76301890818dc4e83b35d9fa4"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
