@@ -1,0 +1,8 @@
+[Unit]
+Description=Serial CAN daemon (can-utils)
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/slcand -o -c -s4 %I can0
+ExecStartPost=/bin/sh -c '/bin/sleep 3; /sbin/ip link set can0 up'
+

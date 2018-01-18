@@ -1,4 +1,4 @@
-SUMMARY = "Aktualizr systemd service and configurations"
+SUMMARY = "Aktualizr configuration for implicit provisioning"
 DESCRIPTION = "Systemd service and configurations for implicitly provisioning Aktualizr, the SOTA Client application written in C++"
 HOMEPAGE = "https://github.com/advancedtelematic/aktualizr"
 SECTION = "base"
@@ -11,24 +11,23 @@ PR = "1"
 
 SRC_URI = " \
   file://LICENSE \
-  file://aktualizr-autoprovision.service \
-  file://sota_implicit_prov.toml \
   "
 
-SYSTEMD_SERVICE_${PN} = "aktualizr.service"
 
-inherit systemd
+require environment.inc
+require credentials.inc
 
 do_install() {
-    install -d ${D}/${systemd_unitdir}/system
-    install -m 0644 ${WORKDIR}/aktualizr-autoprovision.service ${D}/${systemd_unitdir}/system/aktualizr.service
     install -d ${D}${libdir}/sota
-    aktualizr_implicit_writer -c ${SOTA_PACKED_CREDENTIALS} \
-        -i ${WORKDIR}/sota_implicit_prov.toml -o ${D}${libdir}/sota/sota.toml -p ${D}
+    if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
+        aktualizr_implicit_writer -c ${SOTA_PACKED_CREDENTIALS} \
+            -i ${STAGING_DIR_NATIVE}${libdir}/sota/sota_implicit_prov.toml -o ${D}${libdir}/sota/sota.toml -p ${D}
+    fi
 }
 
 FILES_${PN} = " \
-                ${systemd_unitdir}/system/aktualizr.service \
                 ${libdir}/sota/sota.toml \
                 ${libdir}/sota/root.crt \
                 "
+
+# vim:set ts=4 sw=4 sts=4 expandtab:

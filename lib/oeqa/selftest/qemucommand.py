@@ -1,1 +1,0 @@
-../../../scripts/qemucommand.py
