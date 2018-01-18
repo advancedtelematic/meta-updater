@@ -79,25 +79,25 @@ Although we have used U-Boot so far, other boot loaders can be configured work w
 
 === OSTree
 
-OSTree includes its own simple http server. It just exposes the whole OSTree repository to the network so that any remote device can pull data from it to device's local repository. To use the OSTree http server, you will need OSTree installed on your build machine. (Alternatively, you could run version built inside Yocto using bitbake's http://www.openembedded.org/wiki/Devshell[devshell].)
-
-To expose your repo, run ostree trivial-httpd using any free port:
+OSTree used to include a simple HTTP server as part of the ostree binary, but this has been removed in more recent versions. However, OSTree repositories are self-contained directories, and can be trivially served over the network using any HTTP server. For example, you could use Python's SimpleHTTPServer:
 
 ....
-ostree trivial-httpd tmp/deploy/images/qemux86-64/ostree_repo -P 57556
+cd tmp/deploy/images/qemux86-64/ostree_repo
+python -m SimpleHTTPServer <port> # port defaults to 8000
 ....
 
 You can then run ostree from inside your device by adding your repo:
 
 ....
-# agl-remote identifies the remote server in your local repo
-ostree remote add --no-gpg-verify my-remote http://192.168.7.1:57556 ota
+# This behaves like adding a Git remote; you can name it anything
+ostree remote add --no-gpg-verify my-remote http://<your-ip>:<port>
 
-# ota is a branch name in the remote repo, set in OSTREE_BRANCHNAME
-ostree pull my-remote ota
+# If OSTREE_BRANCHNAME is set in local.conf, that will be the name of the
+# branch. If not set, it defaults to the value of MACHINE (e.g. qemux86-64).
+ostree pull my-remote <branch>
 
-# poky is OS name as set in OSTREE_OSNAME
-ostree admin deploy --os=poky my-remote:ota
+# poky is the OS name as set in OSTREE_OSNAME
+ostree admin deploy --os=poky my-remote:<branch>
 ....
 
 After restarting, you will boot into the newly deployed OS image.
