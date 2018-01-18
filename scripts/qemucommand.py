@@ -96,7 +96,7 @@ class QemuCommand(object):
             "-serial", "tcp:127.0.0.1:%d,server,nowait" % self.serial_port,
             "-m", "1G",
             "-usb",
-            "-usbdevice", "tablet",
+            "-device", "usb-tablet",
             "-show-cursor",
             "-vga", "std",
             "-net", netuser,

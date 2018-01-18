@@ -13,6 +13,7 @@ class SotaToolsTests(OESelftestTestCase):
 
     @classmethod
     def setUpClass(cls):
+        super(SotaToolsTests, cls).setUpClass()
         logger = logging.getLogger("selftest")
         logger.info('Running bitbake to build aktualizr-native tools')
         bitbake('aktualizr-native')
@@ -109,6 +110,7 @@ class QemuTests(OESelftestTestCase):
 
     @classmethod
     def setUpClass(cls):
+        super(QemuTests, cls).setUpClass()
         cls.qemu, cls.s = qemu_launch(machine='qemux86-64')
 
     @classmethod
@@ -140,7 +142,7 @@ class GrubTests(OESelftestTestCase):
     def setUpLocal(self):
         # This is a bit of a hack but I can't see a better option.
         path = os.path.abspath(os.path.dirname(__file__))
-        metadir = path + "/../../../../"
+        metadir = path + "/../../../../../"
         grub_config = 'OSTREE_BOOTLOADER = "grub"\nMACHINE = "intel-corei7-64"'
         self.append_config(grub_config)
         self.meta_intel = metadir + "meta-intel"
