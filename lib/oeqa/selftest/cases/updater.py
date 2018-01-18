@@ -1,15 +1,15 @@
-import unittest
 import os
 import logging
 import subprocess
 import time
+import unittest
 
-from oeqa.selftest.base import oeSelfTest
+from oeqa.selftest.case import OESelftestTestCase
 from oeqa.utils.commands import runCmd, bitbake, get_bb_var, get_bb_vars
-from oeqa.selftest.qemucommand import QemuCommand
+from qemucommand import QemuCommand
 
 
-class SotaToolsTests(oeSelfTest):
+class SotaToolsTests(OESelftestTestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -38,14 +38,15 @@ class SotaToolsTests(oeSelfTest):
         result = runCmd('%s --help' % p, ignore_status=True)
         self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
 
-class HsmTests(oeSelfTest):
+
+class HsmTests(OESelftestTestCase):
 
     def test_hsm(self):
         self.write_config('SOTA_CLIENT_FEATURES="hsm"')
         bitbake('core-image-minimal')
 
 
-class GeneralTests(oeSelfTest):
+class GeneralTests(OESelftestTestCase):
 
     def test_feature_sota(self):
         result = get_bb_var('DISTRO_FEATURES').find('sota')
@@ -104,7 +105,7 @@ class GeneralTests(oeSelfTest):
         self.assertNotEqual(size1, size2, "Image sizes are identical; image was not rebuilt.")
 
 
-class QemuTests(oeSelfTest):
+class QemuTests(OESelftestTestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -133,7 +134,8 @@ class QemuTests(oeSelfTest):
         self.assertEqual(err, b'', 'Error: ' + err.decode())
         print(value.decode())
 
-class GrubTests(oeSelfTest):
+
+class GrubTests(OESelftestTestCase):
 
     def setUpLocal(self):
         # This is a bit of a hack but I can't see a better option.
