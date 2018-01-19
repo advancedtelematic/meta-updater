@@ -21,7 +21,7 @@ require credentials.inc
 do_install() {
     install -d ${D}${libdir}/sota
     aktualizr_implicit_writer -c ${SOTA_PACKED_CREDENTIALS} --no-root-ca \
-        -i ${STAGING_DIR_NATIVE}${libdir}/sota/sota_hsm_test.toml -o ${D}${libdir}/sota/sota.toml -p ${D}
+        -i ${STAGING_DIR_NATIVE}${libdir}/sota/sota_hsm_prov.toml -o ${D}${libdir}/sota/sota.toml -p ${D}
 }
 
 FILES_${PN} = " \
