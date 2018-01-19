@@ -73,7 +73,7 @@ class QemuCommand(object):
             try:
                 check_output(['kvm-ok'])
                 self.kvm = True
-            except CalledProcessError:
+            except Exception:
                 self.kvm = False
         else:
             self.kvm = args.kvm
@@ -96,7 +96,7 @@ class QemuCommand(object):
             "-serial", "tcp:127.0.0.1:%d,server,nowait" % self.serial_port,
             "-m", "1G",
             "-usb",
-            "-usbdevice", "tablet",
+            "-device", "usb-tablet",
             "-show-cursor",
             "-vga", "std",
             "-net", netuser,
