@@ -9,7 +9,8 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=fad9b3332be894bab9bc501572864b29"
 DEPENDS = "libtool openssl"
 RDEPENDS_${PN} += " opensc"
 
-SRC_URI = "git://github.com/OpenSC/libp11.git"
+SRC_URI = "git://github.com/OpenSC/libp11.git \
+           file://0001-Workaround-for-a-buggy-version-of-openssl-1.0.2m.patch"
 SRCREV = "da725ab727342083478150a203a3c80c4551feb4"
 
 S = "${WORKDIR}/git"
