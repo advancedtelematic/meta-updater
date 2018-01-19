@@ -165,7 +165,8 @@ class GrubTests(OESelftestTestCase):
         # Strip off line ending.
         value_str = value.decode()[:-1]
         self.assertEqual(value_str, machine,
-                         'MACHINE does not match hostname: ' + machine + ', ' + value_str)
+                         'MACHINE does not match hostname: ' + machine + ', ' + value_str +
+                         '\nIs tianocore ovmf installed?')
         print(value_str)
 
 
