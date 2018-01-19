@@ -21,7 +21,7 @@ SRC_URI = " \
   file://aktualizr.service \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "37fbf0dfd88d42d76301890818dc4e83b35d9fa4"
+SRCREV = "07d73645231681848bd943074498581e930d8582"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -58,7 +58,7 @@ do_install_append_class-native () {
     rm -f ${D}${bindir}/example-interface
     install -d ${D}${libdir}/sota
     install -m 0644 ${S}/config/sota_autoprov.toml ${D}/${libdir}/sota/sota_autoprov.toml
-    install -m 0644 ${S}/config/sota_hsm_test.toml ${D}/${libdir}/sota/sota_hsm_test.toml
+    install -m 0644 ${S}/config/sota_hsm_prov.toml ${D}/${libdir}/sota/sota_hsm_prov.toml
     install -m 0644 ${S}/config/sota_implicit_prov.toml ${D}/${libdir}/sota/sota_implicit_prov.toml
 
     install -m 0755 ${B}/src/sota_tools/garage-sign-prefix/src/garage-sign/bin/* ${D}${bindir}
