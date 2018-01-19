@@ -73,7 +73,7 @@ class QemuCommand(object):
             try:
                 check_output(['kvm-ok'])
                 self.kvm = True
-            except CalledProcessError:
+            except Exception:
                 self.kvm = False
         else:
             self.kvm = args.kvm
