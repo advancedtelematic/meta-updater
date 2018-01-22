@@ -6,6 +6,6 @@ COMPATIBLE_MACHINE = "intel-corei7-64"
 ALLOW_EMPTY_${PN} = "1"
 
 do_install() {
-    echo "fs0:\EFI\BOOT\bootx64.efi" > ${DEPLOY_DIR_IMAGE}/startup.nsh
+    echo 'fs0:\\EFI\\BOOT\\bootx64.efi' > ${DEPLOY_DIR_IMAGE}/startup.nsh
 }
 
