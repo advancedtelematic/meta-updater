@@ -11,6 +11,7 @@ SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master"
 SRCREV="854a823e05d6fe8b610c02c2a71eaeb2bf1e98a6"
 
 PV = "v2017.13"
+PR = "1"
 
 S = "${WORKDIR}/git"
 
