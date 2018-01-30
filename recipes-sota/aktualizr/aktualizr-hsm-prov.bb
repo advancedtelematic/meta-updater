@@ -1,5 +1,5 @@
 SUMMARY = "Aktualizr configuration with HSM support"
-DESCRIPTION = "Systemd service and configurations for Aktualizr, the SOTA Client application written in C++"
+DESCRIPTION = "Systemd service and configurations for HSM provisioning with Aktualizr, the SOTA Client application written in C++"
 HOMEPAGE = "https://github.com/advancedtelematic/aktualizr"
 SECTION = "base"
 LICENSE = "MPL-2.0"
@@ -14,14 +14,15 @@ SRC_URI = " \
 PV = "1.0"
 PR = "6"
 
-
 require environment.inc
 require credentials.inc
 
 do_install() {
     install -d ${D}${libdir}/sota
-    aktualizr_implicit_writer -c ${SOTA_PACKED_CREDENTIALS} --no-root-ca \
-        -i ${STAGING_DIR_NATIVE}${libdir}/sota/sota_hsm_prov.toml -o ${D}${libdir}/sota/sota.toml -p ${D}
+    if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
+        aktualizr_implicit_writer -c ${SOTA_PACKED_CREDENTIALS} --no-root-ca \
+            -i ${STAGING_DIR_NATIVE}${libdir}/sota/sota_hsm_prov.toml -o ${D}${libdir}/sota/sota.toml -p ${D}
+    fi
 }
 
 FILES_${PN} = " \
