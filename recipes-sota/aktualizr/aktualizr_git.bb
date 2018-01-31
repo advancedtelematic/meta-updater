@@ -42,6 +42,7 @@ do_install_append () {
 }
 do_install_append_class-target () {
     rm -f ${D}${bindir}/aktualizr_implicit_writer
+    rm -f ${D}${libdir}/sota/sota.toml
     ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'secondary-example', '', 'rm -f ${D}${bindir}/example-interface', d)}
     ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'secondary-isotp-example', '', 'rm -f ${D}${bindir}/isotp-test-interface', d)}
 
