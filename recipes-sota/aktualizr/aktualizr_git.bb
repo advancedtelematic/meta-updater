@@ -27,6 +27,7 @@ BRANCH ?= "master"
 S = "${WORKDIR}/git"
 
 inherit cmake
+OECMAKE_FIND_ROOT_PATH_MODE_PROGRAM = "BOTH"
 
 inherit systemd
 SYSTEMD_SERVICE_${PN} = "aktualizr.service"
