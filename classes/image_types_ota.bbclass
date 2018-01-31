@@ -53,6 +53,8 @@ export OSTREE_BRANCHNAME
 export OSTREE_REPO
 export OSTREE_BOOTLOADER
 
+export GARAGE_TARGET_NAME
+
 IMAGE_CMD_otaimg () {
 	if ${@bb.utils.contains('IMAGE_FSTYPES', 'otaimg', 'true', 'false', d)}; then
 		if [ -z "$OSTREE_REPO" ]; then
@@ -106,6 +108,9 @@ IMAGE_CMD_otaimg () {
 		mv ${HOME_TMP}/usr/homedirs/home ${PHYS_SYSROOT}/ || true
 		# Ensure that /var/local exists (AGL symlinks /usr/local to /var/local)
 		install -d ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/local
+		# Set package version for the first deployment
+		echo "{\"${ostree_target_hash}\":\"${GARAGE_TARGET_NAME}-${ostree_target_hash}\"}" > ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota/installed_versions
+
 		rm -rf ${HOME_TMP}
 
 		# Calculate image type

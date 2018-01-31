@@ -12,6 +12,8 @@ do_image_ostree[depends] += "ostree-native:do_populate_sysroot \
 export OSTREE_REPO
 export OSTREE_BRANCHNAME
 
+export GARAGE_TARGET_NAME
+
 RAMDISK_EXT ?= ".ext4.gz"
 RAMDISK_EXT_arm ?= ".ext4.gz.u-boot"
 
@@ -205,7 +207,7 @@ IMAGE_CMD_garagesign () {
         push_success=0
         for push_retries in $( seq 3 ); do
             garage-sign targets pull --repo tufrepo --home-dir ${GARAGE_SIGN_REPO}
-            garage-sign targets add --repo tufrepo --home-dir ${GARAGE_SIGN_REPO} --name ${OSTREE_BRANCHNAME} --format OSTREE --version ${ostree_target_hash} --length 0 --url "https://example.com/" --sha256 ${ostree_target_hash} --hardwareids ${MACHINE}
+            garage-sign targets add --repo tufrepo --home-dir ${GARAGE_SIGN_REPO} --name ${GARAGE_TARGET_NAME} --format OSTREE --version ${ostree_target_hash} --length 0 --url "https://example.com/" --sha256 ${ostree_target_hash} --hardwareids ${MACHINE}
             garage-sign targets sign --repo tufrepo --home-dir ${GARAGE_SIGN_REPO} --key-name=targets
             errcode=0
             garage-sign targets push --repo tufrepo --home-dir ${GARAGE_SIGN_REPO} || errcode=$?
