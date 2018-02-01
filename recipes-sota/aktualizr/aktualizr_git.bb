@@ -21,7 +21,7 @@ SRC_URI = " \
   file://aktualizr.service \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "07d73645231681848bd943074498581e930d8582"
+SRCREV = "0060d22191f3bec9d3331118a04c1285ef67db90"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -42,6 +42,7 @@ do_install_append () {
 }
 do_install_append_class-target () {
     rm -f ${D}${bindir}/aktualizr_implicit_writer
+    rm -f ${D}${libdir}/sota/sota.toml
     ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'secondary-example', '', 'rm -f ${D}${bindir}/example-interface', d)}
     ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'secondary-isotp-example', '', 'rm -f ${D}${bindir}/isotp-test-interface', d)}
 
