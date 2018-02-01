@@ -1,0 +1,44 @@
+From 1a1c2c94f700cf0f4dc5dba863950b16477fdc6d Mon Sep 17 00:00:00 2001
+From: Laurent Bonnans <laurent.bonnans@here.com>
+Date: Thu, 25 Jan 2018 09:49:41 +0100
+Subject: [PATCH] Patch the skeletons directory detection
+
+Detect `share/asn1c` from `bin/` if it exists
+---
+ asn1c/asn1c.c | 9 ++++-----
+ 1 file changed, 4 insertions(+), 5 deletions(-)
+
+diff --git a/asn1c/asn1c.c b/asn1c/asn1c.c
+index eb1eff7c..dd9fc832 100644
+--- a/asn1c/asn1c.c
++++ b/asn1c/asn1c.c
+@@ -226,22 +226,21 @@ main(int ac, char **av) {
+     if(skeletons_dir == NULL) {
+         struct stat sb;
+         skeletons_dir = DATADIR;
+-        if((av[-optind][0] == '.' || av[-optind][1] == '/')
+-           && stat(skeletons_dir, &sb)) {
++        if(stat(skeletons_dir, &sb)) {
+             /*
+              * The default skeletons directory does not exist,
+              * compute it from my file name:
+-             * ./asn1c/asn1c -> ./skeletons
++             * ./asn1c/asn1c -> ./share/asn1c
+              */
+             char *p;
+             size_t len;
+ 
+             p = a1c_dirname(av[-optind]);
+ 
+-            len = strlen(p) + sizeof("/../skeletons");
++            len = strlen(p) + sizeof("/../share/asn1c");
+             skeletons_dir = malloc(len);
+             assert(skeletons_dir);
+-            snprintf(skeletons_dir, len, "%s/../skeletons", p);
++            snprintf(skeletons_dir, len, "%s/../share/asn1c", p);
+             if(stat(skeletons_dir, &sb)) {
+                 fprintf(stderr,
+                         "WARNING: skeletons are neither in "
+-- 
+2.15.1
+

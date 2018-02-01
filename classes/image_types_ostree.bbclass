@@ -1,6 +1,6 @@
 # OSTree deployment
 
-IMAGE_DEPENDS_ostree = "ostree-native:do_populate_sysroot \
+do_image_ostree[depends] += "ostree-native:do_populate_sysroot \
                         openssl-native:do_populate_sysroot \
                         coreutils-native:do_populate_sysroot \
                         unzip-native:do_populate_sysroot \
@@ -11,6 +11,7 @@ export OSTREE_REPO
 export OSTREE_BRANCHNAME
 
 RAMDISK_EXT ?= ".${INITRAMFS_FSTYPES}"
+export GARAGE_TARGET_NAME
 
 OSTREE_KERNEL ??= "${KERNEL_IMAGETYPE}"
 
@@ -116,6 +117,7 @@ IMAGE_CMD_ostree () {
     fi
 
     if [ -n "${SOTA_SECONDARY_ECUS}" ]; then
+        mkdir -p var/sota/ecus
         cp ${SOTA_SECONDARY_ECUS} var/sota/ecus
     fi
 
@@ -158,7 +160,7 @@ IMAGE_CMD_ostree () {
 }
 
 IMAGE_TYPEDEP_ostreepush = "ostree"
-IMAGE_DEPENDS_ostreepush = "aktualizr-native:do_populate_sysroot ca-certificates-native:do_populate_sysroot "
+do_image_ostreepush[depends] += "aktualizr-native:do_populate_sysroot ca-certificates-native:do_populate_sysroot"
 IMAGE_CMD_ostreepush () {
     # Print warnings if credetials are not set or if the file has not been found.
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
@@ -176,11 +178,11 @@ IMAGE_CMD_ostreepush () {
 }
 
 IMAGE_TYPEDEP_garagesign = "ostreepush"
-IMAGE_DEPENDS_garagesign = "garage-sign-native:do_populate_sysroot"
+do_image_garage_sign[depends] += "aktualizr-native:do_populate_sysroot"
 IMAGE_CMD_garagesign () {
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         # if credentials are issued by a server that doesn't support offline signing, exit silently
-        unzip -p ${SOTA_PACKED_CREDENTIALS} root.json targets.pub targets.sec 2>&1 >/dev/null || exit 0
+        unzip -p ${SOTA_PACKED_CREDENTIALS} root.json targets.pub targets.sec tufrepo.url 2>&1 >/dev/null || exit 0
 
         java_version=$( java -version 2>&1 | awk -F '"' '/version/ {print $2}' )
         if [ "${java_version}" = "" ]; then
@@ -191,15 +193,8 @@ IMAGE_CMD_garagesign () {
             exit 1
         fi
 
-	if [ ! -d "${GARAGE_SIGN_REPO}" ]; then
-            garage-sign init --repo ${GARAGE_SIGN_REPO} --home-dir ${GARAGE_SIGN_REPO} --credentials ${SOTA_PACKED_CREDENTIALS}
-        fi
-
-        if [ -n "${GARAGE_SIGN_REPOSERVER}" ]; then
-            reposerver_args="--reposerver ${GARAGE_SIGN_REPOSERVER}"
-        else
-            reposerver_args=""
-        fi
+        rm -rf ${GARAGE_SIGN_REPO}
+        garage-sign init --repo tufrepo --home-dir ${GARAGE_SIGN_REPO} --credentials ${SOTA_PACKED_CREDENTIALS}
 
         ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME})
 
@@ -207,11 +202,11 @@ IMAGE_CMD_garagesign () {
         #   in which case targets.json should be pulled again and the whole procedure repeated
         push_success=0
         for push_retries in $( seq 3 ); do
-            garage-sign targets pull --repo ${GARAGE_SIGN_REPO} --home-dir ${GARAGE_SIGN_REPO} ${reposerver_args}
-            garage-sign targets add --repo ${GARAGE_SIGN_REPO} --home-dir ${GARAGE_SIGN_REPO} --name ${OSTREE_BRANCHNAME} --format OSTREE --version ${OSTREE_BRANCHNAME} --length 0 --url "https://example.com/" --sha256 ${ostree_target_hash} --hardwareids ${MACHINE}
-            garage-sign targets sign --repo ${GARAGE_SIGN_REPO} --home-dir ${GARAGE_SIGN_REPO} --key-name=targets
+            garage-sign targets pull --repo tufrepo --home-dir ${GARAGE_SIGN_REPO}
+            garage-sign targets add --repo tufrepo --home-dir ${GARAGE_SIGN_REPO} --name ${GARAGE_TARGET_NAME} --format OSTREE --version ${ostree_target_hash} --length 0 --url "https://example.com/" --sha256 ${ostree_target_hash} --hardwareids ${MACHINE}
+            garage-sign targets sign --repo tufrepo --home-dir ${GARAGE_SIGN_REPO} --key-name=targets
             errcode=0
-            garage-sign targets push --repo ${GARAGE_SIGN_REPO} --home-dir ${GARAGE_SIGN_REPO} ${reposerver_args} || errcode=$?
+            garage-sign targets push --repo tufrepo --home-dir ${GARAGE_SIGN_REPO} || errcode=$?
             if [ "$errcode" -eq "0" ]; then
                 push_success=1
                 break
@@ -224,9 +219,20 @@ IMAGE_CMD_garagesign () {
             bberror "Couldn't push to garage repository"
             exit 1
         fi
-    else
-        bbwarn "SOTA_PACKED_CREDENTIALS not set. Please add SOTA_PACKED_CREDENTIALS."
     fi
 }
 
+IMAGE_TYPEDEP_garagecheck = "ostreepush garagesign"
+do_image_garagecheck[depends] += "aktualizr-native:do_populate_sysroot"
+IMAGE_CMD_garagecheck () {
+    if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
+        # if credentials are issued by a server that doesn't support offline signing, exit silently
+        unzip -p ${SOTA_PACKED_CREDENTIALS} root.json targets.pub targets.sec tufrepo.url 2>&1 >/dev/null || exit 0
+        ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME})
+
+        garage-check --ref=${ostree_target_hash} \
+                     --credentials=${SOTA_PACKED_CREDENTIALS} \
+                     --cacert=${STAGING_ETCDIR_NATIVE}/ssl/certs/ca-certificates.crt
+    fi
+}
 # vim:set ts=4 sw=4 sts=4 expandtab:

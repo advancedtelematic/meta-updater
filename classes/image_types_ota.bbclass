@@ -7,9 +7,11 @@
 # boot scripts, kernel and initramfs images
 #
 
+OSTREE_BOOTLOADER ??= 'u-boot'
+
 do_image_otaimg[depends] += "e2fsprogs-native:do_populate_sysroot \
-                             ${@'grub:do_populate_sysroot' if d.getVar('OSTREE_BOOTLOADER', True) == 'grub' else ''} \
-                             ${@'virtual/bootloader:do_deploy' if d.getVar('OSTREE_BOOTLOADER', True) == 'u-boot' else ''}"
+			${@'grub:do_populate_sysroot' if d.getVar('OSTREE_BOOTLOADER', True) == 'grub' else ''} \
+			${@'virtual/bootloader:do_deploy' if d.getVar('OSTREE_BOOTLOADER', True) == 'u-boot' else ''}"
 
 calculate_size () {
 	BASE=$1
@@ -49,6 +51,8 @@ export OSTREE_BRANCHNAME
 export OSTREE_REPO
 export OSTREE_BOOTLOADER
 
+export GARAGE_TARGET_NAME
+
 IMAGE_CMD_otaimg () {
 	if ${@bb.utils.contains('IMAGE_FSTYPES', 'otaimg', 'true', 'false', d)}; then
 		if [ -z "$OSTREE_REPO" ]; then
@@ -81,14 +85,16 @@ IMAGE_CMD_otaimg () {
 			bberror "Invalid bootloader: ${OSTREE_BOOTLOADER}"
 		fi;
 
-		ostree --repo=${PHYS_SYSROOT}/ostree/repo pull-local --remote=${OSTREE_OSNAME} ${OSTREE_REPO} ${OSTREE_BRANCHNAME}
+		ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME})
+
+		ostree --repo=${PHYS_SYSROOT}/ostree/repo pull-local --remote=${OSTREE_OSNAME} ${OSTREE_REPO} ${ostree_target_hash}
 		export OSTREE_BOOT_PARTITION="/boot"
 		kargs_list=""
 		for arg in ${OSTREE_KERNEL_ARGS}; do
 			kargs_list="${kargs_list} --karg-append=$arg"
 		done
 
-		ostree admin --sysroot=${PHYS_SYSROOT} deploy ${kargs_list} --os=${OSTREE_OSNAME} ${OSTREE_BRANCHNAME}
+		ostree admin --sysroot=${PHYS_SYSROOT} deploy ${kargs_list} --os=${OSTREE_OSNAME} ${ostree_target_hash}
 
 		# Copy deployment /home and /var/sota to sysroot
 		HOME_TMP=`mktemp -d ${WORKDIR}/home-tmp-XXXXX`
@@ -100,6 +106,9 @@ IMAGE_CMD_otaimg () {
 		mv ${HOME_TMP}/usr/homedirs/home ${PHYS_SYSROOT}/ || true
 		# Ensure that /var/local exists (AGL symlinks /usr/local to /var/local)
 		install -d ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/local
+		# Set package version for the first deployment
+		echo "{\"${ostree_target_hash}\":\"${GARAGE_TARGET_NAME}-${ostree_target_hash}\"}" > ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota/installed_versions
+
 		rm -rf ${HOME_TMP}
 
 		# Calculate image type

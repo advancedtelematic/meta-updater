@@ -1,1 +1,1 @@
-SYSROOT_DIRS += "/etc"
+SYSROOT_DIRS += "${sysconfdir}"
