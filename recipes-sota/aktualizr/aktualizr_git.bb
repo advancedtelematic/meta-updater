@@ -21,7 +21,7 @@ SRC_URI = " \
   file://aktualizr.service \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "23eb094a8b3faaac7c0b2a85f902c67804a7d3d3"
+SRCREV = "d861896e7467e3e0cafdd7384ff87c62fe724640"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -49,9 +49,6 @@ do_install_append_class-target () {
     install -d ${D}${systemd_unitdir}/system
     aktualizr_service=${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'serialcan', '${WORKDIR}/aktualizr-serialcan.service', '${WORKDIR}/aktualizr.service', d)}
     install -m 0644 ${aktualizr_service} ${D}${systemd_unitdir}/system/aktualizr.service
-
-    install -d ${D}${libdir}/sota/schemas
-    install -m 0755 ${S}/config/storage/* ${D}${libdir}/sota/schemas
 }
 do_install_append_class-native () {
     rm -f ${D}${bindir}/aktualizr
@@ -66,19 +63,22 @@ do_install_append_class-native () {
     install -m 0644 ${B}/src/sota_tools/garage-sign-prefix/src/garage-sign/lib/* ${D}${libdir}
 }
 
+FILES_${PN}_append = " \
+                ${libdir}/sota \
+                "
+
 FILES_${PN}_class-target = " \
                 ${bindir}/aktualizr \
                 ${bindir}/aktualizr-info \
                 ${systemd_unitdir}/system/aktualizr.service \
-                ${libdir}/sota/schemas \
                 "
+
 FILES_${PN}_append_class-target = " ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'secondary-example', ' ${bindir}/example-interface', '', d)} "
 FILES_${PN}_append_class-target = " ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'secondary-isotp-example', ' ${bindir}/isotp-test-interface', '', d)} "
 FILES_${PN}_class-native = " \
                 ${bindir}/aktualizr_implicit_writer \
                 ${bindir}/garage-deploy \
                 ${bindir}/garage-push \
-                ${libdir}/sota/* \
                 "
 
 # vim:set ts=4 sw=4 sts=4 expandtab:
