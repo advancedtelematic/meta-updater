@@ -10,7 +10,7 @@ do_image_ostree[depends] += "ostree-native:do_populate_sysroot \
 export OSTREE_REPO
 export OSTREE_BRANCHNAME
 
-RAMDISK_EXT ?= ".${INITRAMFS_FSTYPES}"
+RAMDISK_EXT ?= ".${OSTREE_INITRAMFS_FSTYPES}"
 export GARAGE_TARGET_NAME
 
 OSTREE_KERNEL ??= "${KERNEL_IMAGETYPE}"
