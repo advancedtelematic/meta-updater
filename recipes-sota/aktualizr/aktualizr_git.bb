@@ -21,7 +21,7 @@ SRC_URI = " \
   file://aktualizr.service \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "d861896e7467e3e0cafdd7384ff87c62fe724640"
+SRCREV = "32a04532c1b7434b9cab89b78df389059ac45d40"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -39,6 +39,7 @@ EXTRA_OECMAKE_append_class-native = " -DBUILD_SOTA_TOOLS=ON -DBUILD_OSTREE=OFF "
 
 do_install_append () {
     rm -f ${D}${bindir}/aktualizr_cert_provider
+    rm -fr ${D}${libdir}/systemd
 }
 do_install_append_class-target () {
     rm -f ${D}${bindir}/aktualizr_implicit_writer
