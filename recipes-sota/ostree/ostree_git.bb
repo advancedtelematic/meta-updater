@@ -63,8 +63,8 @@ export SYSTEMD_REQUIRED
 
 do_install_append() {
  if [ -n ${SYSTEMD_REQUIRED} ]; then
-  install -p -D ${S}/src/boot/ostree-prepare-root.service ${D}${systemd_unitdir}/system/ostree-prepare-root.service
-  install -p -D ${S}/src/boot/ostree-remount.service ${D}${systemd_unitdir}/system/ostree-remount.service
+  install -m 0644 -D ${S}/src/boot/ostree-prepare-root.service ${D}${systemd_unitdir}/system/ostree-prepare-root.service
+  install -m 0644 -D ${S}/src/boot/ostree-remount.service ${D}${systemd_unitdir}/system/ostree-remount.service
  fi
 }
 
