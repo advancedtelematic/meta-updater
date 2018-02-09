@@ -76,7 +76,7 @@ IMAGE_CMD_otaimg () {
 
 		if [ "${OSTREE_BOOTLOADER}" = "grub" ]; then
 			mkdir -p ${PHYS_SYSROOT}/boot/grub2
-			touch ${PHYS_SYSROOT}/boot/grub2/grub.cfg
+			ln -s ../loader/grub.cfg ${PHYS_SYSROOT}/boot/grub2/grub.cfg
 		elif [ "${OSTREE_BOOTLOADER}" = "u-boot" ]; then
 			touch ${PHYS_SYSROOT}/boot/loader/uEnv.txt
 		else
