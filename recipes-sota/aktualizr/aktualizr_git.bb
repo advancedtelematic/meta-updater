@@ -10,7 +10,6 @@ DEPENDS_append_class-target = "jansson ostree ${@bb.utils.contains('SOTA_CLIENT_
 DEPENDS_append_class-native = "glib-2.0-native "
 
 RDEPENDS_${PN}_class-target = "lshw "
-RDEPENDS_${PN}_append_class-target = "${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', ' engine-pkcs11', '', d)} "
 RDEPENDS_${PN}_append_class-target = " ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'serialcan', '  slcand-start', '', d)} "
 
 PV = "1.0+git${SRCPV}"
@@ -21,7 +20,7 @@ SRC_URI = " \
   file://aktualizr.service \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "32a04532c1b7434b9cab89b78df389059ac45d40"
+SRCREV = "715dfc3410d46670174ee2f55613e8d953fbb1ae"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
