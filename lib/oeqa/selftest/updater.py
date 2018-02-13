@@ -42,12 +42,6 @@ class SotaToolsTests(oeSelfTest):
         result = runCmd('LD_LIBRARY_PATH=%s %s --help' % (l, p), ignore_status=True)
         self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
 
-class HsmTests(oeSelfTest):
-
-    def test_hsm(self):
-        self.write_config('SOTA_CLIENT_FEATURES="hsm"')
-        bitbake('core-image-minimal')
-
 
 class GeneralTests(oeSelfTest):
 
@@ -210,7 +204,7 @@ class QemuTests(oeSelfTest):
                     break
             except IOError as e:
                 print(e)
-        self.assertTrue(ran_ok, 'aktualizr-info failed: ' + stdout.decode() + stderr.decode())
+        self.assertTrue(ran_ok, 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
 
 
 class GrubTests(oeSelfTest):
@@ -245,6 +239,93 @@ class GrubTests(oeSelfTest):
                          'MACHINE does not match hostname: ' + machine + ', ' + value_str +
                          '\nIs tianocore ovmf installed?')
         print(value_str)
+
+
+class HsmTests(oeSelfTest):
+
+    def setUpLocal(self):
+        self.write_config('SOTA_CLIENT_PROV = " aktualizr-hsm-prov "')
+        self.write_config('SOTA_CLIENT_FEATURES="hsm"')
+        self.qemu, self.s = qemu_launch(machine='qemux86-64')
+
+    def tearDownLocal(self):
+        qemu_terminate(self.s)
+
+    def run_command(self, command):
+        return qemu_send_command(self.qemu.ssh_port, command)
+
+    def test_provisioning(self):
+        print('')
+        ran_ok = False
+        for delay in [0, 1, 2, 5, 10, 15]:
+            stdout, stderr, retcode = self.run_command('aktualizr-info')
+            if retcode == 0 and stderr == b'':
+                ran_ok = True
+                break
+        self.assertTrue(ran_ok, 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
+        # Verify that device has NOT yet provisioned.
+        self.assertIn(b'Couldn\'t load device ID', stdout,
+                      'Device already provisioned!? ' + stderr.decode() + stdout.decode())
+        self.assertIn(b'Couldn\'t load ECU serials', stdout,
+                      'Device already provisioned!? ' + stderr.decode() + stdout.decode())
+        self.assertIn(b'Provisioned on server: no', stdout,
+                      'Device already provisioned!? ' + stderr.decode() + stdout.decode())
+        self.assertIn(b'Fetched metadata: no', stdout,
+                      'Device already provisioned!? ' + stderr.decode() + stdout.decode())
+
+        pkcs11_command = 'pkcs11-tool --module=/usr/lib/softhsm/libsofthsm2.so -O'
+        stdout, stderr, retcode = self.run_command(pkcs11_command)
+        self.assertNotEqual(retcode, 0, 'pkcs11-tool succeeded before initialization: ' +
+                        stdout.decode() + stderr.decode())
+        softhsm2_command = 'softhsm2-util --show-slots'
+        stdout, stderr, retcode = self.run_command(softhsm2_command)
+        self.assertNotEqual(retcode, 0, 'softhsm2-tool succeeded before initialization: ' +
+                        stdout.decode() + stderr.decode())
+
+        bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'bindir', 'libdir',
+                               'SOTA_PACKED_CREDENTIALS'], 'aktualizr-native')
+        l = bb_vars['libdir']
+        p = bb_vars['SYSROOT_DESTDIR'] + bb_vars['bindir'] + "/aktualizr_cert_provider"
+        creds = bb_vars['SOTA_PACKED_CREDENTIALS']
+        bb_vars_prov = get_bb_vars(['STAGING_DIR_NATIVE', 'libdir'], 'aktualizr-hsm-prov')
+        config = bb_vars_prov['STAGING_DIR_NATIVE'] + bb_vars_prov['libdir'] + '/sota/sota_implicit_prov.toml'
+        self.assertTrue(os.path.isfile(p), msg = "No aktualizr_cert_provider found (%s)" % p)
+        command = ('LD_LIBRARY_PATH=' + l + ' ' + p + ' -c ' + creds + ' -t root@localhost -p ' +
+                   str(self.qemu.ssh_port) + ' -r -s -g ' + config)
+        logger = logging.getLogger("selftest")
+        # logger.info('Checking output of: ' + command)
+        result = runCmd(command, ignore_status=True)
+        self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
+
+        ran_ok = False
+        for delay in [5, 5, 5, 5, 10]:
+            sleep(delay)
+            p11_out, p11_err, p11_ret = self.run_command(pkcs11_command)
+            hsm_out, hsm_err, hsm_ret = self.run_command(softhsm2_command)
+            if p11_ret == 0 and hsm_ret == 0 and hsm_err == b'':
+                ran_ok = True
+                break
+        self.assertTrue(ran_ok, 'pkcs11-tool or softhsm2-tool failed: ' + p11_err.decode() +
+                        p11_out.decode() + hsm_err.decode() + hsm_out.decode())
+        self.assertIn(b'present token', p11_err, 'pkcs11-tool failed: ' + p11_err.decode() + p11_out.decode())
+        self.assertIn(b'X.509 cert', p11_out, 'pkcs11-tool failed: ' + p11_err.decode() + p11_out.decode())
+        self.assertIn(b'Initialized:      yes', hsm_out, 'softhsm2-tool failed: ' +
+                      hsm_err.decode() + hsm_out.decode())
+        self.assertIn(b'User PIN init.:   yes', hsm_out, 'softhsm2-tool failed: ' +
+                      hsm_err.decode() + hsm_out.decode())
+
+        # Verify that device HAS provisioned.
+        ran_ok = False
+        for delay in [5, 5, 5, 5, 10]:
+            sleep(delay)
+            stdout, stderr, retcode = self.run_command('aktualizr-info')
+            if retcode == 0 and stderr == b'' and stdout.decode().find('Provisioned on server: yes') >= 0:
+                ran_ok = True
+                break
+        self.assertIn(b'Device ID: ', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
+        self.assertIn(b'Primary ecu hardware ID: qemux86-64', stdout,
+                      'Provisioning failed: ' + stderr.decode() + stdout.decode())
+        self.assertIn(b'Fetched metadata: yes', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
 
 
 def qemu_launch(efi=False, machine=None):
