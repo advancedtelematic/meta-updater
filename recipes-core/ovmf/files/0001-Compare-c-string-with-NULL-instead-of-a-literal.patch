@@ -1,0 +1,25 @@
+From 6c730f3da7490ffbba5ad17af29ca44ed167cbfc Mon Sep 17 00:00:00 2001
+From: Patrick Vacek <patrickvacek@gmail.com>
+Date: Tue, 13 Feb 2018 16:38:15 +0100
+Subject: [PATCH] Compare c-string with NULL instead of a literal.
+
+---
+ BaseTools/Source/C/VfrCompile/VfrUtilityLib.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/BaseTools/Source/C/VfrCompile/VfrUtilityLib.cpp b/BaseTools/Source/C/VfrCompile/VfrUtilityLib.cpp
+index 3ca57ed741..4fa066dd9f 100644
+--- a/BaseTools/Source/C/VfrCompile/VfrUtilityLib.cpp
++++ b/BaseTools/Source/C/VfrCompile/VfrUtilityLib.cpp
+@@ -3372,7 +3372,7 @@ CVfrStringDB::GetVarStoreNameFormStringId (
+   UINT8       BlockType;
+   EFI_HII_STRING_PACKAGE_HDR *PkgHeader;
+   
+-  if (mStringFileName == '\0' ) {
++  if (mStringFileName == NULL ) {
+     return NULL;
+   }
+ 
+-- 
+2.14.1
+
