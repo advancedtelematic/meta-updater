@@ -57,6 +57,7 @@ class GeneralTests(oeSelfTest):
         self.assertNotEqual(result, -1, 'Feature "systemd" not set at DISTRO_FEATURES')
 
     def test_credentials(self):
+        self.write_config('SOTA_CLIENT_PROV = " aktualizr-auto-prov "')
         bitbake('core-image-minimal')
         credentials = get_bb_var('SOTA_PACKED_CREDENTIALS')
         # skip the test if the variable SOTA_PACKED_CREDENTIALS is not set
