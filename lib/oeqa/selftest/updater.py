@@ -19,24 +19,27 @@ class SotaToolsTests(oeSelfTest):
         bitbake('aktualizr-native')
 
     def test_push_help(self):
-        bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'bindir'], 'aktualizr-native')
-        p = bb_vars['SYSROOT_DESTDIR'] + bb_vars['bindir'] + "/" + "garage-push"
+        bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'bindir', 'libdir'], 'aktualizr-native')
+        l = bb_vars['libdir']
+        p = bb_vars['SYSROOT_DESTDIR'] + bb_vars['bindir'] + "/garage-push"
         self.assertTrue(os.path.isfile(p), msg = "No garage-push found (%s)" % p)
-        result = runCmd('%s --help' % p, ignore_status=True)
+        result = runCmd('LD_LIBRARY_PATH=%s %s --help' % (l, p), ignore_status=True)
         self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
 
     def test_deploy_help(self):
-        bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'bindir'], 'aktualizr-native')
-        p = bb_vars['SYSROOT_DESTDIR'] + bb_vars['bindir'] + "/" + "garage-deploy"
+        bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'bindir', 'libdir'], 'aktualizr-native')
+        l = bb_vars['libdir']
+        p = bb_vars['SYSROOT_DESTDIR'] + bb_vars['bindir'] + "/garage-deploy"
         self.assertTrue(os.path.isfile(p), msg = "No garage-deploy found (%s)" % p)
-        result = runCmd('%s --help' % p, ignore_status=True)
+        result = runCmd('LD_LIBRARY_PATH=%s %s --help' % (l, p), ignore_status=True)
         self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
 
     def test_garagesign_help(self):
-        bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'bindir'], 'aktualizr-native')
-        p = bb_vars['SYSROOT_DESTDIR'] + bb_vars['bindir'] + "/" + "garage-sign"
+        bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'bindir', 'libdir'], 'aktualizr-native')
+        l = bb_vars['libdir']
+        p = bb_vars['SYSROOT_DESTDIR'] + bb_vars['bindir'] + "/garage-sign"
         self.assertTrue(os.path.isfile(p), msg = "No garage-sign found (%s)" % p)
-        result = runCmd('%s --help' % p, ignore_status=True)
+        result = runCmd('LD_LIBRARY_PATH=%s %s --help' % (l, p), ignore_status=True)
         self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
 
 class HsmTests(oeSelfTest):
@@ -75,6 +78,22 @@ class GeneralTests(oeSelfTest):
     def test_java(self):
         result = runCmd('which java', ignore_status=True)
         self.assertEqual(result.status, 0, "Java not found.")
+
+    def test_implicit_writer_help(self):
+        bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'bindir', 'libdir'], 'aktualizr-native')
+        l = bb_vars['libdir']
+        p = bb_vars['SYSROOT_DESTDIR'] + bb_vars['bindir'] + "/aktualizr_implicit_writer"
+        self.assertTrue(os.path.isfile(p), msg = "No aktualizr_implicit_writer found (%s)" % p)
+        result = runCmd('LD_LIBRARY_PATH=%s %s --help' % (l, p), ignore_status=True)
+        self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
+
+    def test_cert_provider_help(self):
+        bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'bindir', 'libdir'], 'aktualizr-native')
+        l = bb_vars['libdir']
+        p = bb_vars['SYSROOT_DESTDIR'] + bb_vars['bindir'] + "/aktualizr_cert_provider"
+        self.assertTrue(os.path.isfile(p), msg = "No aktualizr_cert_provider found (%s)" % p)
+        result = runCmd('LD_LIBRARY_PATH=%s %s --help' % (l, p), ignore_status=True)
+        self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
 
     def test_add_package(self):
         print('')
@@ -152,9 +171,8 @@ class QemuTests(oeSelfTest):
                     break
             except IOError as e:
                 print(e)
-        if not ran_ok:
-            print(stdout.decode())
-            print(stderr.decode())
+        self.assertTrue(ran_ok, 'aktualizr-info failed: ' + stdout.decode() + stderr.decode())
+
 
 class GrubTests(oeSelfTest):
 

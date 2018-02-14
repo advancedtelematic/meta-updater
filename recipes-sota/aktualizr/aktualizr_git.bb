@@ -37,10 +37,10 @@ EXTRA_OECMAKE_append_class-target = " -DBUILD_OSTREE=ON -DBUILD_ISOTP=ON ${@bb.u
 EXTRA_OECMAKE_append_class-native = " -DBUILD_SOTA_TOOLS=ON -DBUILD_OSTREE=OFF "
 
 do_install_append () {
-    rm -f ${D}${bindir}/aktualizr_cert_provider
     rm -fr ${D}${libdir}/systemd
 }
 do_install_append_class-target () {
+    rm -f ${D}${bindir}/aktualizr_cert_provider
     rm -f ${D}${bindir}/aktualizr_implicit_writer
     rm -f ${D}${libdir}/sota/sota.toml
     ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'secondary-example', '', 'rm -f ${D}${bindir}/example-interface', d)}
@@ -76,6 +76,7 @@ FILES_${PN}_class-target = " \
 FILES_${PN}_append_class-target = " ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'secondary-example', ' ${bindir}/example-interface', '', d)} "
 FILES_${PN}_append_class-target = " ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'secondary-isotp-example', ' ${bindir}/isotp-test-interface', '', d)} "
 FILES_${PN}_class-native = " \
+                ${bindir}/aktualizr_cert_provider \
                 ${bindir}/aktualizr_implicit_writer \
                 ${bindir}/garage-deploy \
                 ${bindir}/garage-push \
