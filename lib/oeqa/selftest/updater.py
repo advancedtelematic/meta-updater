@@ -60,6 +60,8 @@ class GeneralTests(oeSelfTest):
         self.assertNotEqual(result, -1, 'Feature "systemd" not set at DISTRO_FEATURES')
 
     def test_credentials(self):
+        logger = logging.getLogger("selftest")
+        logger.info('Running bitbake to build core-image-minimal')
         self.write_config('SOTA_CLIENT_PROV = " aktualizr-auto-prov "')
         bitbake('core-image-minimal')
         credentials = get_bb_var('SOTA_PACKED_CREDENTIALS')
@@ -78,22 +80,6 @@ class GeneralTests(oeSelfTest):
     def test_java(self):
         result = runCmd('which java', ignore_status=True)
         self.assertEqual(result.status, 0, "Java not found.")
-
-    def test_implicit_writer_help(self):
-        bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'bindir', 'libdir'], 'aktualizr-native')
-        l = bb_vars['libdir']
-        p = bb_vars['SYSROOT_DESTDIR'] + bb_vars['bindir'] + "/aktualizr_implicit_writer"
-        self.assertTrue(os.path.isfile(p), msg = "No aktualizr_implicit_writer found (%s)" % p)
-        result = runCmd('LD_LIBRARY_PATH=%s %s --help' % (l, p), ignore_status=True)
-        self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
-
-    def test_cert_provider_help(self):
-        bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'bindir', 'libdir'], 'aktualizr-native')
-        l = bb_vars['libdir']
-        p = bb_vars['SYSROOT_DESTDIR'] + bb_vars['bindir'] + "/aktualizr_cert_provider"
-        self.assertTrue(os.path.isfile(p), msg = "No aktualizr_cert_provider found (%s)" % p)
-        result = runCmd('LD_LIBRARY_PATH=%s %s --help' % (l, p), ignore_status=True)
-        self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
 
     def test_add_package(self):
         print('')
@@ -124,6 +110,59 @@ class GeneralTests(oeSelfTest):
         logger.info('Second image %s has size %i', path2, size2)
         self.assertNotEqual(path1, path2, "Image paths are identical; image was not rebuilt.")
         self.assertNotEqual(size1, size2, "Image sizes are identical; image was not rebuilt.")
+
+
+class AktualizrToolsTests(oeSelfTest):
+
+    @classmethod
+    def setUpClass(cls):
+        logger = logging.getLogger("selftest")
+        logger.info('Running bitbake to build aktualizr-native tools')
+        bitbake('aktualizr-native')
+
+    def test_implicit_writer_help(self):
+        bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'bindir', 'libdir'], 'aktualizr-native')
+        l = bb_vars['libdir']
+        p = bb_vars['SYSROOT_DESTDIR'] + bb_vars['bindir'] + "/aktualizr_implicit_writer"
+        self.assertTrue(os.path.isfile(p), msg = "No aktualizr_implicit_writer found (%s)" % p)
+        result = runCmd('LD_LIBRARY_PATH=%s %s --help' % (l, p), ignore_status=True)
+        self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
+
+    def test_cert_provider_help(self):
+        bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'bindir', 'libdir'], 'aktualizr-native')
+        l = bb_vars['libdir']
+        p = bb_vars['SYSROOT_DESTDIR'] + bb_vars['bindir'] + "/aktualizr_cert_provider"
+        self.assertTrue(os.path.isfile(p), msg = "No aktualizr_cert_provider found (%s)" % p)
+        result = runCmd('LD_LIBRARY_PATH=%s %s --help' % (l, p), ignore_status=True)
+        self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
+
+    def test_cert_provider_local_output(self):
+        logger = logging.getLogger("selftest")
+        logger.info('Running bitbake to build aktualizr-implicit-prov')
+        bitbake('aktualizr-implicit-prov')
+        bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'bindir', 'libdir',
+                               'SOTA_PACKED_CREDENTIALS', 'T'], 'aktualizr-native')
+        l = bb_vars['libdir']
+        p = bb_vars['SYSROOT_DESTDIR'] + bb_vars['bindir'] + "/aktualizr_cert_provider"
+        creds = bb_vars['SOTA_PACKED_CREDENTIALS']
+        temp_dir = bb_vars['T']
+        bb_vars_prov = get_bb_vars(['STAGING_DIR_NATIVE', 'libdir'], 'aktualizr-implicit-prov')
+        config = bb_vars_prov['STAGING_DIR_NATIVE'] + bb_vars_prov['libdir'] + '/sota/sota_implicit_prov.toml'
+        self.assertTrue(os.path.isfile(p), msg = "No aktualizr_cert_provider found (%s)" % p)
+        command = 'LD_LIBRARY_PATH=' + l + ' ' + p + ' -c ' + creds + ' -r -l ' + temp_dir + ' -g ' + config
+        # logger.info('Checking output of: ' + command)
+        result = runCmd(command, ignore_status=True)
+        self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
+        # Might be nice if these names weren't hardcoded.
+        cert_path = temp_dir + '/client.pem'
+        self.assertTrue(os.path.isfile(cert_path), "Client certificate not found at %s." % cert_path)
+        self.assertTrue(os.path.getsize(cert_path) > 0, "Client certificate at %s is empty." % cert_path)
+        pkey_path = temp_dir + '/pkey.pem'
+        self.assertTrue(os.path.isfile(pkey_path), "Private key not found at %s." % pkey_path)
+        self.assertTrue(os.path.getsize(pkey_path) > 0, "Private key at %s is empty." % pkey_path)
+        ca_path = temp_dir + '/root.crt'
+        self.assertTrue(os.path.isfile(ca_path), "Client certificate not found at %s." % ca_path)
+        self.assertTrue(os.path.getsize(ca_path) > 0, "Client certificate at %s is empty." % ca_path)
 
 
 class QemuTests(oeSelfTest):
