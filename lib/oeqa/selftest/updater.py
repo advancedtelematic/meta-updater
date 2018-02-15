@@ -1,6 +1,7 @@
 # pylint: disable=C0111,C0325
 import os
 import logging
+import re
 import subprocess
 import unittest
 from time import sleep
@@ -273,6 +274,7 @@ class HsmTests(oeSelfTest):
         self.assertIn(b'Fetched metadata: no', stdout,
                       'Device already provisioned!? ' + stderr.decode() + stdout.decode())
 
+        # Verify that HSM is not yet initialized.
         pkcs11_command = 'pkcs11-tool --module=/usr/lib/softhsm/libsofthsm2.so -O'
         stdout, stderr, retcode = self.run_command(pkcs11_command)
         self.assertNotEqual(retcode, 0, 'pkcs11-tool succeeded before initialization: ' +
@@ -282,6 +284,7 @@ class HsmTests(oeSelfTest):
         self.assertNotEqual(retcode, 0, 'softhsm2-tool succeeded before initialization: ' +
                         stdout.decode() + stderr.decode())
 
+        # Run cert_provider.
         bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'bindir', 'libdir',
                                'SOTA_PACKED_CREDENTIALS'], 'aktualizr-native')
         l = bb_vars['libdir']
@@ -297,6 +300,7 @@ class HsmTests(oeSelfTest):
         result = runCmd(command, ignore_status=True)
         self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
 
+        # Verify that HSM is able to initialize.
         ran_ok = False
         for delay in [5, 5, 5, 5, 10]:
             sleep(delay)
@@ -314,6 +318,20 @@ class HsmTests(oeSelfTest):
         self.assertIn(b'User PIN init.:   yes', hsm_out, 'softhsm2-tool failed: ' +
                       hsm_err.decode() + hsm_out.decode())
 
+        # Check that pkcs11 output matches sofhsm output.
+        p11_p = re.compile(r'Using slot [0-9] with a present token \((0x[0-9a-f]*)\)\s')
+        p11_m = p11_p.search(p11_err.decode())
+        self.assertTrue(p11_m, 'Slot number not found with pkcs11-tool: ' + p11_err.decode() + p11_out.decode())
+        self.assertGreater(p11_m.lastindex, 0, 'Slot number not found with pkcs11-tool: ' +
+                           p11_err.decode() + p11_out.decode())
+        hsm_p = re.compile(r'Description:\s*SoftHSM slot ID (0x[0-9a-f]*)\s')
+        hsm_m = hsm_p.search(hsm_out.decode())
+        self.assertTrue(hsm_m, 'Slot number not found with softhsm2-tool: ' + hsm_err.decode() + hsm_out.decode())
+        self.assertGreater(hsm_m.lastindex, 0, 'Slot number not found with softhsm2-tool: ' +
+                           hsm_err.decode() + hsm_out.decode())
+        self.assertEqual(p11_m.group(1), hsm_m.group(1), 'Slot number does not match: ' +
+                         p11_err.decode() + p11_out.decode() + hsm_err.decode() + hsm_out.decode())
+
         # Verify that device HAS provisioned.
         ran_ok = False
         for delay in [5, 5, 5, 5, 10]:
@@ -326,6 +344,11 @@ class HsmTests(oeSelfTest):
         self.assertIn(b'Primary ecu hardware ID: qemux86-64', stdout,
                       'Provisioning failed: ' + stderr.decode() + stdout.decode())
         self.assertIn(b'Fetched metadata: yes', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
+        p = re.compile(r'Device ID: ([a-z0-9-]*)\n')
+        m = p.search(stdout.decode())
+        self.assertTrue(m, 'Device ID could not be read: ' + stderr.decode() + stdout.decode())
+        self.assertGreater(m.lastindex, 0, 'Device ID could not be read: ' + stderr.decode() + stdout.decode())
+        logger.info('Device successfully provisioned with ID: ' + m.group(1))
 
 
 def qemu_launch(efi=False, machine=None):
