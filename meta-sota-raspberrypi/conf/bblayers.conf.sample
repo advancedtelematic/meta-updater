@@ -14,7 +14,7 @@ BBLAYERS ?= " \
   ##OEROOT##/../meta-updater-raspberrypi \
   ##OEROOT##/../meta-openembedded/meta-oe \
   ##OEROOT##/../meta-openembedded/meta-filesystems \
-  ##OEROOT##/../meta-rust \
+  ##OEROOT##/../meta-openembedded/meta-python \
   "
 BBLAYERS_NON_REMOVABLE ?= " \
   ##OEROOT##/meta \
