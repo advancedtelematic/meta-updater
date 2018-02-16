@@ -1,8 +1,9 @@
-import unittest
+# pylint: disable=C0111,C0325
 import os
 import logging
 import subprocess
-import time
+import unittest
+from time import sleep
 
 from oeqa.selftest.base import oeSelfTest
 from oeqa.utils.commands import runCmd, bitbake, get_bb_var, get_bb_vars
@@ -49,11 +50,11 @@ class GeneralTests(oeSelfTest):
 
     def test_feature_sota(self):
         result = get_bb_var('DISTRO_FEATURES').find('sota')
-        self.assertNotEqual(result, -1, 'Feature "sota" not set at DISTRO_FEATURES');
+        self.assertNotEqual(result, -1, 'Feature "sota" not set at DISTRO_FEATURES')
 
     def test_feature_systemd(self):
         result = get_bb_var('DISTRO_FEATURES').find('systemd')
-        self.assertNotEqual(result, -1, 'Feature "systemd" not set at DISTRO_FEATURES');
+        self.assertNotEqual(result, -1, 'Feature "systemd" not set at DISTRO_FEATURES')
 
     def test_credentials(self):
         bitbake('core-image-minimal')
@@ -66,7 +67,8 @@ class GeneralTests(oeSelfTest):
         deploydir = get_bb_var('DEPLOY_DIR_IMAGE')
         imagename = get_bb_var('IMAGE_LINK_NAME', 'core-image-minimal')
         # Check if the credentials are included in the output image
-        result = runCmd('tar -jtvf %s/%s.tar.bz2 | grep sota_provisioning_credentials.zip' % (deploydir, imagename), ignore_status=True)
+        result = runCmd('tar -jtvf %s/%s.tar.bz2 | grep sota_provisioning_credentials.zip' %
+                        (deploydir, imagename), ignore_status=True)
         self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
 
     def test_java(self):
@@ -99,7 +101,7 @@ class GeneralTests(oeSelfTest):
         self.assertEqual(result.output, 'ERROR: Unable to find any package producing path /usr/bin/man')
         path2 = os.path.realpath(image_path)
         size2 = os.path.getsize(path2)
-        logger.info('Second image %s has size %i' % (path2, size2))
+        logger.info('Second image %s has size %i', path2, size2)
         self.assertNotEqual(path1, path2, "Image paths are identical; image was not rebuilt.")
         self.assertNotEqual(size1, size2, "Image sizes are identical; image was not rebuilt.")
 
@@ -114,14 +116,17 @@ class QemuTests(oeSelfTest):
     def tearDownClass(cls):
         qemu_terminate(cls.s)
 
+    def run_command(self, command):
+        return qemu_send_command(self.qemu.ssh_port, command)
+
     def test_hostname(self):
         print('')
         print('Checking machine name (hostname) of device:')
-        value, err = qemu_send_command(self.qemu.ssh_port, 'hostname')
+        stdout, stderr, retcode = self.run_command('hostname')
         machine = get_bb_var('MACHINE', 'core-image-minimal')
-        self.assertEqual(err, b'', 'Error: ' + err.decode())
+        self.assertEqual(stderr, b'', 'Error: ' + stderr.decode())
         # Strip off line ending.
-        value_str = value.decode()[:-1]
+        value_str = stdout.decode()[:-1]
         self.assertEqual(value_str, machine,
                          'MACHINE does not match hostname: ' + machine + ', ' + value_str)
         print(value_str)
@@ -129,9 +134,26 @@ class QemuTests(oeSelfTest):
     def test_var_sota(self):
         print('')
         print('Checking contents of /var/sota:')
-        value, err = qemu_send_command(self.qemu.ssh_port, 'ls /var/sota')
-        self.assertEqual(err, b'', 'Error: ' + err.decode())
-        print(value.decode())
+        stdout, stderr, retcode = self.run_command('ls /var/sota')
+        self.assertEqual(stderr, b'', 'Error: ' + stderr.decode())
+        self.assertEqual(retcode, 0)
+        print(stdout.decode())
+
+    def test_aktualizr_info(self):
+        print('Checking output of aktualizr-info:')
+        ran_ok = False
+        for delay in [0, 1, 2, 5, 10, 15]:
+            sleep(delay)
+            try:
+                stdout, stderr, retcode = self.run_command('aktualizr-info')
+                if retcode == 0 and stderr == b'':
+                    ran_ok = True
+                    break
+            except IOError as e:
+                print(e)
+        if not ran_ok:
+            print(stdout.decode())
+            print(stderr.decode())
 
 class GrubTests(oeSelfTest):
 
@@ -155,13 +177,15 @@ class GrubTests(oeSelfTest):
     def test_grub(self):
         print('')
         print('Checking machine name (hostname) of device:')
-        value, err = qemu_send_command(self.qemu.ssh_port, 'hostname')
+        value, err, retcode = qemu_send_command(self.qemu.ssh_port, 'hostname')
         machine = get_bb_var('MACHINE', 'core-image-minimal')
         self.assertEqual(err, b'', 'Error: ' + err.decode())
+        self.assertEqual(retcode, 0)
         # Strip off line ending.
         value_str = value.decode()[:-1]
         self.assertEqual(value_str, machine,
-                         'MACHINE does not match hostname: ' + machine + ', ' + value_str)
+                         'MACHINE does not match hostname: ' + machine + ', ' + value_str +
+                         '\nIs tianocore ovmf installed?')
         print(value_str)
 
 
@@ -189,7 +213,7 @@ def qemu_launch(efi=False, machine=None):
     cmdline = qemu.command_line()
     print('Booting image with run-qemu-ota...')
     s = subprocess.Popen(cmdline)
-    time.sleep(10)
+    sleep(10)
     return qemu, s
 
 def qemu_terminate(s):
@@ -202,6 +226,7 @@ def qemu_send_command(port, command):
     command = ['ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@localhost -p ' +
                str(port) + ' "' + command + '"']
     s2 = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    value, err = s2.communicate()
-    return value, err
+    stdout, stderr = s2.communicate()
+    return stdout, stderr, s2.returncode
 
+# vim:set ts=4 sw=4 sts=4 expandtab:
