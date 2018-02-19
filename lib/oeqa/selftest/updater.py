@@ -173,10 +173,11 @@ class QemuTests(oeSelfTest):
     def qemu_command(self, command):
         return qemu_send_command(self.qemu.ssh_port, command)
 
-    def test_hostname(self):
-        print('')
+    def test_qemu(self):
         print('Checking machine name (hostname) of device:')
         stdout, stderr, retcode = self.qemu_command('hostname')
+        self.assertEqual(retcode, 0, "Unable to check hostname. " +
+						 "Is an ssh daemon (such as dropbear or openssh) installed on the device?")
         machine = get_bb_var('MACHINE', 'core-image-minimal')
         self.assertEqual(stderr, b'', 'Error: ' + stderr.decode())
         # Strip off line ending.
@@ -184,27 +185,14 @@ class QemuTests(oeSelfTest):
         self.assertEqual(value_str, machine,
                          'MACHINE does not match hostname: ' + machine + ', ' + value_str)
         print(value_str)
-
-    def test_var_sota(self):
-        print('')
-        print('Checking contents of /var/sota:')
-        stdout, stderr, retcode = self.qemu_command('ls /var/sota')
-        self.assertEqual(stderr, b'', 'Error: ' + stderr.decode())
-        self.assertEqual(retcode, 0)
-        print(stdout.decode())
-
-    def test_aktualizr_info(self):
         print('Checking output of aktualizr-info:')
         ran_ok = False
         for delay in [0, 1, 2, 5, 10, 15]:
             sleep(delay)
-            try:
-                stdout, stderr, retcode = self.qemu_command('aktualizr-info')
-                if retcode == 0 and stderr == b'':
-                    ran_ok = True
-                    break
-            except IOError as e:
-                print(e)
+            stdout, stderr, retcode = self.qemu_command('aktualizr-info')
+            if retcode == 0 and stderr == b'':
+                ran_ok = True
+                break
         self.assertTrue(ran_ok, 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
 
 
@@ -227,26 +215,39 @@ class GrubTests(oeSelfTest):
         runCmd('bitbake-layers remove-layer "%s"' % self.meta_intel, ignore_status=True)
         runCmd('bitbake-layers remove-layer "%s"' % self.meta_minnow, ignore_status=True)
 
+    def qemu_command(self, command):
+        return qemu_send_command(self.qemu.ssh_port, command)
+
     def test_grub(self):
         print('')
         print('Checking machine name (hostname) of device:')
-        value, err, retcode = qemu_send_command(self.qemu.ssh_port, 'hostname')
+        stdout, stderr, retcode = self.qemu_command('hostname')
+        self.assertEqual(retcode, 0, "Unable to check hostname. " +
+						 "Is an ssh daemon (such as dropbear or openssh) installed on the device?")
         machine = get_bb_var('MACHINE', 'core-image-minimal')
-        self.assertEqual(err, b'', 'Error: ' + err.decode())
-        self.assertEqual(retcode, 0)
+        self.assertEqual(stderr, b'', 'Error: ' + stderr.decode())
         # Strip off line ending.
-        value_str = value.decode()[:-1]
-        self.assertEqual(value_str, machine,
-                         'MACHINE does not match hostname: ' + machine + ', ' + value_str +
-                         '\nIs tianocore ovmf installed?')
-        print(value_str)
+        value = stdout.decode()[:-1]
+        self.assertEqual(value, machine,
+                         'MACHINE does not match hostname: ' + machine + ', ' + value +
+                         '\nIs TianoCore ovmf installed?')
+        print(value)
+        print('Checking output of aktualizr-info:')
+        ran_ok = False
+        for delay in [0, 1, 2, 5, 10, 15]:
+            sleep(delay)
+            stdout, stderr, retcode = self.qemu_command('aktualizr-info')
+            if retcode == 0 and stderr == b'':
+                ran_ok = True
+                break
+        self.assertTrue(ran_ok, 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
 
 
 class HsmTests(oeSelfTest):
 
     def setUpLocal(self):
-        self.write_config('SOTA_CLIENT_PROV = " aktualizr-hsm-prov "')
-        self.write_config('SOTA_CLIENT_FEATURES="hsm"')
+        self.write_config('SOTA_CLIENT_PROV = "aktualizr-hsm-prov"')
+        self.write_config('SOTA_CLIENT_FEATURES = "hsm"')
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
     def tearDownLocal(self):
@@ -256,7 +257,18 @@ class HsmTests(oeSelfTest):
         return qemu_send_command(self.qemu.ssh_port, command)
 
     def test_provisioning(self):
-        print('')
+        print('Checking machine name (hostname) of device:')
+        stdout, stderr, retcode = self.qemu_command('hostname')
+        self.assertEqual(retcode, 0, "Unable to check hostname. " +
+						 "Is an ssh daemon (such as dropbear or openssh) installed on the device?")
+        machine = get_bb_var('MACHINE', 'core-image-minimal')
+        self.assertEqual(stderr, b'', 'Error: ' + stderr.decode())
+        # Strip off line ending.
+        value_str = stdout.decode()[:-1]
+        self.assertEqual(value_str, machine,
+                         'MACHINE does not match hostname: ' + machine + ', ' + value_str)
+        print(value_str)
+        print('Checking output of aktualizr-info:')
         ran_ok = False
         for delay in [0, 1, 2, 5, 10, 15]:
             stdout, stderr, retcode = self.qemu_command('aktualizr-info')
