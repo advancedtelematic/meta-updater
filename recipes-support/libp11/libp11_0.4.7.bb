@@ -7,6 +7,7 @@ SECTION = "Development/Libraries"
 LICENSE = "LGPLv2+"
 LIC_FILES_CHKSUM = "file://COPYING;md5=fad9b3332be894bab9bc501572864b29"
 DEPENDS = "libtool openssl"
+RDEPENDS_${PN} += " opensc"
 
 SRC_URI = "git://github.com/OpenSC/libp11.git"
 SRCREV = "da725ab727342083478150a203a3c80c4551feb4"
