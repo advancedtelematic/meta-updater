@@ -170,13 +170,13 @@ class QemuTests(oeSelfTest):
     def tearDownClass(cls):
         qemu_terminate(cls.s)
 
-    def run_command(self, command):
+    def qemu_command(self, command):
         return qemu_send_command(self.qemu.ssh_port, command)
 
     def test_hostname(self):
         print('')
         print('Checking machine name (hostname) of device:')
-        stdout, stderr, retcode = self.run_command('hostname')
+        stdout, stderr, retcode = self.qemu_command('hostname')
         machine = get_bb_var('MACHINE', 'core-image-minimal')
         self.assertEqual(stderr, b'', 'Error: ' + stderr.decode())
         # Strip off line ending.
@@ -188,7 +188,7 @@ class QemuTests(oeSelfTest):
     def test_var_sota(self):
         print('')
         print('Checking contents of /var/sota:')
-        stdout, stderr, retcode = self.run_command('ls /var/sota')
+        stdout, stderr, retcode = self.qemu_command('ls /var/sota')
         self.assertEqual(stderr, b'', 'Error: ' + stderr.decode())
         self.assertEqual(retcode, 0)
         print(stdout.decode())
@@ -199,7 +199,7 @@ class QemuTests(oeSelfTest):
         for delay in [0, 1, 2, 5, 10, 15]:
             sleep(delay)
             try:
-                stdout, stderr, retcode = self.run_command('aktualizr-info')
+                stdout, stderr, retcode = self.qemu_command('aktualizr-info')
                 if retcode == 0 and stderr == b'':
                     ran_ok = True
                     break
@@ -252,14 +252,14 @@ class HsmTests(oeSelfTest):
     def tearDownLocal(self):
         qemu_terminate(self.s)
 
-    def run_command(self, command):
+    def qemu_command(self, command):
         return qemu_send_command(self.qemu.ssh_port, command)
 
     def test_provisioning(self):
         print('')
         ran_ok = False
         for delay in [0, 1, 2, 5, 10, 15]:
-            stdout, stderr, retcode = self.run_command('aktualizr-info')
+            stdout, stderr, retcode = self.qemu_command('aktualizr-info')
             if retcode == 0 and stderr == b'':
                 ran_ok = True
                 break
@@ -276,11 +276,11 @@ class HsmTests(oeSelfTest):
 
         # Verify that HSM is not yet initialized.
         pkcs11_command = 'pkcs11-tool --module=/usr/lib/softhsm/libsofthsm2.so -O'
-        stdout, stderr, retcode = self.run_command(pkcs11_command)
+        stdout, stderr, retcode = self.qemu_command(pkcs11_command)
         self.assertNotEqual(retcode, 0, 'pkcs11-tool succeeded before initialization: ' +
                         stdout.decode() + stderr.decode())
         softhsm2_command = 'softhsm2-util --show-slots'
-        stdout, stderr, retcode = self.run_command(softhsm2_command)
+        stdout, stderr, retcode = self.qemu_command(softhsm2_command)
         self.assertNotEqual(retcode, 0, 'softhsm2-tool succeeded before initialization: ' +
                         stdout.decode() + stderr.decode())
 
@@ -304,8 +304,8 @@ class HsmTests(oeSelfTest):
         ran_ok = False
         for delay in [5, 5, 5, 5, 10]:
             sleep(delay)
-            p11_out, p11_err, p11_ret = self.run_command(pkcs11_command)
-            hsm_out, hsm_err, hsm_ret = self.run_command(softhsm2_command)
+            p11_out, p11_err, p11_ret = self.qemu_command(pkcs11_command)
+            hsm_out, hsm_err, hsm_ret = self.qemu_command(softhsm2_command)
             if p11_ret == 0 and hsm_ret == 0 and hsm_err == b'':
                 ran_ok = True
                 break
@@ -336,7 +336,7 @@ class HsmTests(oeSelfTest):
         ran_ok = False
         for delay in [5, 5, 5, 5, 10]:
             sleep(delay)
-            stdout, stderr, retcode = self.run_command('aktualizr-info')
+            stdout, stderr, retcode = self.qemu_command('aktualizr-info')
             if retcode == 0 and stderr == b'' and stdout.decode().find('Provisioned on server: yes') >= 0:
                 ran_ok = True
                 break
