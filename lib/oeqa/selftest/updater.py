@@ -246,6 +246,95 @@ class GrubTests(oeSelfTest):
         self.assertTrue(ran_ok, 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
 
 
+class ImplProvTests(oeSelfTest):
+
+    @classmethod
+    def setUpClass(cls):
+        bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'base_prefix', 'libdir', 'bindir'],
+                              'aktualizr-native')
+        cls.sysroot = bb_vars['SYSROOT_DESTDIR'] + bb_vars['base_prefix']
+        cls.sysrootbin = bb_vars['SYSROOT_DESTDIR'] + bb_vars['bindir']
+        cls.libdir = bb_vars['libdir']
+
+    def setUpLocal(self):
+        self.append_config('SOTA_CLIENT_PROV = " aktualizr-implicit-prov "')
+        self.qemu, self.s = qemu_launch(machine='qemux86-64')
+
+    def tearDownLocal(self):
+        qemu_terminate(self.s)
+
+    def runNativeCmd(self, cmd, **kwargs):
+        program, *_ = cmd.split(' ')
+        p = '{}/{}'.format(self.sysrootbin, program)
+        self.assertTrue(os.path.isfile(p), msg="No {} found ({})".format(program, p))
+        env = dict(os.environ)
+        env['LD_LIBRARY_PATH'] = self.libdir
+        result = runCmd(cmd, env=env, native_sysroot=self.sysroot, ignore_status=True, **kwargs)
+        self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
+
+    def qemu_command(self, command):
+        return qemu_send_command(self.qemu.ssh_port, command)
+
+    def test_provisioning(self):
+        print('Checking machine name (hostname) of device:')
+        stdout, stderr, retcode = self.qemu_command('hostname')
+        self.assertEqual(retcode, 0, "Unable to check hostname. " +
+                         "Is an ssh daemon (such as dropbear or openssh) installed on the device?")
+        machine = get_bb_var('MACHINE', 'core-image-minimal')
+        self.assertEqual(stderr, b'', 'Error: ' + stderr.decode())
+        # Strip off line ending.
+        value_str = stdout.decode()[:-1]
+        self.assertEqual(value_str, machine,
+                         'MACHINE does not match hostname: ' + machine + ', ' + value_str)
+        print(value_str)
+        print('Checking output of aktualizr-info:')
+        ran_ok = False
+        for delay in [0, 1, 2, 5, 10, 15]:
+            stdout, stderr, retcode = self.qemu_command('aktualizr-info')
+            if retcode == 0 and stderr == b'':
+                ran_ok = True
+                break
+        self.assertTrue(ran_ok, 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
+        # Verify that device has NOT yet provisioned.
+        self.assertIn(b'Couldn\'t load device ID', stdout,
+                      'Device already provisioned!? ' + stderr.decode() + stdout.decode())
+        self.assertIn(b'Couldn\'t load ECU serials', stdout,
+                      'Device already provisioned!? ' + stderr.decode() + stdout.decode())
+        self.assertIn(b'Provisioned on server: no', stdout,
+                      'Device already provisioned!? ' + stderr.decode() + stdout.decode())
+        self.assertIn(b'Fetched metadata: no', stdout,
+                      'Device already provisioned!? ' + stderr.decode() + stdout.decode())
+
+        # Run cert_provider.
+        bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'bindir', 'libdir',
+                               'SOTA_PACKED_CREDENTIALS'], 'aktualizr-native')
+        creds = bb_vars['SOTA_PACKED_CREDENTIALS']
+        bb_vars_prov = get_bb_vars(['STAGING_DIR_NATIVE', 'libdir'], 'aktualizr-implicit-prov')
+        config = bb_vars_prov['STAGING_DIR_NATIVE'] + bb_vars_prov['libdir'] + '/sota/sota_implicit_prov.toml'
+
+        self.runNativeCmd('aktualizr_cert_provider -c {creds} -t root@localhost -p {port} -s -g {config}' \
+                          .format(creds=creds, port=self.qemu.ssh_port, config=config))
+
+        # Verify that device HAS provisioned.
+        ran_ok = False
+        for delay in [5, 5, 5, 5, 10]:
+            sleep(delay)
+            stdout, stderr, retcode = self.qemu_command('aktualizr-info')
+            if retcode == 0 and stderr == b'' and stdout.decode().find('Fetched metadata: yes') >= 0:
+                ran_ok = True
+                break
+        self.assertIn(b'Device ID: ', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
+        self.assertIn(b'Primary ecu hardware ID: qemux86-64', stdout,
+                      'Provisioning failed: ' + stderr.decode() + stdout.decode())
+        self.assertIn(b'Fetched metadata: yes', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
+        p = re.compile(r'Device ID: ([a-z0-9-]*)\n')
+        m = p.search(stdout.decode())
+        self.assertTrue(m, 'Device ID could not be read: ' + stderr.decode() + stdout.decode())
+        self.assertGreater(m.lastindex, 0, 'Device ID could not be read: ' + stderr.decode() + stdout.decode())
+        logger = logging.getLogger("selftest")
+        logger.info('Device successfully provisioned with ID: ' + m.group(1))
+
+
 class HsmTests(oeSelfTest):
 
     @classmethod
