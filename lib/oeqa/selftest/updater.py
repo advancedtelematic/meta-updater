@@ -57,7 +57,7 @@ class GeneralTests(oeSelfTest):
     def test_credentials(self):
         logger = logging.getLogger("selftest")
         logger.info('Running bitbake to build core-image-minimal')
-        self.write_config('SOTA_CLIENT_PROV = " aktualizr-auto-prov "')
+        self.append_config('SOTA_CLIENT_PROV = "aktualizr-auto-prov"')
         bitbake('core-image-minimal')
         credentials = get_bb_var('SOTA_PACKED_CREDENTIALS')
         # skip the test if the variable SOTA_PACKED_CREDENTIALS is not set
@@ -74,7 +74,8 @@ class GeneralTests(oeSelfTest):
 
     def test_java(self):
         result = runCmd('which java', ignore_status=True)
-        self.assertEqual(result.status, 0, "Java not found.")
+        self.assertEqual(result.status, 0,
+                         "Java not found. Do you have a JDK installed on your host machine?")
 
     def test_add_package(self):
         print('')
@@ -84,7 +85,7 @@ class GeneralTests(oeSelfTest):
         logger = logging.getLogger("selftest")
 
         logger.info('Running bitbake with man in the image package list')
-        self.write_config('IMAGE_INSTALL_append = " man "')
+        self.append_config('IMAGE_INSTALL_append = " man "')
         bitbake('-c cleanall man')
         bitbake('core-image-minimal')
         result = runCmd('oe-pkgdata-util find-path /usr/bin/man')
@@ -94,7 +95,7 @@ class GeneralTests(oeSelfTest):
         logger.info('First image %s has size %i' % (path1, size1))
 
         logger.info('Running bitbake without man in the image package list')
-        self.write_config('IMAGE_INSTALL_remove = " man "')
+        self.append_config('IMAGE_INSTALL_remove = " man "')
         bitbake('-c cleanall man')
         bitbake('core-image-minimal')
         result = runCmd('oe-pkgdata-util find-path /usr/bin/man', ignore_status=True)
@@ -230,7 +231,7 @@ class GrubTests(oeSelfTest):
         value = stdout.decode()[:-1]
         self.assertEqual(value, machine,
                          'MACHINE does not match hostname: ' + machine + ', ' + value +
-                         '\nIs TianoCore ovmf installed?')
+                         '\nIs TianoCore ovmf installed on your host machine?')
         print(value)
         print('Checking output of aktualizr-info:')
         ran_ok = False
@@ -246,8 +247,8 @@ class GrubTests(oeSelfTest):
 class HsmTests(oeSelfTest):
 
     def setUpLocal(self):
-        self.write_config('SOTA_CLIENT_PROV = "aktualizr-hsm-prov"')
-        self.write_config('SOTA_CLIENT_FEATURES = "hsm"')
+        self.append_config('SOTA_CLIENT_PROV = "aktualizr-hsm-prov"')
+        self.append_config('SOTA_CLIENT_FEATURES = "hsm"')
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
     def tearDownLocal(self):
@@ -349,7 +350,7 @@ class HsmTests(oeSelfTest):
         for delay in [5, 5, 5, 5, 10]:
             sleep(delay)
             stdout, stderr, retcode = self.qemu_command('aktualizr-info')
-            if retcode == 0 and stderr == b'' and stdout.decode().find('Provisioned on server: yes') >= 0:
+            if retcode == 0 and stderr == b'' and stdout.decode().find('Fetched metadata: yes') >= 0:
                 ran_ok = True
                 break
         self.assertIn(b'Device ID: ', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
