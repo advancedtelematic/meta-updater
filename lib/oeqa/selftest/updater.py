@@ -250,15 +250,11 @@ class HsmTests(oeSelfTest):
 
     @classmethod
     def setUpClass(cls):
-        logger = logging.getLogger("selftest")
         bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'base_prefix', 'libdir', 'bindir'],
                               'aktualizr-native')
         cls.sysroot = bb_vars['SYSROOT_DESTDIR'] + bb_vars['base_prefix']
         cls.sysrootbin = bb_vars['SYSROOT_DESTDIR'] + bb_vars['bindir']
         cls.libdir = bb_vars['libdir']
-
-        logger.info('Running bitbake to build aktualizr-native tools')
-        bitbake('aktualizr-native')
 
     def setUpLocal(self):
         self.append_config('SOTA_CLIENT_PROV = "aktualizr-hsm-prov"')
@@ -378,7 +374,8 @@ class HsmTests(oeSelfTest):
         m = p.search(stdout.decode())
         self.assertTrue(m, 'Device ID could not be read: ' + stderr.decode() + stdout.decode())
         self.assertGreater(m.lastindex, 0, 'Device ID could not be read: ' + stderr.decode() + stdout.decode())
-        self.logger.info('Device successfully provisioned with ID: ' + m.group(1))
+        logger = logging.getLogger("selftest")
+        logger.info('Device successfully provisioned with ID: ' + m.group(1))
 
 
 def qemu_launch(efi=False, machine=None):
