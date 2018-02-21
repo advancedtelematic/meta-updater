@@ -1,21 +1,27 @@
-From ebb26338d0c2f436a86fd4d7cb8d723a90d6a369 Mon Sep 17 00:00:00 2001
-From: Anton Gerasimov <anton@advancedtelematic.com>
-Date: Thu, 15 Sep 2016 17:52:41 +0200
-Subject: [PATCH 1/2] Set up environment for OSTree integration
+From 855282cc487f2afa6771d33b0d036ad637e87d1b Mon Sep 17 00:00:00 2001
+From: Leon Anavi <leon.anavi@konsulko.com>
+Date: Tue, 20 Feb 2018 19:31:55 +0200
+Subject: [PATCH] qemu-x86.h: Set up environment for OSTree integration
 
+Rebase Anton's patch for setting up envieronment
+for OSTree integration for QEMU.
+
+Co-Authored-By: Anton Gerasimov <anton@advancedtelematic.com>
+Signed-off-by: Leon Anavi <leon.anavi@konsulko.com>
 ---
- include/configs/qemu-x86.h | 20 ++++++++++++++++++++
- 1 file changed, 20 insertions(+)
+ include/configs/qemu-x86.h | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
 
 diff --git a/include/configs/qemu-x86.h b/include/configs/qemu-x86.h
-index 78c296f..79df455 100644
+index 01072f8..755fb65 100644
 --- a/include/configs/qemu-x86.h
 +++ b/include/configs/qemu-x86.h
-@@ -74,4 +74,24 @@
- #undef CONFIG_ENV_IS_IN_SPI_FLASH
- #define CONFIG_ENV_IS_NOWHERE
+@@ -45,4 +45,25 @@
+ #define CONFIG_SPL_BOARD_LOAD_IMAGE
+ #define BOOT_DEVICE_BOARD		11
  
 +#undef CONFIG_BOOTARGS
++
 +#define CONFIG_BOOTARGS "root=/dev/hda2 console=ttyS0"
 +
 +#undef CONFIG_BOOTDELAY
@@ -33,9 +39,9 @@ index 78c296f..79df455 100644
 +				  "ramdisk_image=/initrd\0" \
 +				  "ramdiskaddr=0x4000000\0" \
 +				  "bootdelay=3\0" \
-+				  "loadenv=if ext2load ide 0 $loadaddr /boot/loader/uEnv.txt; then env import -t $loadaddr $filesize; fi;" 
++				  "loadenv=if ext2load ide 0 $loadaddr /boot/loader/uEnv.txt; then env import -t $loadaddr $filesize; fi;"
 +
  #endif	/* __CONFIG_H */
 -- 
-2.9.3
+2.7.4
 
