@@ -345,7 +345,7 @@ class HsmTests(oeSelfTest):
         bb_vars = get_bb_vars(['SOTA_PACKED_CREDENTIALS'], 'aktualizr-native')
         creds = bb_vars['SOTA_PACKED_CREDENTIALS']
         bb_vars_prov = get_bb_vars(['STAGING_DIR_NATIVE', 'libdir'], 'aktualizr-hsm-prov')
-        config = bb_vars_prov['STAGING_DIR_NATIVE'] + bb_vars_prov['libdir'] + '/sota/sota_implicit_prov.toml'
+        config = bb_vars_prov['STAGING_DIR_NATIVE'] + bb_vars_prov['libdir'] + '/sota/sota_hsm_prov.toml'
 
         akt_native_run(self, 'aktualizr_cert_provider -c {creds} -t root@localhost -p {port} -r -s -g {config}'
                        .format(creds=creds, port=self.qemu.ssh_port, config=config))
