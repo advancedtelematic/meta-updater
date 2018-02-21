@@ -123,7 +123,7 @@ The https://github.com/advancedtelematic/aktualizr[aktualizr repo] contains a to
 garage-push --repo=/path/to/ostree-repo --ref=mybranch --credentials=/path/to/credentials.zip
 ....
 
-You can set SOTA_PACKED_CREDENTIALS in your local.conf to make your build results be automatically synchronized with a remote server. Credentials are stored in the JSON format described in the https://github.com/advancedtelematic/aktualizr/blob/master/README.sotatools.adoc[garage-push README]. This JSON file can be optionally stored inside a zip file, although if it is stored this way, the JSON file must be named treehub.json.
+You can set `SOTA_PACKED_CREDENTIALS` in your `local.conf` to automatically synchronize your build results with a remote server. Credentials are stored in an archive as described in the https://github.com/advancedtelematic/aktualizr/blob/master/docs/credentials.adoc[aktualizr documentation].
 
 == QA with `oe-selftest`
 
