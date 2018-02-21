@@ -217,14 +217,9 @@ class GrubTests(oeSelfTest):
 
 class ImplProvTests(oeSelfTest):
 
-    @classmethod
-    def setUpClass(cls):
-        logger = logging.getLogger("selftest")
-        logger.info('Running bitbake to build aktualizr-native tools')
-        bitbake('aktualizr-native')
-
     def setUpLocal(self):
         self.append_config('SOTA_CLIENT_PROV = " aktualizr-implicit-prov "')
+        # note: this will build aktualizr-native as a side-effect
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
     def tearDownLocal(self):
@@ -294,15 +289,10 @@ class ImplProvTests(oeSelfTest):
 
 class HsmTests(oeSelfTest):
 
-    @classmethod
-    def setUpClass(cls):
-        logger = logging.getLogger("selftest")
-        logger.info('Running bitbake to build aktualizr-native tools')
-        bitbake('aktualizr-native')
-
     def setUpLocal(self):
         self.append_config('SOTA_CLIENT_PROV = "aktualizr-hsm-prov"')
         self.append_config('SOTA_CLIENT_FEATURES = "hsm"')
+        # note: this will build aktualizr-native as a side-effect
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
     def tearDownLocal(self):
