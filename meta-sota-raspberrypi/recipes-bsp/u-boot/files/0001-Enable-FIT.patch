@@ -1,0 +1,23 @@
+From d6323c4aacff2922051cf801eb7c2661b437baf6 Mon Sep 17 00:00:00 2001
+From: Anton Gerasimov <anton@advancedtelematic.com>
+Date: Tue, 13 Feb 2018 15:16:00 +0100
+Subject: [PATCH] Enable FIT
+
+---
+ configs/rpi_3_32b_defconfig | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/configs/rpi_3_32b_defconfig b/configs/rpi_3_32b_defconfig
+index bb56a9e4e1..b366a3a061 100644
+--- a/configs/rpi_3_32b_defconfig
++++ b/configs/rpi_3_32b_defconfig
+@@ -36,3 +36,6 @@ CONFIG_SYS_WHITE_ON_BLACK=y
+ CONFIG_CONSOLE_SCROLL_LINES=10
+ CONFIG_PHYS_TO_BUS=y
+ CONFIG_OF_LIBFDT_OVERLAY=y
++
++CONFIG_FIT=y
++CONFIG_FIT_VERBOSE=y
+-- 
+2.15.1
+
