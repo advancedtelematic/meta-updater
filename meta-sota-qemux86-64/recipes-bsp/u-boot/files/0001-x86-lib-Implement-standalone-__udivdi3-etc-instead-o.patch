@@ -1,0 +1,232 @@
+From aa7839b39c2ee77f9ab8c393c56b8d812507dbb7 Mon Sep 17 00:00:00 2001
+From: Stefan Roese <sr@denx.de>
+Date: Wed, 29 Nov 2017 16:23:31 +0100
+Subject: [PATCH] x86: lib: Implement standalone __udivdi3 etc instead of
+ libgcc ones
+
+This patch removes the inclusion of the libgcc math functions and
+replaces them by functions coded in C, taken from the coreboot
+project. This makes U-Boot building more independent from the toolchain
+installed / available on the build system.
+
+The code taken from coreboot is authored from Vadim Bendebury
+<vbendeb@chromium.org> on 2014-11-28 and committed with commit
+ID e63990ef [libpayload: provide basic 64bit division implementation]
+(coreboot git repository located here [1]).
+
+I modified the code so that its checkpatch clean without any
+functional changes.
+
+[1] git://github.com/coreboot/coreboot.git
+
+Signed-off-by: Stefan Roese <sr@denx.de>
+Cc: Simon Glass <sjg@chromium.org>
+Cc: Bin Meng <bmeng.cn@gmail.com>
+Reviewed-by: Bin Meng <bmeng.cn@gmail.com>
+Tested-by: Bin Meng <bmeng.cn@gmail.com>
+---
+ arch/x86/config.mk    |   3 --
+ arch/x86/lib/Makefile |   8 +---
+ arch/x86/lib/div64.c  | 113 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ arch/x86/lib/gcc.c    |  29 -------------
+ 4 files changed, 114 insertions(+), 39 deletions(-)
+ create mode 100644 arch/x86/lib/div64.c
+ delete mode 100644 arch/x86/lib/gcc.c
+
+diff --git a/arch/x86/config.mk b/arch/x86/config.mk
+index 8835dcf..472ada5 100644
+--- a/arch/x86/config.mk
++++ b/arch/x86/config.mk
+@@ -34,9 +34,6 @@ PLATFORM_RELFLAGS += -ffunction-sections -fvisibility=hidden
+ PLATFORM_LDFLAGS += -Bsymbolic -Bsymbolic-functions
+ PLATFORM_LDFLAGS += -m $(if $(IS_32BIT),elf_i386,elf_x86_64)
+ 
+-LDFLAGS_FINAL += --wrap=__divdi3 --wrap=__udivdi3
+-LDFLAGS_FINAL += --wrap=__moddi3 --wrap=__umoddi3
+-
+ # This is used in the top-level Makefile which does not include
+ # PLATFORM_LDFLAGS
+ LDFLAGS_EFI_PAYLOAD := -Bsymbolic -Bsymbolic-functions -shared --no-undefined
+diff --git a/arch/x86/lib/Makefile b/arch/x86/lib/Makefile
+index fe00d75..7d729ea 100644
+--- a/arch/x86/lib/Makefile
++++ b/arch/x86/lib/Makefile
+@@ -18,7 +18,6 @@ obj-$(CONFIG_SEABIOS) += coreboot_table.o
+ obj-y	+= early_cmos.o
+ obj-$(CONFIG_EFI) += efi/
+ obj-y	+= e820.o
+-obj-y	+= gcc.o
+ obj-y	+= init_helpers.o
+ obj-y	+= interrupts.o
+ obj-y	+= lpc-uclass.o
+@@ -49,12 +48,7 @@ endif
+ obj-$(CONFIG_HAVE_FSP) += fsp/
+ obj-$(CONFIG_SPL_BUILD) += spl.o
+ 
+-extra-$(CONFIG_USE_PRIVATE_LIBGCC) += lib.a
+-
+-NORMAL_LIBGCC = $(shell $(CC) $(PLATFORM_CPPFLAGS) -print-libgcc-file-name)
+-OBJCOPYFLAGS := --prefix-symbols=__normal_
+-$(obj)/lib.a: $(NORMAL_LIBGCC) FORCE
+-	$(call if_changed,objcopy)
++lib-$(CONFIG_USE_PRIVATE_LIBGCC) += div64.o
+ 
+ ifeq ($(CONFIG_$(SPL_)X86_64),)
+ obj-$(CONFIG_EFI_APP) += crt0_ia32_efi.o reloc_ia32_efi.o
+diff --git a/arch/x86/lib/div64.c b/arch/x86/lib/div64.c
+new file mode 100644
+index 0000000..4efed74
+--- /dev/null
++++ b/arch/x86/lib/div64.c
+@@ -0,0 +1,113 @@
++/*
++ * This file is copied from the coreboot repository as part of
++ * the libpayload project:
++ *
++ * Copyright 2014 Google Inc.
++ *
++ * SPDX-License-Identifier:     BSD-3-Clause
++ */
++
++#include <common.h>
++
++union overlay64 {
++	u64 longw;
++	struct {
++		u32 lower;
++		u32 higher;
++	} words;
++};
++
++u64 __ashldi3(u64 num, unsigned int shift)
++{
++	union overlay64 output;
++
++	output.longw = num;
++	if (shift >= 32) {
++		output.words.higher = output.words.lower << (shift - 32);
++		output.words.lower = 0;
++	} else {
++		if (!shift)
++			return num;
++		output.words.higher = (output.words.higher << shift) |
++			(output.words.lower >> (32 - shift));
++		output.words.lower = output.words.lower << shift;
++	}
++	return output.longw;
++}
++
++u64 __lshrdi3(u64 num, unsigned int shift)
++{
++	union overlay64 output;
++
++	output.longw = num;
++	if (shift >= 32) {
++		output.words.lower = output.words.higher >> (shift - 32);
++		output.words.higher = 0;
++	} else {
++		if (!shift)
++			return num;
++		output.words.lower = output.words.lower >> shift |
++			(output.words.higher << (32 - shift));
++		output.words.higher = output.words.higher >> shift;
++	}
++	return output.longw;
++}
++
++#define MAX_32BIT_UINT ((((u64)1) << 32) - 1)
++
++static u64 _64bit_divide(u64 dividend, u64 divider, u64 *rem_p)
++{
++	u64 result = 0;
++
++	/*
++	 * If divider is zero - let the rest of the system care about the
++	 * exception.
++	 */
++	if (!divider)
++		return 1 / (u32)divider;
++
++	/* As an optimization, let's not use 64 bit division unless we must. */
++	if (dividend <= MAX_32BIT_UINT) {
++		if (divider > MAX_32BIT_UINT) {
++			result = 0;
++			if (rem_p)
++				*rem_p = divider;
++		} else {
++			result = (u32)dividend / (u32)divider;
++			if (rem_p)
++				*rem_p = (u32)dividend % (u32)divider;
++		}
++		return result;
++	}
++
++	while (divider <= dividend) {
++		u64 locald = divider;
++		u64 limit = __lshrdi3(dividend, 1);
++		int shifts = 0;
++
++		while (locald <= limit) {
++			shifts++;
++			locald = locald + locald;
++		}
++		result |= __ashldi3(1, shifts);
++		dividend -= locald;
++	}
++
++	if (rem_p)
++		*rem_p = dividend;
++
++	return result;
++}
++
++u64 __udivdi3(u64 num, u64 den)
++{
++	return _64bit_divide(num, den, NULL);
++}
++
++u64 __umoddi3(u64 num, u64 den)
++{
++	u64 v = 0;
++
++	_64bit_divide(num, den, &v);
++	return v;
++}
+diff --git a/arch/x86/lib/gcc.c b/arch/x86/lib/gcc.c
+deleted file mode 100644
+index 3c70d79..0000000
+--- a/arch/x86/lib/gcc.c
++++ /dev/null
+@@ -1,29 +0,0 @@
+-/*
+- * This file is part of the coreboot project.
+- *
+- * Copyright (C) 2009 coresystems GmbH
+- *
+- * SPDX-License-Identifier:	GPL-2.0
+- */
+-
+-#ifdef __GNUC__
+-
+-/*
+- * GCC's libgcc handling is quite broken. While the libgcc functions
+- * are always regparm(0) the code that calls them uses whatever the
+- * compiler call specifies. Therefore we need a wrapper around those
+- * functions. See gcc bug PR41055 for more information.
+- */
+-#define WRAP_LIBGCC_CALL(type, name) \
+-	type __normal_##name(type a, type b) __attribute__((regparm(0))); \
+-	type __wrap_##name(type a, type b); \
+-	type __attribute__((no_instrument_function)) \
+-		__wrap_##name(type a, type b) \
+-		 { return __normal_##name(a, b); }
+-
+-WRAP_LIBGCC_CALL(long long, __divdi3)
+-WRAP_LIBGCC_CALL(unsigned long long, __udivdi3)
+-WRAP_LIBGCC_CALL(long long, __moddi3)
+-WRAP_LIBGCC_CALL(unsigned long long, __umoddi3)
+-
+-#endif
+-- 
+2.7.4
+
