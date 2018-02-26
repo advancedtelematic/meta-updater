@@ -38,12 +38,12 @@ EXTRA_OECMAKE_append_class-target = " -DBUILD_OSTREE=ON -DBUILD_ISOTP=ON ${@bb.u
 EXTRA_OECMAKE_append_class-native = " -DBUILD_SOTA_TOOLS=ON -DBUILD_OSTREE=OFF "
 
 do_install_append () {
-    rm -f ${D}${bindir}/aktualizr_cert_provider
     rm -fr ${D}${libdir}/systemd
 }
 do_install_append_class-target () {
     rm -f ${D}${bindir}/aktualizr_implicit_writer
     rm -f ${D}${libdir}/sota/sota.toml
+    rm -f ${D}${bindir}/aktualizr_cert_provider
     ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'secondary-example', '', 'rm -f ${D}${bindir}/example-interface', d)}
     ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'secondary-isotp-example', '', 'rm -f ${D}${bindir}/isotp-test-interface', d)}
 
@@ -51,6 +51,7 @@ do_install_append_class-target () {
     aktualizr_service=${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'serialcan', '${WORKDIR}/aktualizr-serialcan.service', '${WORKDIR}/aktualizr.service', d)}
     install -m 0644 ${aktualizr_service} ${D}${systemd_unitdir}/system/aktualizr.service
 }
+
 do_install_append_class-native () {
     rm -f ${D}${bindir}/aktualizr
     rm -f ${D}${bindir}/aktualizr-info
@@ -59,6 +60,7 @@ do_install_append_class-native () {
     install -m 0644 ${S}/config/sota_autoprov.toml ${D}/${libdir}/sota/sota_autoprov.toml
     install -m 0644 ${S}/config/sota_hsm_prov.toml ${D}/${libdir}/sota/sota_hsm_prov.toml
     install -m 0644 ${S}/config/sota_implicit_prov.toml ${D}/${libdir}/sota/sota_implicit_prov.toml
+    install -m 0644 ${S}/config/sota_implicit_prov_ca.toml ${D}/${libdir}/sota/sota_implicit_prov_ca.toml
 
     install -m 0755 ${B}/src/sota_tools/garage-sign-prefix/src/garage-sign/bin/* ${D}${bindir}
     install -m 0644 ${B}/src/sota_tools/garage-sign-prefix/src/garage-sign/lib/* ${D}${libdir}
