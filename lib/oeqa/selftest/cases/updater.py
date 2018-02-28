@@ -139,10 +139,22 @@ class AutoProvTests(OESelftestTestCase):
     def setUpLocal(self):
         self.append_config('MACHINE = "qemux86-64"')
         self.append_config('SOTA_CLIENT_PROV = " aktualizr-auto-prov "')
+        layer = "meta-updater-qemux86-64"
+        result = runCmd('bitbake-layers show-layers')
+        if re.search(layer, result.output) is None:
+            # This is a bit of a hack but I can't see a better option.
+            path = os.path.abspath(os.path.dirname(__file__))
+            metadir = path + "/../../../../../"
+            self.meta_qemu = metadir + layer
+            runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
+        else:
+            self.meta_qemu = None
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
     def tearDownLocal(self):
         qemu_terminate(self.s)
+        if self.meta_qemu:
+            runCmd('bitbake-layers remove-layer "%s"' % self.meta_qemu, ignore_status=True)
 
     def qemu_command(self, command):
         return qemu_send_command(self.qemu.ssh_port, command)
@@ -178,19 +190,30 @@ class GrubTests(OESelftestTestCase):
         self.append_config('MACHINE = "intel-corei7-64"')
         self.append_config('OSTREE_BOOTLOADER = "grub"')
         self.append_config('SOTA_CLIENT_PROV = " aktualizr-auto-prov "')
+        layer_intel = "meta-intel"
+        layer_minnow = "meta-updater-minnowboard"
+        result = runCmd('bitbake-layers show-layers')
         # This is a bit of a hack but I can't see a better option.
         path = os.path.abspath(os.path.dirname(__file__))
         metadir = path + "/../../../../../"
-        self.meta_intel = metadir + "meta-intel"
-        self.meta_minnow = metadir + "meta-updater-minnowboard"
-        runCmd('bitbake-layers add-layer "%s"' % self.meta_intel)
-        runCmd('bitbake-layers add-layer "%s"' % self.meta_minnow)
+        if re.search(layer_intel, result.output) is None:
+            self.meta_intel = metadir + layer_intel
+            runCmd('bitbake-layers add-layer "%s"' % self.meta_intel)
+        else:
+            self.meta_intel = None
+        if re.search(layer_minnow, result.output) is None:
+            self.meta_minnow = metadir + layer_minnow
+            runCmd('bitbake-layers add-layer "%s"' % self.meta_minnow)
+        else:
+            self.meta_minnow = None
         self.qemu, self.s = qemu_launch(efi=True, machine='intel-corei7-64')
 
     def tearDownLocal(self):
         qemu_terminate(self.s)
-        runCmd('bitbake-layers remove-layer "%s"' % self.meta_intel, ignore_status=True)
-        runCmd('bitbake-layers remove-layer "%s"' % self.meta_minnow, ignore_status=True)
+        if self.meta_intel:
+            runCmd('bitbake-layers remove-layer "%s"' % self.meta_intel, ignore_status=True)
+        if self.meta_minnow:
+            runCmd('bitbake-layers remove-layer "%s"' % self.meta_minnow, ignore_status=True)
 
     def qemu_command(self, command):
         return qemu_send_command(self.qemu.ssh_port, command)
@@ -227,11 +250,22 @@ class ImplProvTests(OESelftestTestCase):
     def setUpLocal(self):
         self.append_config('MACHINE = "qemux86-64"')
         self.append_config('SOTA_CLIENT_PROV = " aktualizr-implicit-prov "')
-        # note: this will build aktualizr-native as a side-effect
+        layer = "meta-updater-qemux86-64"
+        result = runCmd('bitbake-layers show-layers')
+        if re.search(layer, result.output) is None:
+            # This is a bit of a hack but I can't see a better option.
+            path = os.path.abspath(os.path.dirname(__file__))
+            metadir = path + "/../../../../../"
+            self.meta_qemu = metadir + layer
+            runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
+        else:
+            self.meta_qemu = None
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
     def tearDownLocal(self):
         qemu_terminate(self.s)
+        if self.meta_qemu:
+            runCmd('bitbake-layers remove-layer "%s"' % self.meta_qemu, ignore_status=True)
 
     def qemu_command(self, command):
         return qemu_send_command(self.qemu.ssh_port, command)
@@ -284,11 +318,22 @@ class HsmTests(OESelftestTestCase):
         self.append_config('MACHINE = "qemux86-64"')
         self.append_config('SOTA_CLIENT_PROV = "aktualizr-hsm-prov"')
         self.append_config('SOTA_CLIENT_FEATURES = "hsm"')
-        # note: this will build aktualizr-native as a side-effect
+        layer = "meta-updater-qemux86-64"
+        result = runCmd('bitbake-layers show-layers')
+        if re.search(layer, result.output) is None:
+            # This is a bit of a hack but I can't see a better option.
+            path = os.path.abspath(os.path.dirname(__file__))
+            metadir = path + "/../../../../../"
+            self.meta_qemu = metadir + layer
+            runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
+        else:
+            self.meta_qemu = None
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
     def tearDownLocal(self):
         qemu_terminate(self.s)
+        if self.meta_qemu:
+            runCmd('bitbake-layers remove-layer "%s"' % self.meta_qemu, ignore_status=True)
 
     def qemu_command(self, command):
         return qemu_send_command(self.qemu.ssh_port, command)
