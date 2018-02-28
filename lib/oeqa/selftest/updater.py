@@ -132,20 +132,20 @@ class AktualizrToolsTests(oeSelfTest):
         self.assertTrue(os.path.getsize(ca_path) > 0, "Client certificate at %s is empty." % ca_path)
 
 
-class QemuTests(oeSelfTest):
+class AutoProvTests(oeSelfTest):
 
-    @classmethod
-    def setUpClass(cls):
-        cls.qemu, cls.s = qemu_launch(machine='qemux86-64')
+    def setUpLocal(self):
+        self.append_config('MACHINE = "qemux86-64"')
+        self.append_config('SOTA_CLIENT_PROV = " aktualizr-auto-prov "')
+        self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
-    @classmethod
-    def tearDownClass(cls):
-        qemu_terminate(cls.s)
+    def tearDownLocal(self):
+        qemu_terminate(self.s)
 
     def qemu_command(self, command):
         return qemu_send_command(self.qemu.ssh_port, command)
 
-    def test_qemu(self):
+    def test_provisioning(self):
         print('Checking machine name (hostname) of device:')
         stdout, stderr, retcode = self.qemu_command('hostname')
         self.assertEqual(retcode, 0, "Unable to check hostname. " +
@@ -153,10 +153,10 @@ class QemuTests(oeSelfTest):
         machine = get_bb_var('MACHINE', 'core-image-minimal')
         self.assertEqual(stderr, b'', 'Error: ' + stderr.decode())
         # Strip off line ending.
-        value_str = stdout.decode()[:-1]
-        self.assertEqual(value_str, machine,
-                         'MACHINE does not match hostname: ' + machine + ', ' + value_str)
-        print(value_str)
+        value = stdout.decode()[:-1]
+        self.assertEqual(value, machine,
+                         'MACHINE does not match hostname: ' + machine + ', ' + value)
+        print(value)
         print('Checking output of aktualizr-info:')
         ran_ok = False
         for delay in [0, 1, 2, 5, 10, 15]:
@@ -167,15 +167,18 @@ class QemuTests(oeSelfTest):
                 break
         self.assertTrue(ran_ok, 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
 
+        verifyProvisioned(self, machine)
+
 
 class GrubTests(oeSelfTest):
 
     def setUpLocal(self):
+        self.append_config('MACHINE = "intel-corei7-64"')
+        self.append_config('OSTREE_BOOTLOADER = "grub"')
+        self.append_config('SOTA_CLIENT_PROV = " aktualizr-auto-prov "')
         # This is a bit of a hack but I can't see a better option.
         path = os.path.abspath(os.path.dirname(__file__))
         metadir = path + "/../../../../"
-        grub_config = 'OSTREE_BOOTLOADER = "grub"\nMACHINE = "intel-corei7-64"'
-        self.append_config(grub_config)
         self.meta_intel = metadir + "meta-intel"
         self.meta_minnow = metadir + "meta-updater-minnowboard"
         runCmd('bitbake-layers add-layer "%s"' % self.meta_intel)
@@ -214,10 +217,13 @@ class GrubTests(oeSelfTest):
                 break
         self.assertTrue(ran_ok, 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
 
+        verifyProvisioned(self, machine)
+
 
 class ImplProvTests(oeSelfTest):
 
     def setUpLocal(self):
+        self.append_config('MACHINE = "qemux86-64"')
         self.append_config('SOTA_CLIENT_PROV = " aktualizr-implicit-prov "')
         # note: this will build aktualizr-native as a side-effect
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
@@ -236,10 +242,10 @@ class ImplProvTests(oeSelfTest):
         machine = get_bb_var('MACHINE', 'core-image-minimal')
         self.assertEqual(stderr, b'', 'Error: ' + stderr.decode())
         # Strip off line ending.
-        value_str = stdout.decode()[:-1]
-        self.assertEqual(value_str, machine,
-                         'MACHINE does not match hostname: ' + machine + ', ' + value_str)
-        print(value_str)
+        value = stdout.decode()[:-1]
+        self.assertEqual(value, machine,
+                         'MACHINE does not match hostname: ' + machine + ', ' + value)
+        print(value)
         print('Checking output of aktualizr-info:')
         ran_ok = False
         for delay in [0, 1, 2, 5, 10, 15]:
@@ -267,29 +273,13 @@ class ImplProvTests(oeSelfTest):
         akt_native_run(self, 'aktualizr_cert_provider -c {creds} -t root@localhost -p {port} -s -g {config}'
                        .format(creds=creds, port=self.qemu.ssh_port, config=config))
 
-        # Verify that device HAS provisioned.
-        ran_ok = False
-        for delay in [5, 5, 5, 5, 10]:
-            sleep(delay)
-            stdout, stderr, retcode = self.qemu_command('aktualizr-info')
-            if retcode == 0 and stderr == b'' and stdout.decode().find('Fetched metadata: yes') >= 0:
-                ran_ok = True
-                break
-        self.assertIn(b'Device ID: ', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
-        self.assertIn(b'Primary ecu hardware ID: qemux86-64', stdout,
-                      'Provisioning failed: ' + stderr.decode() + stdout.decode())
-        self.assertIn(b'Fetched metadata: yes', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
-        p = re.compile(r'Device ID: ([a-z0-9-]*)\n')
-        m = p.search(stdout.decode())
-        self.assertTrue(m, 'Device ID could not be read: ' + stderr.decode() + stdout.decode())
-        self.assertGreater(m.lastindex, 0, 'Device ID could not be read: ' + stderr.decode() + stdout.decode())
-        logger = logging.getLogger("selftest")
-        logger.info('Device successfully provisioned with ID: ' + m.group(1))
+        verifyProvisioned(self, machine)
 
 
 class HsmTests(oeSelfTest):
 
     def setUpLocal(self):
+        self.append_config('MACHINE = "qemux86-64"')
         self.append_config('SOTA_CLIENT_PROV = "aktualizr-hsm-prov"')
         self.append_config('SOTA_CLIENT_FEATURES = "hsm"')
         # note: this will build aktualizr-native as a side-effect
@@ -309,10 +299,11 @@ class HsmTests(oeSelfTest):
         machine = get_bb_var('MACHINE', 'core-image-minimal')
         self.assertEqual(stderr, b'', 'Error: ' + stderr.decode())
         # Strip off line ending.
-        value_str = stdout.decode()[:-1]
-        self.assertEqual(value_str, machine,
-                         'MACHINE does not match hostname: ' + machine + ', ' + value_str)
-        print(value_str)
+        value = stdout.decode()[:-1]
+        self.assertEqual(value, machine,
+                         'MACHINE does not match hostname: ' + machine + ', ' + value +
+                         '\nIs tianocore ovmf installed?')
+        print(value)
         print('Checking output of aktualizr-info:')
         ran_ok = False
         for delay in [0, 1, 2, 5, 10, 15]:
@@ -382,24 +373,7 @@ class HsmTests(oeSelfTest):
         self.assertEqual(p11_m.group(1), hsm_m.group(1), 'Slot number does not match: ' +
                          p11_err.decode() + p11_out.decode() + hsm_err.decode() + hsm_out.decode())
 
-        # Verify that device HAS provisioned.
-        ran_ok = False
-        for delay in [5, 5, 5, 5, 10]:
-            sleep(delay)
-            stdout, stderr, retcode = self.qemu_command('aktualizr-info')
-            if retcode == 0 and stderr == b'' and stdout.decode().find('Fetched metadata: yes') >= 0:
-                ran_ok = True
-                break
-        self.assertIn(b'Device ID: ', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
-        self.assertIn(b'Primary ecu hardware ID: qemux86-64', stdout,
-                      'Provisioning failed: ' + stderr.decode() + stdout.decode())
-        self.assertIn(b'Fetched metadata: yes', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
-        p = re.compile(r'Device ID: ([a-z0-9-]*)\n')
-        m = p.search(stdout.decode())
-        self.assertTrue(m, 'Device ID could not be read: ' + stderr.decode() + stdout.decode())
-        self.assertGreater(m.lastindex, 0, 'Device ID could not be read: ' + stderr.decode() + stdout.decode())
-        logger = logging.getLogger("selftest")
-        logger.info('Device successfully provisioned with ID: ' + m.group(1))
+        verifyProvisioned(self, machine)
 
 
 def qemu_launch(efi=False, machine=None):
@@ -465,6 +439,26 @@ def akt_native_run(testInst, cmd, **kwargs):
     result = runCmd(cmd, env=env, native_sysroot=sysroot, ignore_status=True, **kwargs)
     testInst.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
 
+
+def verifyProvisioned(testInst, machine):
+    # Verify that device HAS provisioned.
+    ran_ok = False
+    for delay in [5, 5, 5, 5, 10]:
+        sleep(delay)
+        stdout, stderr, retcode = testInst.qemu_command('aktualizr-info')
+        if retcode == 0 and stderr == b'' and stdout.decode().find('Fetched metadata: yes') >= 0:
+            ran_ok = True
+            break
+    testInst.assertIn(b'Device ID: ', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
+    testInst.assertIn(b'Primary ecu hardware ID: ' + machine.encode(), stdout,
+                  'Provisioning failed: ' + stderr.decode() + stdout.decode())
+    testInst.assertIn(b'Fetched metadata: yes', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
+    p = re.compile(r'Device ID: ([a-z0-9-]*)\n')
+    m = p.search(stdout.decode())
+    testInst.assertTrue(m, 'Device ID could not be read: ' + stderr.decode() + stdout.decode())
+    testInst.assertGreater(m.lastindex, 0, 'Device ID could not be read: ' + stderr.decode() + stdout.decode())
+    logger = logging.getLogger("selftest")
+    logger.info('Device successfully provisioned with ID: ' + m.group(1))
 
 
 # vim:set ts=4 sw=4 sts=4 expandtab:
