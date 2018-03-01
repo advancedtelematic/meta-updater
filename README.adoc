@@ -20,7 +20,7 @@ If you already have a Yocto-based project and you want to add atomic filesystem 
 2.  Clone BSP integration layer (`meta-updater-$\{PLATFORM}`, e.g. https://github.com/advancedtelematic/meta-updater-raspberrypi[meta-updater-raspberrypi]) and add it to your `conf/bblayers.conf`. If your board isn't supported yet, you could write a BSP integration for it yourself. See the <<Adding support for your board>> section for the details.
 3.  Set up your https://www.yoctoproject.org/docs/2.1/ref-manual/ref-manual.html#var-DISTRO[distro]. If you are using "poky", the default distro in Yocto, you can change it in your `conf/local.conf` to "poky-sota". Alternatively, if you are using your own or third party distro configuration, you can add `INHERIT += " sota"` to it, thus combining capabilities of your distro with meta-updater features.
 
-You can then build your image as usual, with bitbake. After building the root file system, bitbake will then create an https://ostree.readthedocs.io/en/latest/manual/adapting-existing/[OSTree-enabled version] of it, commit it to your local OSTree repo and (optionally) push it to a remote server. Additionally, a live disk image will be created (normally named `$\{IMAGE_NAME}.-sdimg-ota` e.g. `core-image-raspberrypi3.rpi-sdimg-ota`). You can control this behaviour through <<variables in your local.conf,OSTree-related variables in your local.conf>>.
+You can then build your image as usual, with bitbake. After building the root file system, bitbake will then create an https://ostree.readthedocs.io/en/latest/manual/adapting-existing/[OSTree-enabled version] of it, commit it to your local OSTree repo and (optionally) push it to a remote server. Additionally, a live disk image will be created (normally named `$\{IMAGE_NAME}.-sdimg-ota` e.g. `core-image-raspberrypi3.rpi-sdimg-ota`). You can control this behaviour through <<sota-related-variables-in-localconf,variables in your local.conf>>.
 
 === Build in AGL
 
@@ -73,7 +73,7 @@ You may take a look into https://github.com/advancedtelematic/meta-updater-minno
 
 Although we have used U-Boot so far, other boot loaders can be configured work with OSTree as well.
 
-== SOTA-related variables in `local.conf`
+== SOTA-related variables in local.conf
 
 * `OSTREE_REPO` - path to your OSTree repository. Defaults to `$\{DEPLOY_DIR_IMAGE}/ostree_repo`
 * `OSTREE_OSNAME` - OS deployment name on your target device. For more information about deployments and osnames see the https://ostree.readthedocs.io/en/latest/manual/deployment/[OSTree documentation]. Defaults to "poky".
@@ -151,13 +151,15 @@ SANITY_TESTED_DISTROS = ""
 IMAGE_INSTALL_append = " dropbear "
 ```
 
-3. To be able to build an image for the grub tests, you will need to install https://github.com/tianocore/tianocore.github.io/wiki/OVMF[TianoCore's ovmf] package on your host system. On Debian-like systems, you can do so with this command:
+3. Some tests require that `SOTA_PACKED_CREDENTIALS` is set in your `conf/local.conf`. See the <<sota-related-variables-in-localconf,SOTA-related variables in local.conf>> section.
+
+4. To be able to build an image for the grub tests, you will need to install https://github.com/tianocore/tianocore.github.io/wiki/OVMF[TianoCore's ovmf] package on your host system. On Debian-like systems, you can do so with this command:
 +
 ```
 sudo apt install ovmf
 ```
 
-4. Run oe-selftest:
+5. Run oe-selftest:
 +
 ```
 oe-selftest --run-tests updater
