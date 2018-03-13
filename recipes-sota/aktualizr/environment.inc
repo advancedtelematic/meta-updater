@@ -11,7 +11,8 @@ do_install_append() {
     AKTUALIZR_PARAMETERS_VIRTUALSECS="${AKTUALIZR_PARAMETERS_VIRTUALSECS} --secondary-config $sec"
   done
 
-  echo "AKTUALIZR_CMDLINE_PARAMETERS=${AKTUALIZR_PARAMETERS_CONFIGFILE} ${AKTUALIZR_PARAMETERS_LEGACYSEC} ${AKTUALIZR_PARAMETERS_VIRTUALSECS}" > ${D}${libdir}/sota/sota.env
+  install -d ${D}${sysconfdir}/sota
+  echo "AKTUALIZR_CMDLINE_PARAMETERS=${AKTUALIZR_PARAMETERS_CONFIGFILE} ${AKTUALIZR_PARAMETERS_LEGACYSEC} ${AKTUALIZR_PARAMETERS_VIRTUALSECS}" > ${D}${sysconfdir}/sota/sota.env
 }
 
-FILES_${PN}_append = " ${libdir}/sota/sota.env"
+FILES_${PN}_append = " ${sysconfdir}/sota/sota.env"
