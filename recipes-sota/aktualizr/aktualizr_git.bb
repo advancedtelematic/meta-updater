@@ -18,9 +18,11 @@ PR = "7"
 SRC_URI = " \
   gitsm://github.com/advancedtelematic/aktualizr;branch=${BRANCH} \
   file://aktualizr.service \
+  file://aktualizr-secondary.service \
+  file://aktualizr-secondary.socket \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "dca6271f4ec06eb2272cc99b4b9cf76a9805f18d"
+SRCREV = "fbb3404824c4eb239455c7fa1a794c26e2ea954d"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -28,7 +30,10 @@ S = "${WORKDIR}/git"
 inherit cmake
 
 inherit systemd
+
+SYSTEMD_PACKAGES = "${PN} ${PN}-secondary"
 SYSTEMD_SERVICE_${PN} = "aktualizr.service"
+SYSTEMD_SERVICE_${PN}-secondary = "aktualizr-secondary.socket"
 
 BBCLASSEXTEND =+ "native"
 
@@ -39,6 +44,11 @@ EXTRA_OECMAKE_append_class-native = " -DBUILD_SOTA_TOOLS=ON -DBUILD_OSTREE=OFF -
 do_install_append () {
     rm -fr ${D}${libdir}/systemd
     rm -f ${D}${libdir}/sota/sota.toml # Only needed for the Debian package
+    install -d ${D}${libdir}/sota
+    install -m 0644 ${S}/config/sota_secondary.toml ${D}/${libdir}/sota/sota_secondary.toml
+    install -d ${D}${systemd_unitdir}/system
+    install -m 0644 ${WORKDIR}/aktualizr-secondary.socket ${D}${systemd_unitdir}/system/aktualizr-secondary.socket
+    install -m 0644 ${WORKDIR}/aktualizr-secondary.service ${D}${systemd_unitdir}/system/aktualizr-secondary.service
 }
 do_install_append_class-target () {
     install -d ${D}${systemd_unitdir}/system
@@ -84,6 +94,9 @@ FILES_${PN}-host-tools = " \
 
 FILES_${PN}-secondary = " \
                 ${bindir}/aktualizr-secondary \
+                ${libdir}/sota/sota_secondary.toml \
+                ${systemd_unitdir}/system/aktualizr-secondary.socket \
+                ${systemd_unitdir}/system/aktualizr-secondary.service \
                 "
 
 # Both primary and secondary need the SQL Schemas

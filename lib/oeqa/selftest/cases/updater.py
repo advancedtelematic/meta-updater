@@ -543,6 +543,11 @@ class SecondaryTests(OESelftestTestCase):
         self.assertEqual(retcode, 0, "Unable to run aktualizr-secondary --help")
         self.assertEqual(stderr, b'', 'Error: ' + stderr.decode())
 
+    def test_secondary_listening(self):
+        print('Checking aktualizr-secondary is present')
+        stdout, stderr, retcode = self.qemu_command('echo test | nc localhost 9030')
+        self.assertEqual(retcode, 0, "Unable to connect to secondary")
+
 def qemu_launch(efi=False, machine=None, imagename=None):
     logger = logging.getLogger("selftest")
     logger.info('Running bitbake to build core-image-minimal')
