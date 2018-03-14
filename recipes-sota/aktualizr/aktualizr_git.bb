@@ -20,7 +20,7 @@ SRC_URI = " \
   file://aktualizr.service \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "1a6432175b9fb7326173e8db35d326cc1a1011a1"
+SRCREV = "dca6271f4ec06eb2272cc99b4b9cf76a9805f18d"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -34,27 +34,19 @@ BBCLASSEXTEND =+ "native"
 
 EXTRA_OECMAKE = "-DWARNING_AS_ERROR=OFF -DCMAKE_BUILD_TYPE=Release -DAKTUALIZR_VERSION=${PV} "
 EXTRA_OECMAKE_append_class-target = " -DBUILD_OSTREE=ON -DBUILD_ISOTP=ON ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', '-DBUILD_P11=ON', '', d)} "
-EXTRA_OECMAKE_append_class-native = " -DBUILD_SOTA_TOOLS=ON -DBUILD_OSTREE=OFF "
+EXTRA_OECMAKE_append_class-native = " -DBUILD_SOTA_TOOLS=ON -DBUILD_OSTREE=OFF -DBUILD_SYSTEMD=OFF "
 
 do_install_append () {
     rm -fr ${D}${libdir}/systemd
+    rm -f ${D}${libdir}/sota/sota.toml # Only needed for the Debian package
 }
 do_install_append_class-target () {
-    rm -f ${D}${bindir}/aktualizr_cert_provider
-    rm -f ${D}${bindir}/aktualizr_implicit_writer
-    rm -f ${D}${libdir}/sota/sota.toml
-    ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'secondary-example', '', 'rm -f ${D}${bindir}/example-interface', d)}
-    ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'secondary-isotp-example', '', 'rm -f ${D}${bindir}/isotp-test-interface', d)}
-
     install -d ${D}${systemd_unitdir}/system
     aktualizr_service=${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'serialcan', '${WORKDIR}/aktualizr-serialcan.service', '${WORKDIR}/aktualizr.service', d)}
     install -m 0644 ${aktualizr_service} ${D}${systemd_unitdir}/system/aktualizr.service
 }
 
 do_install_append_class-native () {
-    rm -f ${D}${bindir}/aktualizr
-    rm -f ${D}${bindir}/aktualizr-info
-    rm -f ${D}${bindir}/example-interface
     install -d ${D}${libdir}/sota
     install -m 0644 ${S}/config/sota_autoprov.toml ${D}/${libdir}/sota/sota_autoprov.toml
     install -m 0644 ${S}/config/sota_hsm_prov.toml ${D}/${libdir}/sota/sota_hsm_prov.toml
@@ -65,23 +57,37 @@ do_install_append_class-native () {
     install -m 0644 ${B}/src/sota_tools/garage-sign-prefix/src/garage-sign/lib/* ${D}${libdir}
 }
 
-FILES_${PN}_append = " \
-                ${libdir}/sota \
-                "
+PACKAGES =+ " ${PN}-common ${PN}-examples ${PN}-host-tools ${PN}-secondary "
 
-FILES_${PN}_class-target = " \
+FILES_${PN} = " \
                 ${bindir}/aktualizr \
                 ${bindir}/aktualizr-info \
                 ${systemd_unitdir}/system/aktualizr.service \
                 "
 
-FILES_${PN}_append_class-target = " ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'secondary-example', ' ${bindir}/example-interface', '', d)} "
-FILES_${PN}_append_class-target = " ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'secondary-isotp-example', ' ${bindir}/isotp-test-interface', '', d)} "
-FILES_${PN}_class-native = " \
+FILES_${PN}-common = " \
+                ${libdir}/sota/schemas \
+                "
+
+FILES_${PN}-examples = " \
+                ${libdir}/sota/demo_secondary.json \
+                ${bindir}/example-interface \
+                ${bindir}/isotp-test-interface \
+                "
+
+FILES_${PN}-host-tools = " \
                 ${bindir}/aktualizr_cert_provider \
                 ${bindir}/aktualizr_implicit_writer \
                 ${bindir}/garage-deploy \
                 ${bindir}/garage-push \
                 "
+
+FILES_${PN}-secondary = " \
+                ${bindir}/aktualizr-secondary \
+                "
+
+# Both primary and secondary need the SQL Schemas
+RDEPENDS_${PN}_class-target =+ "${PN}-common"
+RDEPENDS_${PN}-secondary_class-target =+ "${PN}-common"
 
 # vim:set ts=4 sw=4 sts=4 expandtab:
