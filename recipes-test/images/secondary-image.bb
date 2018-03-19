@@ -15,4 +15,7 @@ IMAGE_INSTALL_remove = " \
                         aktualizr-implicit-prov \
                         "
 
-IMAGE_INSTALL_append = " aktualizr-secondary "
+IMAGE_INSTALL_append = " \
+                        aktualizr-secondary \
+                        secondary-network-config \
+                        "

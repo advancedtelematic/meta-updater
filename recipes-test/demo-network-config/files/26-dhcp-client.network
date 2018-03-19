@@ -1,0 +1,6 @@
+[Match]
+Name=enp0s4
+
+[Network]
+Description=Private internal network between aktualizr Primary and Secondary nodes
+DHCP=yes
