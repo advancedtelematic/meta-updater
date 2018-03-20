@@ -570,6 +570,7 @@ def qemu_launch(efi=False, machine=None, imagename=None):
     args.pcap = None
     args.overlay = None
     args.dry_run = False
+    args.secondary_network = False
 
     qemu = QemuCommand(args)
     cmdline = qemu.command_line()
