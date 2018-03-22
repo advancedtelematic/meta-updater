@@ -81,6 +81,7 @@ class QemuCommand(object):
         self.gdb = args.gdb
         self.pcap = args.pcap
         self.overlay = args.overlay
+        self.secondary_network = args.secondary_network
 
     def command_line(self):
         netuser = 'user,hostfwd=tcp:0.0.0.0:%d-:22,restrict=off' % self.ssh_port
@@ -104,6 +105,11 @@ class QemuCommand(object):
         ]
         if self.pcap:
             cmdline += ['-net', 'dump,file=' + self.pcap]
+        if self.secondary_network:
+            cmdline += [
+                '-net', 'nic,vlan=1,macaddr='+random_mac(),
+                '-net', 'socket,vlan=1,mcast=230.0.0.1:1234',
+            ]
         if self.gui:
             cmdline += ["-serial", "stdio"]
         else:
