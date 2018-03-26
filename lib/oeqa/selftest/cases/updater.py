@@ -544,7 +544,7 @@ class SecondaryTests(OESelftestTestCase):
         self.assertEqual(stderr, b'', 'Error: ' + stderr.decode())
 
     def test_secondary_listening(self):
-        print('Checking aktualizr-secondary is present')
+        print('Checking aktualizr-secondary service is listening')
         stdout, stderr, retcode = self.qemu_command('echo test | nc localhost 9030')
         self.assertEqual(retcode, 0, "Unable to connect to secondary")
 
@@ -591,7 +591,7 @@ def qemu_send_command(port, command):
     command = ['ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@localhost -p ' +
                str(port) + ' "' + command + '"']
     s2 = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = s2.communicate()
+    stdout, stderr = s2.communicate(timeout=60)
     return stdout, stderr, s2.returncode
 
 

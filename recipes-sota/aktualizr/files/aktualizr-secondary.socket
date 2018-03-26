@@ -1,5 +1,6 @@
 [Socket]
 ListenStream=9030
+ListenDatagram=9031
 
 [Install]
 WantedBy=sockets.target
