@@ -13,6 +13,8 @@ IMAGE_INSTALL_remove = " \
                         aktualizr-ca-implicit-prov \
                         aktualizr-hsm-prov \
                         aktualizr-implicit-prov \
+                        connman \
+                        connman-client \
                         "
 
 IMAGE_INSTALL_append = " \

@@ -22,7 +22,7 @@ SRC_URI = " \
   file://aktualizr-secondary.socket \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "7d1d71a28a9ff0b14240b98600de3d541835b278"
+SRCREV = "3fc94e7ed20a486da0067f01906250e9d4868931"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -59,6 +59,7 @@ do_install_append_class-target () {
 do_install_append_class-native () {
     install -d ${D}${libdir}/sota
     install -m 0644 ${S}/config/sota_autoprov.toml ${D}/${libdir}/sota/sota_autoprov.toml
+    install -m 0644 ${S}/config/sota_autoprov_primary.toml ${D}/${libdir}/sota/sota_autoprov_primary.toml
     install -m 0644 ${S}/config/sota_hsm_prov.toml ${D}/${libdir}/sota/sota_hsm_prov.toml
     install -m 0644 ${S}/config/sota_implicit_prov.toml ${D}/${libdir}/sota/sota_implicit_prov.toml
     install -m 0644 ${S}/config/sota_implicit_prov_ca.toml ${D}/${libdir}/sota/sota_implicit_prov_ca.toml
