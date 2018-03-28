@@ -73,6 +73,7 @@ PACKAGES =+ " ${PN}-common ${PN}-examples ${PN}-host-tools ${PN}-secondary "
 FILES_${PN} = " \
                 ${bindir}/aktualizr \
                 ${bindir}/aktualizr-info \
+                ${bindir}/aktualizr-check-discovery \
                 ${systemd_unitdir}/system/aktualizr.service \
                 "
 
