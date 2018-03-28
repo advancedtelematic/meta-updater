@@ -548,6 +548,47 @@ class SecondaryTests(OESelftestTestCase):
         stdout, stderr, retcode = self.qemu_command('echo test | nc localhost 9030')
         self.assertEqual(retcode, 0, "Unable to connect to secondary")
 
+
+class PrimaryTests(OESelftestTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super(PrimaryTests, cls).setUpClass()
+        logger = logging.getLogger("selftest")
+        logger.info('Running bitbake to build primary-image')
+        bitbake('primary-image')
+
+    def setUpLocal(self):
+        layer = "meta-updater-qemux86-64"
+        result = runCmd('bitbake-layers show-layers')
+        if re.search(layer, result.output) is None:
+            # Assume the directory layout for finding other layers. We could also
+            # make assumptions by using 'show-layers', but either way, if the
+            # layers we need aren't where we expect them, we are out of like.
+            path = os.path.abspath(os.path.dirname(__file__))
+            metadir = path + "/../../../../../"
+            self.meta_qemu = metadir + layer
+            runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
+        else:
+            self.meta_qemu = None
+        self.append_config('MACHINE = "qemux86-64"')
+        self.append_config('SOTA_CLIENT_PROV = " aktualizr-auto-prov "')
+        self.append_config('SOTA_CLIENT_FEATURES = "secondary-network"')
+        self.qemu, self.s = qemu_launch(machine='qemux86-64', imagename='primary-image')
+
+    def tearDownLocal(self):
+        qemu_terminate(self.s)
+        if self.meta_qemu:
+            runCmd('bitbake-layers remove-layer "%s"' % self.meta_qemu, ignore_status=True)
+
+    def qemu_command(self, command):
+        return qemu_send_command(self.qemu.ssh_port, command)
+
+    def test_aktualizr_present(self):
+        print('Checking aktualizr is present')
+        stdout, stderr, retcode = self.qemu_command('aktualizr --help')
+        self.assertEqual(retcode, 0, "Unable to run aktualizr --help")
+        self.assertEqual(stderr, b'', 'Error: ' + stderr.decode())
+
 def qemu_launch(efi=False, machine=None, imagename=None):
     logger = logging.getLogger("selftest")
     logger.info('Running bitbake to build core-image-minimal')
