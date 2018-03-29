@@ -22,7 +22,7 @@ SRC_URI = " \
   file://aktualizr-secondary.socket \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "178ba9985e23d9c3938d87dd5f2cb39f48f61de6"
+SRCREV = "930d8eef6eb584686654601c056d7c9c6fca3048"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -50,6 +50,7 @@ do_install_append () {
     install -m 0644 ${WORKDIR}/aktualizr-secondary.socket ${D}${systemd_unitdir}/system/aktualizr-secondary.socket
     install -m 0644 ${WORKDIR}/aktualizr-secondary.service ${D}${systemd_unitdir}/system/aktualizr-secondary.service
 }
+
 do_install_append_class-target () {
     install -d ${D}${systemd_unitdir}/system
     aktualizr_service=${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'serialcan', '${WORKDIR}/aktualizr-serialcan.service', '${WORKDIR}/aktualizr.service', d)}
