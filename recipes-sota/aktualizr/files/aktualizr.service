@@ -8,6 +8,7 @@ Requires=network-online.target
 RestartSec=10
 Restart=always
 EnvironmentFile=/usr/lib/sota/sota.env
+EnvironmentFile=-/etc/sota/sota.env
 ExecStart=/usr/bin/aktualizr $AKTUALIZR_CMDLINE_PARAMETERS
 
 [Install]
