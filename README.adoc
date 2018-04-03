@@ -1,10 +1,17 @@
 = meta-updater
+:toc: macro
+:toc-title:
 
 This layer enables over-the-air updates (OTA) with https://github.com/ostreedev/ostree[OSTree] and https://github.com/advancedtelematic/aktualizr[Aktualizr].
 
 https://github.com/ostreedev/ostree[OSTree] is a tool for atomic full file system upgrades with rollback capability. OSTree has several advantages over traditional dual-bank systems, but the most important one is that it minimizes network bandwidth and data storage footprint by sharing files with the same contents across file system deployments.
 
 https://github.com/advancedtelematic/aktualizr[Aktualizr] (and https://github.com/advancedtelematic/rvi_sota_client[RVI SOTA client]) add authentication and provisioning capabilities to OTA and are integrated with OSTree. You can connect with the open-source https://github.com/advancedtelematic/rvi_sota_server[RVI SOTA server] or sign up for a free account at https://app.atsgarage.com[ATS Garage] to get started.
+
+[discrete]
+== Table of Contents
+
+toc::[]
 
 == Build
 
@@ -135,7 +142,24 @@ garage-push --repo=/path/to/ostree-repo --ref=mybranch --credentials=/path/to/cr
 
 You can set `SOTA_PACKED_CREDENTIALS` in your `local.conf` to automatically synchronize your build results with a remote server. Credentials are stored in an archive as described in the https://github.com/advancedtelematic/aktualizr/blob/master/docs/credentials.adoc[aktualizr documentation].
 
-== QA with `oe-selftest`
+== Development configuration
+
+There are a few settings that can be controlled in `local.conf` to simplify the development process:
+
+[options="header"]
+|======================
+| Option                              | Effect
+| `require classes/sota_bleeding.inc` | Build the latest head (by default, using the master branch) of Aktualizr
+| `BRANCH_pn-aktualizr = "mybranch"`
+
+`BRANCH_pn-aktualizr-native = "mybranch"` | Build `mybranch` of Aktualizr. Note that both of these need to be set. This is normally used in conjunction with `require classes/sota_bleeding.inc`
+| `SRCREV_pn-aktualizr = "1004efa3f86cef90c012b34620992b5762b741e3"`
+
+`SRCREV_pn-aktualizr-native = "1004efa3f86cef90c012b34620992b5762b741e3"` | Build the specified revision of Aktualizr. Note that both of these need to be set. This can be used in conjunction with `BRANCH_pn-aktualizr` and `BRANCH_pn-aktualizr-native` but will conflict with `require classes/sota_bleeding.inc`
+| `TOOLCHAIN_HOST_TASK_append = " nativesdk-cmake "` | Use with `bitbake -c populate_sdk core-image-minimal` to build an SDK. See the https://github.com/advancedtelematic/aktualizr#developing-against-an-openembedded-system[aktualizr repo] for more information.
+|======================
+
+== QA with oe-selftest
 
 This layer relies on the test framework oe-selftest for quality assurance. Follow the steps below to run the tests:
 
