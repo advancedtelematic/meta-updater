@@ -33,6 +33,9 @@ def main():
                         help='Use an overlay storage image file. Will be created if it does not exist. ' +
                              'This option lets you have a persistent image without modifying the underlying image ' +
                              'file, permitting multiple different persistent machines.')
+    parser.add_argument('--secondary-network', action='store_true', dest='secondary_network',
+                        help='Give the image a second network card connected to a virtual network. ' +
+                             'This can be used to test Uptane Primary/Secondary communication.')
     parser.add_argument('-n', '--dry-run', help='Print qemu command line rather then run it', action='store_true')
     args = parser.parse_args()
     try:

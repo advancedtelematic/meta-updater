@@ -9,9 +9,9 @@ do_image_ostree[depends] += "ostree-native:do_populate_sysroot \
 
 export OSTREE_REPO
 export OSTREE_BRANCHNAME
+export GARAGE_TARGET_NAME
 
 RAMDISK_EXT ?= ".${OSTREE_INITRAMFS_FSTYPES}"
-export GARAGE_TARGET_NAME
 
 OSTREE_KERNEL ??= "${KERNEL_IMAGETYPE}"
 
@@ -194,7 +194,9 @@ IMAGE_CMD_garagesign () {
         fi
 
         rm -rf ${GARAGE_SIGN_REPO}
-        garage-sign init --repo tufrepo --home-dir ${GARAGE_SIGN_REPO} --credentials ${SOTA_PACKED_CREDENTIALS}
+        garage-sign init --repo tufrepo \
+                         --home-dir ${GARAGE_SIGN_REPO} \
+                         --credentials ${SOTA_PACKED_CREDENTIALS}
 
         ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME})
 
@@ -202,11 +204,23 @@ IMAGE_CMD_garagesign () {
         #   in which case targets.json should be pulled again and the whole procedure repeated
         push_success=0
         for push_retries in $( seq 3 ); do
-            garage-sign targets pull --repo tufrepo --home-dir ${GARAGE_SIGN_REPO}
-            garage-sign targets add --repo tufrepo --home-dir ${GARAGE_SIGN_REPO} --name ${GARAGE_TARGET_NAME} --format OSTREE --version ${ostree_target_hash} --length 0 --url "https://example.com/" --sha256 ${ostree_target_hash} --hardwareids ${MACHINE}
-            garage-sign targets sign --repo tufrepo --home-dir ${GARAGE_SIGN_REPO} --key-name=targets
+            garage-sign targets pull --repo tufrepo \
+                                     --home-dir ${GARAGE_SIGN_REPO}
+            garage-sign targets add --repo tufrepo \
+                                    --home-dir ${GARAGE_SIGN_REPO} \
+                                    --name ${GARAGE_TARGET_NAME} \
+                                    --format OSTREE \
+                                    --version ${ostree_target_hash} \
+                                    --length 0 \
+                                    --url "https://example.com/" \
+                                    --sha256 ${ostree_target_hash} \
+                                    --hardwareids ${MACHINE}
+            garage-sign targets sign --repo tufrepo \
+                                     --home-dir ${GARAGE_SIGN_REPO} \
+                                     --key-name=targets
             errcode=0
-            garage-sign targets push --repo tufrepo --home-dir ${GARAGE_SIGN_REPO} || errcode=$?
+            garage-sign targets push --repo tufrepo \
+                                     --home-dir ${GARAGE_SIGN_REPO} || errcode=$?
             if [ "$errcode" -eq "0" ]; then
                 push_success=1
                 break
