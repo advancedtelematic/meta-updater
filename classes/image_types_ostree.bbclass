@@ -228,6 +228,7 @@ IMAGE_CMD_garagesign () {
                 bbwarn "Push to garage repository has failed, retrying"
             fi
         done
+        rm -rf ${GARAGE_SIGN_REPO}
 
         if [ "$push_success" -ne "1" ]; then
             bberror "Couldn't push to garage repository"
