@@ -22,7 +22,7 @@ SRC_URI = " \
   file://aktualizr-secondary.socket \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "930d8eef6eb584686654601c056d7c9c6fca3048"
+SRCREV = "7ccfc5b4286b9a04915e74a7474a8d3451145e1c"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -36,6 +36,8 @@ SYSTEMD_SERVICE_${PN} = "aktualizr.service"
 SYSTEMD_SERVICE_${PN}-secondary = "aktualizr-secondary.socket"
 
 BBCLASSEXTEND =+ "native"
+
+require garage-sign-version.inc
 
 EXTRA_OECMAKE = "-DWARNING_AS_ERROR=OFF \
                  -DCMAKE_BUILD_TYPE=Release \
