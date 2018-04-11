@@ -201,6 +201,12 @@ IMAGE_CMD_garagesign () {
 
         ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME})
 
+        # Use OSTree target hash as version if none was provided by the user
+        target_version=${ostree_target_hash}
+        if [ -n "${GARAGE_TARGET_VERSION}" ]; then
+            target_version=${GARAGE_TARGET_VERSION}
+        fi
+
         # Push may fail due to race condition when multiple build machines try to push simultaneously
         #   in which case targets.json should be pulled again and the whole procedure repeated
         push_success=0
@@ -211,9 +217,9 @@ IMAGE_CMD_garagesign () {
                                     --home-dir ${GARAGE_SIGN_REPO} \
                                     --name ${GARAGE_TARGET_NAME} \
                                     --format OSTREE \
-                                    --version ${ostree_target_hash} \
+                                    --version ${target_version} \
                                     --length 0 \
-                                    --url "https://example.com/" \
+                                    --url "${GARAGE_TARGET_URL}" \
                                     --sha256 ${ostree_target_hash} \
                                     --hardwareids ${MACHINE}
             garage-sign targets sign --repo tufrepo \
