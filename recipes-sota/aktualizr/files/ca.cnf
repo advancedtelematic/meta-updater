@@ -1,0 +1,10 @@
+[req]
+req_extensions = cacert
+distinguished_name = req_distinguished_name
+
+[req_distinguished_name]
+
+[cacert]
+basicConstraints = critical,CA:true
+keyUsage = keyCertSign
+

@@ -1,0 +1,15 @@
+[Unit]
+Description=Aktualizr SOTA Client
+Wants=network-online.target slcand@ttyACM0.service
+After=network.target network-online.target slcand@ttyACM0.service
+
+Requires=network-online.target
+
+[Service]
+RestartSec=10
+Restart=always
+EnvironmentFile=/usr/lib/sota/sota.env
+ExecStart=/bin/sh -c "(ip addr | grep can0) && /usr/bin/aktualizr $AKTUALIZR_CMDLINE_PARAMETERS"
+
+[Install]
+WantedBy=multi-user.target
