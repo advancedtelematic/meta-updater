@@ -15,6 +15,7 @@ class SotaToolsTests(oeSelfTest):
 
     @classmethod
     def setUpClass(cls):
+        super(SotaToolsTests, cls).setUpClass()
         logger = logging.getLogger("selftest")
         logger.info('Running bitbake to build aktualizr-native tools')
         bitbake('aktualizr-native')
@@ -96,6 +97,7 @@ class AktualizrToolsTests(oeSelfTest):
 
     @classmethod
     def setUpClass(cls):
+        super(AktualizrToolsTests, cls).setUpClass()
         logger = logging.getLogger("selftest")
         logger.info('Running bitbake to build aktualizr-native tools')
         bitbake('aktualizr-native')

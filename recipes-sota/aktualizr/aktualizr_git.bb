@@ -20,7 +20,7 @@ SRC_URI = " \
   file://aktualizr.service \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "930d8eef6eb584686654601c056d7c9c6fca3048"
+SRCREV = "6a2a0db0e557ef0ad95e19baee516a94b67aa566"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -34,10 +34,12 @@ BBCLASSEXTEND =+ "native"
 
 EXTRA_OECMAKE = "-DWARNING_AS_ERROR=OFF -DCMAKE_BUILD_TYPE=Release -DAKTUALIZR_VERSION=${PV} "
 EXTRA_OECMAKE_append_class-target = " -DBUILD_OSTREE=ON -DBUILD_ISOTP=ON ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', '-DBUILD_P11=ON', '', d)} "
-EXTRA_OECMAKE_append_class-native = " -DBUILD_SOTA_TOOLS=ON -DBUILD_OSTREE=OFF "
+EXTRA_OECMAKE_append_class-native = " -DBUILD_SOTA_TOOLS=ON -DBUILD_OSTREE=OFF -DBUILD_SYSTEMD=OFF "
 
 do_install_append () {
     rm -fr ${D}${libdir}/systemd
+    rm -f ${D}${bindir}/aktualizr-secondary
+    rm -f ${D}${bindir}/aktualizr-check-discovery
 }
 
 do_install_append_class-target () {
