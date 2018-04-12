@@ -107,7 +107,11 @@ IMAGE_CMD_otaimg () {
 		# Ensure that /var/local exists (AGL symlinks /usr/local to /var/local)
 		install -d ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/local
 		# Set package version for the first deployment
-		echo "{\"${ostree_target_hash}\":\"${GARAGE_TARGET_NAME}-${ostree_target_hash}\"}" > ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota/installed_versions
+		target_version=${ostree_target_hash}
+		if [ -n "${GARAGE_TARGET_VERSION}" ]; then
+			target_version=${GARAGE_TARGET_VERSION}
+		fi
+		echo "{\"${ostree_target_hash}\":\"${GARAGE_TARGET_NAME}-${target_version}\"}" > ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota/installed_versions
 
 		rm -rf ${HOME_TMP}
 
