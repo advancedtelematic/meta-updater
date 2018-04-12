@@ -33,6 +33,8 @@ OSTREE_BOOTLOADER ??= 'u-boot'
 GARAGE_SIGN_REPO ?= "${DEPLOY_DIR_IMAGE}/garage_sign_repo"
 GARAGE_SIGN_KEYNAME ?= "garage-key"
 GARAGE_TARGET_NAME ?= "${OSTREE_BRANCHNAME}"
+GARAGE_TARGET_VERSION ?= ""
+GARAGE_TARGET_URL ?= "https://example.com/"
 
 SOTA_MACHINE ??="none"
 SOTA_MACHINE_rpi ?= "raspberrypi"
