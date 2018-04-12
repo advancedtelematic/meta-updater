@@ -165,10 +165,25 @@ IMAGE_CMD_ostreepush () {
     # Print warnings if credetials are not set or if the file has not been found.
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         if [ -e ${SOTA_PACKED_CREDENTIALS} ]; then
-            garage-push --repo=${OSTREE_REPO} \
-                        --ref=${OSTREE_BRANCHNAME} \
-                        --credentials=${SOTA_PACKED_CREDENTIALS} \
-                        --cacert=${STAGING_ETCDIR_NATIVE}/ssl/certs/ca-certificates.crt
+            # Retry multiple times in case of push errors on the server side
+            push_success=0
+            for push_retries in $( seq 3 ); do
+                errcode=0
+                garage-push --repo=${OSTREE_REPO} \
+                            --ref=${OSTREE_BRANCHNAME} \
+                            --credentials=${SOTA_PACKED_CREDENTIALS} \
+                            --cacert=${STAGING_ETCDIR_NATIVE}/ssl/certs/ca-certificates.crt || errcode=$?
+                if [ "$errcode" -eq "0" ]; then
+                    push_success=1
+                    break
+                else
+                    bbwarn "Push to garage treehub repository has failed, retrying"
+                fi
+            done
+            if [ "$push_success" -ne "1" ]; then
+                bberror "Couldn't push to garage treehub repository"
+                exit 1
+            fi
         else
             bbwarn "SOTA_PACKED_CREDENTIALS file does not exist."
         fi
