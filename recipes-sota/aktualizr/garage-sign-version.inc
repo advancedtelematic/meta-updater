@@ -14,7 +14,7 @@ python () {
     r = urllib.request.urlopen(url)
     if r.code != 200:
         return
-    resp = r.read()
+    resp = r.read().decode('utf-8')
     j = json.loads(resp)
     version = 'cli-' + j['version'] + '.tgz'
     d.setVar("GARAGE_SIGN_VERSION", version)
