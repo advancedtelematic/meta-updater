@@ -22,7 +22,7 @@ SRC_URI = " \
   file://aktualizr-secondary.socket \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "930d8eef6eb584686654601c056d7c9c6fca3048"
+SRCREV = "7ccfc5b4286b9a04915e74a7474a8d3451145e1c"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -37,9 +37,19 @@ SYSTEMD_SERVICE_${PN}-secondary = "aktualizr-secondary.socket"
 
 BBCLASSEXTEND =+ "native"
 
-EXTRA_OECMAKE = "-DWARNING_AS_ERROR=OFF -DCMAKE_BUILD_TYPE=Release -DAKTUALIZR_VERSION=${PV} "
-EXTRA_OECMAKE_append_class-target = " -DBUILD_OSTREE=ON -DBUILD_ISOTP=ON ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', '-DBUILD_P11=ON', '', d)} "
-EXTRA_OECMAKE_append_class-native = " -DBUILD_SOTA_TOOLS=ON -DBUILD_OSTREE=OFF -DBUILD_SYSTEMD=OFF "
+require garage-sign-version.inc
+
+EXTRA_OECMAKE = "-DWARNING_AS_ERROR=OFF \
+                 -DCMAKE_BUILD_TYPE=Release \
+                 -DAKTUALIZR_VERSION=${PV} "
+EXTRA_OECMAKE_append_class-target = " -DBUILD_OSTREE=ON \
+                                      -DBUILD_ISOTP=ON \
+                                      ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', '-DBUILD_P11=ON', '', d)} "
+EXTRA_OECMAKE_append_class-native = " -DBUILD_SOTA_TOOLS=ON \
+                                      -DBUILD_OSTREE=OFF \
+                                      -DBUILD_SYSTEMD=OFF \
+                                      -DGARAGE_SIGN_VERSION=${GARAGE_SIGN_VERSION} \
+                                      -DGARAGE_SIGN_SHA256=${GARAGE_SIGN_SHA256}"
 
 do_install_append () {
     rm -fr ${D}${libdir}/systemd
@@ -65,8 +75,8 @@ do_install_append_class-native () {
     install -m 0644 ${S}/config/sota_implicit_prov.toml ${D}/${libdir}/sota/sota_implicit_prov.toml
     install -m 0644 ${S}/config/sota_implicit_prov_ca.toml ${D}/${libdir}/sota/sota_implicit_prov_ca.toml
 
-    install -m 0755 ${B}/src/sota_tools/garage-sign-prefix/src/garage-sign/bin/* ${D}${bindir}
-    install -m 0644 ${B}/src/sota_tools/garage-sign-prefix/src/garage-sign/lib/* ${D}${libdir}
+    install -m 0755 ${B}/src/sota_tools/garage-sign/bin/* ${D}${bindir}
+    install -m 0644 ${B}/src/sota_tools/garage-sign/lib/* ${D}${libdir}
 }
 
 PACKAGES =+ " ${PN}-common ${PN}-examples ${PN}-host-tools ${PN}-secondary "
