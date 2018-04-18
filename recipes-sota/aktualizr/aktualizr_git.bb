@@ -5,8 +5,8 @@ SECTION = "base"
 LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=9741c346eef56131163e13b9db1241b3"
 
-DEPENDS = "boost curl openssl libarchive libsodium "
-DEPENDS_append_class-target = "jansson ostree ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', ' libp11', '', d)} "
+DEPENDS = "boost curl openssl libarchive libsodium asn1c-native "
+DEPENDS_append_class-target = "ostree ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', ' libp11', '', d)} "
 DEPENDS_append_class-native = "glib-2.0-native "
 
 RDEPENDS_${PN}_class-target = "lshw "
@@ -20,7 +20,7 @@ SRC_URI = " \
   file://aktualizr.service \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "1a6432175b9fb7326173e8db35d326cc1a1011a1"
+SRCREV = "6a2a0db0e557ef0ad95e19baee516a94b67aa566"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -34,11 +34,14 @@ BBCLASSEXTEND =+ "native"
 
 EXTRA_OECMAKE = "-DWARNING_AS_ERROR=OFF -DCMAKE_BUILD_TYPE=Release -DAKTUALIZR_VERSION=${PV} "
 EXTRA_OECMAKE_append_class-target = " -DBUILD_OSTREE=ON -DBUILD_ISOTP=ON ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', '-DBUILD_P11=ON', '', d)} "
-EXTRA_OECMAKE_append_class-native = " -DBUILD_SOTA_TOOLS=ON -DBUILD_OSTREE=OFF "
+EXTRA_OECMAKE_append_class-native = " -DBUILD_SOTA_TOOLS=ON -DBUILD_OSTREE=OFF -DBUILD_SYSTEMD=OFF "
 
 do_install_append () {
     rm -fr ${D}${libdir}/systemd
+    rm -f ${D}${bindir}/aktualizr-secondary
+    rm -f ${D}${bindir}/aktualizr-check-discovery
 }
+
 do_install_append_class-target () {
     rm -f ${D}${bindir}/aktualizr_cert_provider
     rm -f ${D}${bindir}/aktualizr_implicit_writer

@@ -1,10 +1,17 @@
 = meta-updater
+:toc: macro
+:toc-title:
 
 This layer enables over-the-air updates (OTA) with https://github.com/ostreedev/ostree[OSTree] and https://github.com/advancedtelematic/aktualizr[Aktualizr].
 
 https://github.com/ostreedev/ostree[OSTree] is a tool for atomic full file system upgrades with rollback capability. OSTree has several advantages over traditional dual-bank systems, but the most important one is that it minimizes network bandwidth and data storage footprint by sharing files with the same contents across file system deployments.
 
 https://github.com/advancedtelematic/aktualizr[Aktualizr] (and https://github.com/advancedtelematic/rvi_sota_client[RVI SOTA client]) add authentication and provisioning capabilities to OTA and are integrated with OSTree. You can connect with the open-source https://github.com/advancedtelematic/rvi_sota_server[RVI SOTA server] or sign up for a free account at https://app.atsgarage.com[ATS Garage] to get started.
+
+[discrete]
+== Table of Contents
+
+toc::[]
 
 == Build
 
@@ -20,7 +27,7 @@ If you already have a Yocto-based project and you want to add atomic filesystem 
 2.  Clone BSP integration layer (`meta-updater-$\{PLATFORM}`, e.g. https://github.com/advancedtelematic/meta-updater-raspberrypi[meta-updater-raspberrypi]) and add it to your `conf/bblayers.conf`. If your board isn't supported yet, you could write a BSP integration for it yourself. See the <<Adding support for your board>> section for the details.
 3.  Set up your https://www.yoctoproject.org/docs/2.1/ref-manual/ref-manual.html#var-DISTRO[distro]. If you are using "poky", the default distro in Yocto, you can change it in your `conf/local.conf` to "poky-sota". Alternatively, if you are using your own or third party distro configuration, you can add `INHERIT += " sota"` to it, thus combining capabilities of your distro with meta-updater features.
 
-You can then build your image as usual, with bitbake. After building the root file system, bitbake will then create an https://ostree.readthedocs.io/en/latest/manual/adapting-existing/[OSTree-enabled version] of it, commit it to your local OSTree repo and (optionally) push it to a remote server. Additionally, a live disk image will be created (normally named `$\{IMAGE_NAME}.-sdimg-ota` e.g. `core-image-raspberrypi3.rpi-sdimg-ota`). You can control this behaviour through <<variables in your local.conf,OSTree-related variables in your local.conf>>.
+You can then build your image as usual, with bitbake. After building the root file system, bitbake will then create an https://ostree.readthedocs.io/en/latest/manual/adapting-existing/[OSTree-enabled version] of it, commit it to your local OSTree repo and (optionally) push it to a remote server. Additionally, a live disk image will be created (normally named `$\{IMAGE_NAME}.-sdimg-ota` e.g. `core-image-raspberrypi3.rpi-sdimg-ota`). You can control this behaviour through <<sota-related-variables-in-localconf,variables in your local.conf>>.
 
 === Build in AGL
 
@@ -63,7 +70,7 @@ You may take a look into https://github.com/advancedtelematic/meta-updater-minno
 
 Although we have used U-Boot so far, other boot loaders can be configured work with OSTree as well.
 
-== SOTA-related variables in `local.conf`
+== SOTA-related variables in local.conf
 
 * `OSTREE_REPO` - path to your OSTree repository. Defaults to `$\{DEPLOY_DIR_IMAGE}/ostree_repo`
 * `OSTREE_OSNAME` - OS deployment name on your target device. For more information about deployments and osnames see the https://ostree.readthedocs.io/en/latest/manual/deployment/[OSTree documentation]. Defaults to "poky".
@@ -123,9 +130,26 @@ The https://github.com/advancedtelematic/aktualizr[aktualizr repo] contains a to
 garage-push --repo=/path/to/ostree-repo --ref=mybranch --credentials=/path/to/credentials.zip
 ....
 
-You can set SOTA_PACKED_CREDENTIALS in your local.conf to make your build results be automatically synchronized with a remote server. Credentials are stored in the JSON format described in the https://github.com/advancedtelematic/aktualizr/blob/master/README.sotatools.adoc[garage-push README]. This JSON file can be optionally stored inside a zip file, although if it is stored this way, the JSON file must be named treehub.json.
+You can set `SOTA_PACKED_CREDENTIALS` in your `local.conf` to automatically synchronize your build results with a remote server. Credentials are stored in an archive as described in the https://github.com/advancedtelematic/aktualizr/blob/master/docs/credentials.adoc[aktualizr documentation].
 
-== QA with `oe-selftest`
+== Development configuration
+
+There are a few settings that can be controlled in `local.conf` to simplify the development process:
+
+[options="header"]
+|======================
+| Option                              | Effect
+| `require classes/sota_bleeding.inc` | Build the latest head (by default, using the master branch) of Aktualizr
+| `BRANCH_pn-aktualizr = "mybranch"`
+
+`BRANCH_pn-aktualizr-native = "mybranch"` | Build `mybranch` of Aktualizr. Note that both of these need to be set. This is normally used in conjunction with `require classes/sota_bleeding.inc`
+| `SRCREV_pn-aktualizr = "1004efa3f86cef90c012b34620992b5762b741e3"`
+
+`SRCREV_pn-aktualizr-native = "1004efa3f86cef90c012b34620992b5762b741e3"` | Build the specified revision of Aktualizr. Note that both of these need to be set. This can be used in conjunction with `BRANCH_pn-aktualizr` and `BRANCH_pn-aktualizr-native` but will conflict with `require classes/sota_bleeding.inc`
+| `TOOLCHAIN_HOST_TASK_append = " nativesdk-cmake "` | Use with `bitbake -c populate_sdk core-image-minimal` to build an SDK. See the https://github.com/advancedtelematic/aktualizr#developing-against-an-openembedded-system[aktualizr repo] for more information.
+|======================
+
+== QA with oe-selftest
 
 This layer relies on the test framework oe-selftest for quality assurance. Follow the steps below to run the tests:
 
@@ -141,13 +165,15 @@ SANITY_TESTED_DISTROS = ""
 IMAGE_INSTALL_append = " dropbear "
 ```
 
-3. To be able to build an image for the grub tests, you will need to install https://github.com/tianocore/tianocore.github.io/wiki/OVMF[TianoCore's ovmf] package on your host system. On Debian-like systems, you can do so with this command:
+3. Some tests require that `SOTA_PACKED_CREDENTIALS` is set in your `conf/local.conf`. See the <<sota-related-variables-in-localconf,SOTA-related variables in local.conf>> section.
+
+4. To be able to build an image for the grub tests, you will need to install https://github.com/tianocore/tianocore.github.io/wiki/OVMF[TianoCore's ovmf] package on your host system. On Debian-like systems, you can do so with this command:
 +
 ```
 sudo apt install ovmf
 ```
 
-4. Run oe-selftest:
+5. Run oe-selftest:
 +
 ```
 oe-selftest --run-tests updater

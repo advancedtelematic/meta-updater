@@ -15,6 +15,7 @@ class SotaToolsTests(oeSelfTest):
 
     @classmethod
     def setUpClass(cls):
+        super(SotaToolsTests, cls).setUpClass()
         logger = logging.getLogger("selftest")
         logger.info('Running bitbake to build aktualizr-native tools')
         bitbake('aktualizr-native')
@@ -63,7 +64,6 @@ class GeneralTests(oeSelfTest):
                          "Java not found. Do you have a JDK installed on your host machine?")
 
     def test_add_package(self):
-        print('')
         deploydir = get_bb_var('DEPLOY_DIR_IMAGE')
         imagename = get_bb_var('IMAGE_LINK_NAME', 'core-image-minimal')
         image_path = deploydir + '/' + imagename + '.otaimg'
@@ -97,6 +97,7 @@ class AktualizrToolsTests(oeSelfTest):
 
     @classmethod
     def setUpClass(cls):
+        super(AktualizrToolsTests, cls).setUpClass()
         logger = logging.getLogger("selftest")
         logger.info('Running bitbake to build aktualizr-native tools')
         bitbake('aktualizr-native')
@@ -132,20 +133,34 @@ class AktualizrToolsTests(oeSelfTest):
         self.assertTrue(os.path.getsize(ca_path) > 0, "Client certificate at %s is empty." % ca_path)
 
 
-class QemuTests(oeSelfTest):
+class AutoProvTests(oeSelfTest):
 
-    @classmethod
-    def setUpClass(cls):
-        cls.qemu, cls.s = qemu_launch(machine='qemux86-64')
+    def setUpLocal(self):
+        layer = "meta-updater-qemux86-64"
+        result = runCmd('bitbake-layers show-layers')
+        if re.search(layer, result.output) is None:
+            # Assume the directory layout for finding other layers. We could also
+            # make assumptions by using 'show-layers', but either way, if the
+            # layers we need aren't where we expect them, we are out of like.
+            path = os.path.abspath(os.path.dirname(__file__))
+            metadir = path + "/../../../../"
+            self.meta_qemu = metadir + layer
+            runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
+        else:
+            self.meta_qemu = None
+        self.append_config('MACHINE = "qemux86-64"')
+        self.append_config('SOTA_CLIENT_PROV = " aktualizr-auto-prov "')
+        self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
-    @classmethod
-    def tearDownClass(cls):
-        qemu_terminate(cls.s)
+    def tearDownLocal(self):
+        qemu_terminate(self.s)
+        if self.meta_qemu:
+            runCmd('bitbake-layers remove-layer "%s"' % self.meta_qemu, ignore_status=True)
 
     def qemu_command(self, command):
         return qemu_send_command(self.qemu.ssh_port, command)
 
-    def test_qemu(self):
+    def test_provisioning(self):
         print('Checking machine name (hostname) of device:')
         stdout, stderr, retcode = self.qemu_command('hostname')
         self.assertEqual(retcode, 0, "Unable to check hostname. " +
@@ -153,10 +168,10 @@ class QemuTests(oeSelfTest):
         machine = get_bb_var('MACHINE', 'core-image-minimal')
         self.assertEqual(stderr, b'', 'Error: ' + stderr.decode())
         # Strip off line ending.
-        value_str = stdout.decode()[:-1]
-        self.assertEqual(value_str, machine,
-                         'MACHINE does not match hostname: ' + machine + ', ' + value_str)
-        print(value_str)
+        value = stdout.decode()[:-1]
+        self.assertEqual(value, machine,
+                         'MACHINE does not match hostname: ' + machine + ', ' + value)
+        print(value)
         print('Checking output of aktualizr-info:')
         ran_ok = False
         for delay in [0, 1, 2, 5, 10, 15]:
@@ -167,31 +182,122 @@ class QemuTests(oeSelfTest):
                 break
         self.assertTrue(ran_ok, 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
 
+        verifyProvisioned(self, machine)
+
+
+class RpiTests(oeSelfTest):
+
+    def setUpLocal(self):
+        # Add layers before changing the machine type, otherwise the sanity
+        # checker complains loudly.
+        layer_python = "meta-openembedded/meta-python"
+        layer_rpi = "meta-raspberrypi"
+        layer_upd_rpi = "meta-updater-raspberrypi"
+        result = runCmd('bitbake-layers show-layers')
+        # Assume the directory layout for finding other layers. We could also
+        # make assumptions by using 'show-layers', but either way, if the
+        # layers we need aren't where we expect them, we are out of like.
+        path = os.path.abspath(os.path.dirname(__file__))
+        metadir = path + "/../../../../"
+        if re.search(layer_python, result.output) is None:
+            self.meta_python = metadir + layer_python
+            runCmd('bitbake-layers add-layer "%s"' % self.meta_python)
+        else:
+            self.meta_python = None
+        if re.search(layer_rpi, result.output) is None:
+            self.meta_rpi = metadir + layer_rpi
+            runCmd('bitbake-layers add-layer "%s"' % self.meta_rpi)
+        else:
+            self.meta_rpi = None
+        if re.search(layer_upd_rpi, result.output) is None:
+            self.meta_upd_rpi = metadir + layer_upd_rpi
+            runCmd('bitbake-layers add-layer "%s"' % self.meta_upd_rpi)
+        else:
+            self.meta_upd_rpi = None
+
+        # This is trickier that I would've thought. The fundamental problem is
+        # that the qemu layer changes the u-boot file extension to .rom, but
+        # raspberrypi still expects .bin. To prevent this, the qemu layer must
+        # be temporarily removed if it is present. It has to be removed by name
+        # without the complete path, but to add it back when we are done, we
+        # need the full path.
+        p = re.compile(r'meta-updater-qemux86-64\s*(\S*meta-updater-qemux86-64)\s')
+        m = p.search(result.output)
+        if m and m.lastindex > 0:
+            self.meta_qemu = m.group(1)
+            runCmd('bitbake-layers remove-layer meta-updater-qemux86-64')
+        else:
+            self.meta_qemu = None
+
+        self.append_config('MACHINE = "raspberrypi3"')
+        self.append_config('SOTA_CLIENT_PROV = " aktualizr-auto-prov "')
+
+    def tearDownLocal(self):
+        if self.meta_qemu:
+            runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu, ignore_status=True)
+        if self.meta_upd_rpi:
+            runCmd('bitbake-layers remove-layer "%s"' % self.meta_upd_rpi, ignore_status=True)
+        if self.meta_rpi:
+            runCmd('bitbake-layers remove-layer "%s"' % self.meta_rpi, ignore_status=True)
+        if self.meta_python:
+            runCmd('bitbake-layers remove-layer "%s"' % self.meta_python, ignore_status=True)
+
+    def test_rpi(self):
+        logger = logging.getLogger("selftest")
+        logger.info('Running bitbake to build rpi-basic-image')
+        self.append_config('SOTA_CLIENT_PROV = "aktualizr-auto-prov"')
+        bitbake('rpi-basic-image')
+        credentials = get_bb_var('SOTA_PACKED_CREDENTIALS')
+        # Skip the test if the variable SOTA_PACKED_CREDENTIALS is not set.
+        if credentials is None:
+            raise unittest.SkipTest("Variable 'SOTA_PACKED_CREDENTIALS' not set.")
+        # Check if the file exists.
+        self.assertTrue(os.path.isfile(credentials), "File %s does not exist" % credentials)
+        deploydir = get_bb_var('DEPLOY_DIR_IMAGE')
+        imagename = get_bb_var('IMAGE_LINK_NAME', 'rpi-basic-image')
+        # Check if the credentials are included in the output image.
+        result = runCmd('tar -jtvf %s/%s.tar.bz2 | grep sota_provisioning_credentials.zip' %
+                        (deploydir, imagename), ignore_status=True)
+        self.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
+
 
 class GrubTests(oeSelfTest):
 
     def setUpLocal(self):
-        # This is a bit of a hack but I can't see a better option.
+        layer_intel = "meta-intel"
+        layer_minnow = "meta-updater-minnowboard"
+        result = runCmd('bitbake-layers show-layers')
+        # Assume the directory layout for finding other layers. We could also
+        # make assumptions by using 'show-layers', but either way, if the
+        # layers we need aren't where we expect them, we are out of like.
         path = os.path.abspath(os.path.dirname(__file__))
         metadir = path + "/../../../../"
-        grub_config = 'OSTREE_BOOTLOADER = "grub"\nMACHINE = "intel-corei7-64"'
-        self.append_config(grub_config)
-        self.meta_intel = metadir + "meta-intel"
-        self.meta_minnow = metadir + "meta-updater-minnowboard"
-        runCmd('bitbake-layers add-layer "%s"' % self.meta_intel)
-        runCmd('bitbake-layers add-layer "%s"' % self.meta_minnow)
+        if re.search(layer_intel, result.output) is None:
+            self.meta_intel = metadir + layer_intel
+            runCmd('bitbake-layers add-layer "%s"' % self.meta_intel)
+        else:
+            self.meta_intel = None
+        if re.search(layer_minnow, result.output) is None:
+            self.meta_minnow = metadir + layer_minnow
+            runCmd('bitbake-layers add-layer "%s"' % self.meta_minnow)
+        else:
+            self.meta_minnow = None
+        self.append_config('MACHINE = "intel-corei7-64"')
+        self.append_config('OSTREE_BOOTLOADER = "grub"')
+        self.append_config('SOTA_CLIENT_PROV = " aktualizr-auto-prov "')
         self.qemu, self.s = qemu_launch(efi=True, machine='intel-corei7-64')
 
     def tearDownLocal(self):
         qemu_terminate(self.s)
-        runCmd('bitbake-layers remove-layer "%s"' % self.meta_intel, ignore_status=True)
-        runCmd('bitbake-layers remove-layer "%s"' % self.meta_minnow, ignore_status=True)
+        if self.meta_intel:
+            runCmd('bitbake-layers remove-layer "%s"' % self.meta_intel, ignore_status=True)
+        if self.meta_minnow:
+            runCmd('bitbake-layers remove-layer "%s"' % self.meta_minnow, ignore_status=True)
 
     def qemu_command(self, command):
         return qemu_send_command(self.qemu.ssh_port, command)
 
     def test_grub(self):
-        print('')
         print('Checking machine name (hostname) of device:')
         stdout, stderr, retcode = self.qemu_command('hostname')
         self.assertEqual(retcode, 0, "Unable to check hostname. " +
@@ -214,16 +320,32 @@ class GrubTests(oeSelfTest):
                 break
         self.assertTrue(ran_ok, 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
 
+        verifyProvisioned(self, machine)
+
 
 class ImplProvTests(oeSelfTest):
 
     def setUpLocal(self):
+        layer = "meta-updater-qemux86-64"
+        result = runCmd('bitbake-layers show-layers')
+        if re.search(layer, result.output) is None:
+            # Assume the directory layout for finding other layers. We could also
+            # make assumptions by using 'show-layers', but either way, if the
+            # layers we need aren't where we expect them, we are out of like.
+            path = os.path.abspath(os.path.dirname(__file__))
+            metadir = path + "/../../../../"
+            self.meta_qemu = metadir + layer
+            runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
+        else:
+            self.meta_qemu = None
+        self.append_config('MACHINE = "qemux86-64"')
         self.append_config('SOTA_CLIENT_PROV = " aktualizr-implicit-prov "')
-        # note: this will build aktualizr-native as a side-effect
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
     def tearDownLocal(self):
         qemu_terminate(self.s)
+        if self.meta_qemu:
+            runCmd('bitbake-layers remove-layer "%s"' % self.meta_qemu, ignore_status=True)
 
     def qemu_command(self, command):
         return qemu_send_command(self.qemu.ssh_port, command)
@@ -236,10 +358,10 @@ class ImplProvTests(oeSelfTest):
         machine = get_bb_var('MACHINE', 'core-image-minimal')
         self.assertEqual(stderr, b'', 'Error: ' + stderr.decode())
         # Strip off line ending.
-        value_str = stdout.decode()[:-1]
-        self.assertEqual(value_str, machine,
-                         'MACHINE does not match hostname: ' + machine + ', ' + value_str)
-        print(value_str)
+        value = stdout.decode()[:-1]
+        self.assertEqual(value, machine,
+                         'MACHINE does not match hostname: ' + machine + ', ' + value)
+        print(value)
         print('Checking output of aktualizr-info:')
         ran_ok = False
         for delay in [0, 1, 2, 5, 10, 15]:
@@ -267,36 +389,33 @@ class ImplProvTests(oeSelfTest):
         akt_native_run(self, 'aktualizr_cert_provider -c {creds} -t root@localhost -p {port} -s -g {config}'
                        .format(creds=creds, port=self.qemu.ssh_port, config=config))
 
-        # Verify that device HAS provisioned.
-        ran_ok = False
-        for delay in [5, 5, 5, 5, 10]:
-            sleep(delay)
-            stdout, stderr, retcode = self.qemu_command('aktualizr-info')
-            if retcode == 0 and stderr == b'' and stdout.decode().find('Fetched metadata: yes') >= 0:
-                ran_ok = True
-                break
-        self.assertIn(b'Device ID: ', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
-        self.assertIn(b'Primary ecu hardware ID: qemux86-64', stdout,
-                      'Provisioning failed: ' + stderr.decode() + stdout.decode())
-        self.assertIn(b'Fetched metadata: yes', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
-        p = re.compile(r'Device ID: ([a-z0-9-]*)\n')
-        m = p.search(stdout.decode())
-        self.assertTrue(m, 'Device ID could not be read: ' + stderr.decode() + stdout.decode())
-        self.assertGreater(m.lastindex, 0, 'Device ID could not be read: ' + stderr.decode() + stdout.decode())
-        logger = logging.getLogger("selftest")
-        logger.info('Device successfully provisioned with ID: ' + m.group(1))
+        verifyProvisioned(self, machine)
 
 
 class HsmTests(oeSelfTest):
 
     def setUpLocal(self):
+        layer = "meta-updater-qemux86-64"
+        result = runCmd('bitbake-layers show-layers')
+        if re.search(layer, result.output) is None:
+            # Assume the directory layout for finding other layers. We could also
+            # make assumptions by using 'show-layers', but either way, if the
+            # layers we need aren't where we expect them, we are out of like.
+            path = os.path.abspath(os.path.dirname(__file__))
+            metadir = path + "/../../../../"
+            self.meta_qemu = metadir + layer
+            runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
+        else:
+            self.meta_qemu = None
+        self.append_config('MACHINE = "qemux86-64"')
         self.append_config('SOTA_CLIENT_PROV = "aktualizr-hsm-prov"')
         self.append_config('SOTA_CLIENT_FEATURES = "hsm"')
-        # note: this will build aktualizr-native as a side-effect
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
     def tearDownLocal(self):
         qemu_terminate(self.s)
+        if self.meta_qemu:
+            runCmd('bitbake-layers remove-layer "%s"' % self.meta_qemu, ignore_status=True)
 
     def qemu_command(self, command):
         return qemu_send_command(self.qemu.ssh_port, command)
@@ -309,10 +428,11 @@ class HsmTests(oeSelfTest):
         machine = get_bb_var('MACHINE', 'core-image-minimal')
         self.assertEqual(stderr, b'', 'Error: ' + stderr.decode())
         # Strip off line ending.
-        value_str = stdout.decode()[:-1]
-        self.assertEqual(value_str, machine,
-                         'MACHINE does not match hostname: ' + machine + ', ' + value_str)
-        print(value_str)
+        value = stdout.decode()[:-1]
+        self.assertEqual(value, machine,
+                         'MACHINE does not match hostname: ' + machine + ', ' + value +
+                         '\nIs tianocore ovmf installed?')
+        print(value)
         print('Checking output of aktualizr-info:')
         ran_ok = False
         for delay in [0, 1, 2, 5, 10, 15]:
@@ -382,24 +502,7 @@ class HsmTests(oeSelfTest):
         self.assertEqual(p11_m.group(1), hsm_m.group(1), 'Slot number does not match: ' +
                          p11_err.decode() + p11_out.decode() + hsm_err.decode() + hsm_out.decode())
 
-        # Verify that device HAS provisioned.
-        ran_ok = False
-        for delay in [5, 5, 5, 5, 10]:
-            sleep(delay)
-            stdout, stderr, retcode = self.qemu_command('aktualizr-info')
-            if retcode == 0 and stderr == b'' and stdout.decode().find('Fetched metadata: yes') >= 0:
-                ran_ok = True
-                break
-        self.assertIn(b'Device ID: ', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
-        self.assertIn(b'Primary ecu hardware ID: qemux86-64', stdout,
-                      'Provisioning failed: ' + stderr.decode() + stdout.decode())
-        self.assertIn(b'Fetched metadata: yes', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
-        p = re.compile(r'Device ID: ([a-z0-9-]*)\n')
-        m = p.search(stdout.decode())
-        self.assertTrue(m, 'Device ID could not be read: ' + stderr.decode() + stdout.decode())
-        self.assertGreater(m.lastindex, 0, 'Device ID could not be read: ' + stderr.decode() + stdout.decode())
-        logger = logging.getLogger("selftest")
-        logger.info('Device successfully provisioned with ID: ' + m.group(1))
+        verifyProvisioned(self, machine)
 
 
 def qemu_launch(efi=False, machine=None):
@@ -465,6 +568,26 @@ def akt_native_run(testInst, cmd, **kwargs):
     result = runCmd(cmd, env=env, native_sysroot=sysroot, ignore_status=True, **kwargs)
     testInst.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
 
+
+def verifyProvisioned(testInst, machine):
+    # Verify that device HAS provisioned.
+    ran_ok = False
+    for delay in [5, 5, 5, 5, 10]:
+        sleep(delay)
+        stdout, stderr, retcode = testInst.qemu_command('aktualizr-info')
+        if retcode == 0 and stderr == b'' and stdout.decode().find('Fetched metadata: yes') >= 0:
+            ran_ok = True
+            break
+    testInst.assertIn(b'Device ID: ', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
+    testInst.assertIn(b'Primary ecu hardware ID: ' + machine.encode(), stdout,
+                  'Provisioning failed: ' + stderr.decode() + stdout.decode())
+    testInst.assertIn(b'Fetched metadata: yes', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
+    p = re.compile(r'Device ID: ([a-z0-9-]*)\n')
+    m = p.search(stdout.decode())
+    testInst.assertTrue(m, 'Device ID could not be read: ' + stderr.decode() + stdout.decode())
+    testInst.assertGreater(m.lastindex, 0, 'Device ID could not be read: ' + stderr.decode() + stdout.decode())
+    logger = logging.getLogger("selftest")
+    logger.info('Device successfully provisioned with ID: ' + m.group(1))
 
 
 # vim:set ts=4 sw=4 sts=4 expandtab:
