@@ -23,6 +23,14 @@ do_install() {
         aktualizr_implicit_writer -c ${SOTA_PACKED_CREDENTIALS} \
             -i ${STAGING_DIR_NATIVE}${libdir}/sota/sota_implicit_prov.toml -o ${D}${libdir}/sota/sota.toml -p ${D}
     fi
+
+    if ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'disable_send_ip', 'true', 'false', d)}; then
+      cat << EOF >> ${D}${libdir}/sota/sota.toml
+
+[telemetry]
+report_network = false
+EOF
+    fi
 }
 
 FILES_${PN} = " \
