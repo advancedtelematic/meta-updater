@@ -16,8 +16,6 @@ SRC_URI = " \
 require environment.inc
 require credentials.inc
 
-export SOTA_PACKED_CREDENTIALS
-
 do_install() {
     if [ -n "${SOTA_AUTOPROVISION_CREDENTIALS}" ]; then
         bbwarn "SOTA_AUTOPROVISION_CREDENTIALS are ignored. Please use SOTA_PACKED_CREDENTIALS"
