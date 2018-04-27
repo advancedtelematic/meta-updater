@@ -5,7 +5,7 @@ SECTION = "base"
 LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=9741c346eef56131163e13b9db1241b3"
 
-DEPENDS = "boost curl openssl libarchive libsodium asn1c-native "
+DEPENDS = "boost curl openssl libarchive libsodium asn1c-native sqlite3 "
 DEPENDS_append_class-target = "ostree ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', ' libp11', '', d)} "
 DEPENDS_append_class-native = "glib-2.0-native "
 
