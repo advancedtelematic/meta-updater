@@ -18,15 +18,15 @@ require environment.inc
 require credentials.inc
 
 do_install() {
-    install -d ${D}${libdir}/sota
+    install -m 0700 -d ${D}${libdir}/sota/conf.d
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         aktualizr_implicit_writer -c ${SOTA_PACKED_CREDENTIALS} --no-root-ca \
-            -i ${STAGING_DIR_NATIVE}${libdir}/sota/sota_hsm_prov.toml -o ${D}${libdir}/sota/sota.toml -p ${D}
+            -i ${STAGING_DIR_NATIVE}${libdir}/sota/sota_hsm_prov.toml -o ${D}${libdir}/sota/conf.d/20-sota.toml -p ${D}
     fi
 }
 
 FILES_${PN} = " \
-                ${libdir}/sota/sota.toml \
+                ${libdir}/sota/conf.d/20-sota.toml \
                 "
 
 # vim:set ts=4 sw=4 sts=4 expandtab:

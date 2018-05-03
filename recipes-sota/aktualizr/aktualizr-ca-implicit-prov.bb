@@ -26,7 +26,7 @@ export SOTA_CACERT_PATH
 export SOTA_CAKEY_PATH
 
 do_install() {
-    install -d ${D}${libdir}/sota
+    install -m 0700 -d ${D}${libdir}/sota/conf.d
 
     if [ -z "${SOTA_PACKED_CREDENTIALS}" ]; then
         bberror "SOTA_PACKED_CREDENTIALS are required for implicit provisioning"
@@ -51,21 +51,20 @@ do_install() {
         bberror "SOTA_CAKEY_PATH should be set when using implicit provisioning"
     fi
 
-    install -d ${D}${libdir}/sota
-    install -d ${D}${localstatedir}/sota
-    install -m 0644 ${STAGING_DIR_NATIVE}${libdir}/sota/sota_implicit_prov_ca.toml ${D}${libdir}/sota/sota.toml
+    install -m 0700 -d ${D}${localstatedir}/sota
+    install -m 0644 ${STAGING_DIR_NATIVE}${libdir}/sota/sota_implicit_prov_ca.toml ${D}${libdir}/sota/conf.d/20-sota.toml
     aktualizr_cert_provider --credentials ${SOTA_PACKED_CREDENTIALS} \
                             --device-ca ${SOTA_CACERT_PATH} \
                             --device-ca-key ${SOTA_CAKEY_PATH} \
                             --root-ca \
                             --server-url \
                             --local ${D}${localstatedir}/sota \
-                            --config ${D}${libdir}/sota/sota.toml
+                            --config ${D}${libdir}/sota/conf.d/20-sota.toml
 }
 
 FILES_${PN} = " \
                 ${localstatedir}/sota/* \
-                ${libdir}/sota/sota.toml \
+                ${libdir}/sota/conf.d/20-sota.toml \
                 ${libdir}/sota/root.crt \
                 "
 
