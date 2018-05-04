@@ -23,9 +23,9 @@ If you don't already have a Yocto project that you want to add OTA to, you can u
 
 If you already have a Yocto-based project and you want to add atomic filesystem updates to it, you just need to do three things:
 
-1.  Clone the `meta-updater` layer and add it to your https://www.yoctoproject.org/docs/2.1/ref-manual/ref-manual.html#structure-build-conf-bblayers.conf[bblayers.conf].
+1.  Clone the `meta-updater` layer and add it to your https://www.yoctoproject.org/docs/current/ref-manual/ref-manual.html#structure-build-conf-bblayers.conf[bblayers.conf].
 2.  Clone BSP integration layer (`meta-updater-$\{PLATFORM}`, e.g. https://github.com/advancedtelematic/meta-updater-raspberrypi[meta-updater-raspberrypi]) and add it to your `conf/bblayers.conf`. If your board isn't supported yet, you could write a BSP integration for it yourself. See the <<Adding support for your board>> section for the details.
-3.  Set up your https://www.yoctoproject.org/docs/2.1/ref-manual/ref-manual.html#var-DISTRO[distro]. If you are using "poky", the default distro in Yocto, you can change it in your `conf/local.conf` to "poky-sota". Alternatively, if you are using your own or third party distro configuration, you can add `INHERIT += " sota"` to it, thus combining capabilities of your distro with meta-updater features.
+3.  Set up your https://www.yoctoproject.org/docs/current/ref-manual/ref-manual.html#var-DISTRO[distro]. If you are using "poky", the default distro in Yocto, you can change it in your `conf/local.conf` to "poky-sota". Alternatively, if you are using your own or third party distro configuration, you can add `INHERIT += " sota"` to it, thus combining capabilities of your distro with meta-updater features.
 
 You can then build your image as usual, with bitbake. After building the root file system, bitbake will then create an https://ostree.readthedocs.io/en/latest/manual/adapting-existing/[OSTree-enabled version] of it, commit it to your local OSTree repo and (optionally) push it to a remote server. Additionally, a live disk image will be created (normally named `$\{IMAGE_NAME}.-sdimg-ota` e.g. `core-image-raspberrypi3.rpi-sdimg-ota`). You can control this behaviour through <<sota-related-variables-in-localconf,variables in your local.conf>>.
 
@@ -47,7 +47,7 @@ and get as a result an `ostree_repo` folder in your images directory (`tmp/deplo
 
 * your OSTree repository, with the rootfs committed as an OSTree deployment,
 * an `otaimg` bootstrap image, which is an OSTree physical sysroot as a burnable filesystem image, and optionally
-* some machine-dependent live images (e.g. `.rpi-sdimg-ota` for Raspberry Pi or `.porter-sdimg-ota` Renesas Porter board).
+* some machine-dependent live images (e.g. `.wic` for Raspberry Pi or `.porter-sdimg-ota` Renesas Porter board).
 
 Although `aglsetup.sh` hooks provide reasonable defaults for SOTA-related variables, you may want to tune some of them.
 
@@ -86,9 +86,8 @@ Although we have used U-Boot so far, other boot loaders can be configured work w
 * `OSTREE_OSNAME` - OS deployment name on your target device. For more information about deployments and osnames see the https://ostree.readthedocs.io/en/latest/manual/deployment/[OSTree documentation]. Defaults to "poky".
 * `OSTREE_INITRAMFS_IMAGE` - initramfs/initrd image that is used as a proxy while booting into OSTree deployment. Do not change this setting unless you are sure that your initramfs can serve as such a proxy.
 * `SOTA_PACKED_CREDENTIALS` - when set, your ostree commit will be pushed to a remote repo as a bitbake step. This should be the path to a zipped credentials file in https://github.com/advancedtelematic/aktualizr/blob/master/docs/credentials.adoc[the format accepted by garage-push].
-* `SOTA_CLIENT_PROV` - which provisioning method to use. Valid options are https://github.com/advancedtelematic/aktualizr/blob/master/docs/automatic-provisioning.adoc[`aktualizr-auto-prov`], https://github.com/advancedtelematic/aktualizr/blob/master/docs/implicit-provisioning.adoc[`aktualizr-implicit-prov`], and `aktualizr-hsm-prov`. The default is `aktualizr-auto-prov`. This can also be set to an empty string to avoid using a provisioning recipe.
+* `SOTA_CLIENT_PROV` - which provisioning method to use. Valid options are https://github.com/advancedtelematic/aktualizr/blob/master/docs/automatic-provisioning.adoc[`aktualizr-auto-prov`], https://github.com/advancedtelematic/aktualizr/blob/master/docs/implicit-provisioning.adoc[`aktualizr-implicit-prov`], and https://github.com/advancedtelematic/aktualizr/blob/master/docs/hsm-provisioning.adoc[`aktualizr-hsm-prov`]. The default is `aktualizr-auto-prov`. This can also be set to an empty string to avoid using a provisioning recipe.
 * `SOTA_CLIENT_FEATURES` - extensions to aktualizr. The only valid option is `hsm` (to build with HSM support)
-* `SOTA_LEGACY_SECONDARY_INTERFACE` - path to a https://github.com/advancedtelematic/aktualizr/blob/master/docs/legacysecondary.adoc[legacy secondary interface] installed on the device. To use the example interface from the Aktualizr repo, use `/usr/bin/example-interface` and make sure `IMAGE_INSTALL_append` includes `aktualizr-examples`.
 * `SOTA_SECONDARY_ECUS` - a list of paths separated by spaces of JSON configuration files for virtual secondaries on the host. These will be installed into `/var/sota/ecus` on the device.
 * `SOTA_VIRTUAL_SECONDARIES` - a list of paths separated by spaces of JSON configuration files for virtual secondaries installed on the device. If `SOTA_SECONDARY_ECUS` is used to install them, then you can expect them to be installed in `/var/sota/ecus`.
 
@@ -141,6 +140,20 @@ garage-push --repo=/path/to/ostree-repo --ref=mybranch --credentials=/path/to/cr
 ....
 
 You can set `SOTA_PACKED_CREDENTIALS` in your `local.conf` to automatically synchronize your build results with a remote server. Credentials are stored in an archive as described in the https://github.com/advancedtelematic/aktualizr/blob/master/docs/credentials.adoc[aktualizr documentation].
+
+=== aktualizr configuration
+
+https://github.com/advancedtelematic/aktualizr[Aktualizr] supports a variety of https://github.com/advancedtelematic/aktualizr/blob/master/docs/configuration.adoc[configuration options via a configuration file and the command line]. There are two primary ways to control aktualizr's configuration from meta-updater.
+
+First, you can set `SOTA_CLIENT_PROV` to control which provisioning recipe is used. Each recipe installs an appropriate `sota.toml` file from aktualizr according to the provisioning needs. See the <<sota-related-variables-in-localconf,SOTA-related variables in local.conf>> section for more information.
+
+Second, you can write recipes to install additional config files with customized options. A few recipes already exist to address common needs and provide an example:
+
+* link:recipes-sota/config/aktualizr-example-interface.bb[aktualizr-example-interface.bb] will configure aktualizr to connect to an example interface for a legacy flasher. This is intended to be used in conjunction with the `aktualizr-examples` package. See https://github.com/advancedtelematic/aktualizr/blob/master/docs/legacysecondary.adoc[legacysecondary.adoc] in the aktualizr repo for more information.
+* link:recipes-sota/config/aktualizr-disable-send-ip.bb[aktualizr-disable-send-ip.bb] disables the reporting of networking information to the server. This is enabled by default and supported by https://app.atsgarage.com[ATS Garage]. However, if you are using a different server that does not support this feature, you may want to disable it in aktualizr.
+* link:recipes-sota/config/aktualizr-log-debug.bb[aktualizr-log-debug.bb] sets the log level of aktualizr to 0 (trace). The default is 2 (info). This recipe is intended for development and debugging purposes.
+
+To use these recipes, you will need to add them to your image with a line such as `IMAGE_INSTALL_append = " aktualizr-log-debug "` in your `local.conf`.
 
 == Development configuration
 

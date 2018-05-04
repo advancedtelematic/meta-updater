@@ -16,8 +16,6 @@ SRC_URI = " \
 require environment.inc
 require credentials.inc
 
-export SOTA_PACKED_CREDENTIALS
-
 do_install() {
     if [ -n "${SOTA_AUTOPROVISION_CREDENTIALS}" ]; then
         bbwarn "SOTA_AUTOPROVISION_CREDENTIALS are ignored. Please use SOTA_PACKED_CREDENTIALS"
@@ -32,12 +30,12 @@ do_install() {
         bbwarn "OSTREE_PUSH_CREDENTIALS is ignored. Please use SOTA_PACKED_CREDENTIALS"
     fi
 
-    install -d ${D}${libdir}/sota
-    install -d ${D}${localstatedir}/sota
+    install -m 0700 -d ${D}${libdir}/sota/conf.d
+    install -m 0700 -d ${D}${localstatedir}/sota
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         aktualizr_toml=${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'secondary-network', 'sota_autoprov_primary.toml', 'sota_autoprov.toml', d)}
 
-        install -m 0644 ${STAGING_DIR_NATIVE}${libdir}/sota/${aktualizr_toml} ${D}${libdir}/sota/sota.toml
+        install -m 0644 ${STAGING_DIR_NATIVE}${libdir}/sota/${aktualizr_toml} ${D}${libdir}/sota/conf.d/20-sota.toml
 
         # deploy SOTA credentials
         if [ -e ${SOTA_PACKED_CREDENTIALS} ]; then
@@ -49,7 +47,7 @@ do_install() {
 }
 
 FILES_${PN} = " \
-                ${libdir}/sota/sota.toml \
+                ${libdir}/sota/conf.d/20-sota.toml \
                 ${localstatedir}/sota \
                 ${localstatedir}/sota/sota_provisioning_credentials.zip \
                 "
