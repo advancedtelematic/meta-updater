@@ -16,10 +16,9 @@ S = "${WORKDIR}/git"
 
 BBCLASSEXTEND = "native"
 
-DEPENDS += "attr libarchive glib-2.0 pkgconfig gpgme libgsystem fuse e2fsprogs gtk-doc-native curl xz"
+DEPENDS += "attr libarchive libcap glib-2.0 gpgme libgsystem fuse e2fsprogs curl xz"
 DEPENDS_append = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', ' systemd', '', d)}"
-
-RDEPENDS_${PN} = "util-linux-libuuid util-linux-libblkid util-linux-libmount libcap bash"
+RDEPENDS_${PN} = "bash"
 
 CFLAGS_append = " -Wno-error=missing-prototypes"
 EXTRA_OECONF = "--disable-gtk-doc --disable-man --with-smack --with-builtin-grub2-mkconfig --with-curl --without-soup"
