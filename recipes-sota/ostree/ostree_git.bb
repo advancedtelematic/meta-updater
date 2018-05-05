@@ -17,12 +17,15 @@ S = "${WORKDIR}/git"
 BBCLASSEXTEND = "native"
 
 DEPENDS += "attr libarchive libcap glib-2.0 gpgme libgsystem fuse e2fsprogs curl xz"
-DEPENDS_append = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', ' systemd', '', d)}"
+DEPENDS += "${@bb.utils.filter('DISTRO_FEATURES', 'systemd', d)}"
 RDEPENDS_${PN} = "bash"
 
 CFLAGS_append = " -Wno-error=missing-prototypes"
 EXTRA_OECONF = "--disable-gtk-doc --disable-man --with-smack --with-builtin-grub2-mkconfig --with-curl --without-soup"
 EXTRA_OECONF_append_class-native = " --enable-wrpseudo-compat"
+
+PACKAGECONFIG ??= "${@bb.utils.filter('DISTRO_FEATURES', 'systemd', d)}"
+PACKAGECONFIG[systemd] = "--with-systemdsystemunitdir=${systemd_unitdir}/system/ --with-dracut"
 
 # Path to ${prefix}/lib/ostree/ostree-grub-generator is hardcoded on the
 #  do_configure stage so we do depend on it
@@ -30,12 +33,7 @@ SYSROOT_DIR = "${STAGING_DIR_TARGET}"
 SYSROOT_DIR_class-native = "${STAGING_DIR_NATIVE}"
 do_configure[vardeps] += "SYSROOT_DIR"
 
-SYSTEMD_REQUIRED = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}"
-
 SYSTEMD_SERVICE_${PN} = "ostree-prepare-root.service ostree-remount.service"
-
-PACKAGECONFIG ??= "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'systemd', '', d)}"
-PACKAGECONFIG[systemd] = "--with-systemdsystemunitdir=${systemd_unitdir}/system/ --with-dracut"
 
 FILES_${PN} += "${libdir}/ostree/ ${libdir}/ostbuild"
 
@@ -49,23 +47,13 @@ do_configure_prepend() {
     NOCONFIGURE=1 "${S}/autogen.sh"
 }
 
-export SYSTEMD_REQUIRED
-
-do_install_append() {
-    if [ -n ${SYSTEMD_REQUIRED} ]; then
-        install -m 0644 -D ${S}/src/boot/ostree-prepare-root.service ${D}${systemd_unitdir}/system/ostree-prepare-root.service
-        install -m 0644 -D ${S}/src/boot/ostree-remount.service ${D}${systemd_unitdir}/system/ostree-remount.service
-    fi
-}
-
 do_install_append_class-native() {
     create_wrapper ${D}${bindir}/ostree OSTREE_GRUB2_EXEC="${STAGING_LIBDIR_NATIVE}/ostree/ostree-grub-generator"
 }
 
 
 FILES_${PN} += " \
-    ${@'${systemd_unitdir}/system/' if d.getVar('SYSTEMD_REQUIRED', True) else ''} \
-    ${@'${libdir}/dracut/modules.d/98ostree/module-setup.sh' if d.getVar('SYSTEMD_REQUIRED', True) else ''} \
+    ${@bb.utils.contains('DISTRO_FEATURES','systemd','${libdir}/dracut', '', d)} \
     ${datadir}/gir-1.0 \
     ${datadir}/gir-1.0/OSTree-1.0.gir \
     ${libdir}/girepository-1.0 \
