@@ -45,18 +45,14 @@ PACKAGECONFIG[systemd] = "--with-systemdsystemunitdir=${systemd_unitdir}/system/
 
 FILES_${PN} += "${libdir}/ostree/ ${libdir}/ostbuild"
 
+export BUILD_SYS
+export HOST_SYS
 export STAGING_INCDIR
 export STAGING_LIBDIR
 
-do_configure() {
+do_configure_prepend() {
     unset docdir
     NOCONFIGURE=1 "${S}/autogen.sh"
-    oe_runconf
-}
-
-do_compile_prepend() {
-    export BUILD_SYS="${BUILD_SYS}"
-    export HOST_SYS="${HOST_SYS}"
 }
 
 export SYSTEMD_REQUIRED
