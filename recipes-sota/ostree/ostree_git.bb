@@ -5,8 +5,6 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=5f30f0716dfdd0d91eb439ebec522ec2"
 
 inherit autotools pkgconfig systemd gobject-introspection
 
-INHERIT_remove_class-native = "systemd"
-
 SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master"
 
 SRCREV="854a823e05d6fe8b610c02c2a71eaeb2bf1e98a6"
@@ -20,7 +18,6 @@ BBCLASSEXTEND = "native"
 
 DEPENDS += "attr libarchive glib-2.0 pkgconfig gpgme libgsystem fuse e2fsprogs gtk-doc-native curl xz"
 DEPENDS_append = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', ' systemd', '', d)}"
-DEPENDS_remove_class-native = "systemd-native"
 
 RDEPENDS_${PN} = "util-linux-libuuid util-linux-libblkid util-linux-libmount libcap bash"
 
@@ -35,13 +32,10 @@ SYSROOT_DIR_class-native = "${STAGING_DIR_NATIVE}"
 do_configure[vardeps] += "SYSROOT_DIR"
 
 SYSTEMD_REQUIRED = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}"
-SYSTEMD_REQUIRED_class-native = ""
 
 SYSTEMD_SERVICE_${PN} = "ostree-prepare-root.service ostree-remount.service"
-SYSTEMD_SERVICE_${PN}_class-native = ""
 
 PACKAGECONFIG ??= "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'systemd', '', d)}"
-PACKAGECONFIG_class-native = ""
 PACKAGECONFIG[systemd] = "--with-systemdsystemunitdir=${systemd_unitdir}/system/ --with-dracut"
 
 FILES_${PN} += "${libdir}/ostree/ ${libdir}/ostbuild"
@@ -86,4 +80,3 @@ PACKAGES =+ "${PN}-switchroot"
 
 FILES_${PN}-switchroot = "${libdir}/ostree/ostree-prepare-root"
 RDEPENDS_${PN}-switchroot = ""
-DEPENDS_remove_class-native = "systemd-native"
