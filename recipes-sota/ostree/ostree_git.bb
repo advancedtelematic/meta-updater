@@ -1,5 +1,6 @@
 SUMMARY = "Tool for managing bootable, immutable, versioned filesystem trees"
-LICENSE = "GPLv2+"
+HOMEPAGE = "https://ostree.readthedocs.io/en/latest/"
+LICENSE = "LGPLv2+"
 LIC_FILES_CHKSUM = "file://COPYING;md5=5f30f0716dfdd0d91eb439ebec522ec2"
 
 inherit autotools pkgconfig systemd gobject-introspection
