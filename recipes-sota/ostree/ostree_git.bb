@@ -24,7 +24,8 @@ DEPENDS_remove_class-native = "systemd-native"
 
 RDEPENDS_${PN} = "util-linux-libuuid util-linux-libblkid util-linux-libmount libcap bash"
 
-EXTRA_OECONF = "CFLAGS='-Wno-error=missing-prototypes' --with-libarchive --disable-gtk-doc --disable-gtk-doc-html --disable-gtk-doc-pdf --disable-man --with-smack --with-builtin-grub2-mkconfig --with-curl --without-soup"
+CFLAGS_append = " -Wno-error=missing-prototypes"
+EXTRA_OECONF = "--disable-gtk-doc --disable-man --with-smack --with-builtin-grub2-mkconfig --with-curl --without-soup"
 EXTRA_OECONF_append_class-native = " --enable-wrpseudo-compat"
 
 # Path to ${prefix}/lib/ostree/ostree-grub-generator is hardcoded on the
