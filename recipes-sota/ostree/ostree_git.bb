@@ -48,27 +48,27 @@ export STAGING_INCDIR
 export STAGING_LIBDIR
 
 do_configure() {
- unset docdir
- NOCONFIGURE=1 "${S}/autogen.sh"
- oe_runconf
+    unset docdir
+    NOCONFIGURE=1 "${S}/autogen.sh"
+    oe_runconf
 }
 
 do_compile_prepend() {
- export BUILD_SYS="${BUILD_SYS}"
- export HOST_SYS="${HOST_SYS}"
+    export BUILD_SYS="${BUILD_SYS}"
+    export HOST_SYS="${HOST_SYS}"
 }
 
 export SYSTEMD_REQUIRED
 
 do_install_append() {
- if [ -n ${SYSTEMD_REQUIRED} ]; then
-  install -m 0644 -D ${S}/src/boot/ostree-prepare-root.service ${D}${systemd_unitdir}/system/ostree-prepare-root.service
-  install -m 0644 -D ${S}/src/boot/ostree-remount.service ${D}${systemd_unitdir}/system/ostree-remount.service
- fi
+    if [ -n ${SYSTEMD_REQUIRED} ]; then
+        install -m 0644 -D ${S}/src/boot/ostree-prepare-root.service ${D}${systemd_unitdir}/system/ostree-prepare-root.service
+        install -m 0644 -D ${S}/src/boot/ostree-remount.service ${D}${systemd_unitdir}/system/ostree-remount.service
+    fi
 }
 
 do_install_append_class-native() {
-	create_wrapper ${D}${bindir}/ostree OSTREE_GRUB2_EXEC="${STAGING_LIBDIR_NATIVE}/ostree/ostree-grub-generator"
+    create_wrapper ${D}${bindir}/ostree OSTREE_GRUB2_EXEC="${STAGING_LIBDIR_NATIVE}/ostree/ostree-grub-generator"
 }
 
 
@@ -89,4 +89,3 @@ PACKAGES =+ "${PN}-switchroot"
 FILES_${PN}-switchroot = "${libdir}/ostree/ostree-prepare-root"
 RDEPENDS_${PN}-switchroot = ""
 DEPENDS_remove_class-native = "systemd-native"
-
