@@ -22,7 +22,7 @@ SRC_URI = " \
   file://aktualizr-secondary.socket \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "5fa9a79f1fb29266c862a9a6cb32082bb77844a5"
+SRCREV = "617d6d9242239a5719296f18e207ac4d8d94b7b2"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -41,7 +41,8 @@ require garage-sign-version.inc
 
 EXTRA_OECMAKE = "-DWARNING_AS_ERROR=OFF \
                  -DCMAKE_BUILD_TYPE=Release \
-                 -DAKTUALIZR_VERSION=${PV} "
+                 -DAKTUALIZR_VERSION=${PV} \
+                 -DBUILD_LOAD_TESTS=OFF"
 EXTRA_OECMAKE_append_class-target = " -DBUILD_OSTREE=ON \
                                       -DBUILD_ISOTP=ON \
                                       ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', '-DBUILD_P11=ON', '', d)} "
