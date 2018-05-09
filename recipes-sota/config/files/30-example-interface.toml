@@ -1,0 +1,2 @@
+[uptane]
+legacy_interface = "/usr/bin/example-interface"
