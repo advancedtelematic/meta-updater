@@ -7,11 +7,12 @@ LIC_FILES_CHKSUM = "file://${WORKDIR}/LICENSE;md5=9741c346eef56131163e13b9db1241
 
 SRC_URI = " \
             file://LICENSE \
+            file://30-example-interface.toml \
             "
 
 do_install_append () {
     install -m 0700 -d ${D}${libdir}/sota/conf.d
-    echo "[uptane]\nlegacy_interface = \"/usr/bin/example-interface\"\n" > ${D}${libdir}/sota/conf.d/30-example-interface.toml
+    install -m 0644 ${WORKDIR}/30-example-interface.toml ${D}${libdir}/sota/conf.d/30-example-interface.toml
 }
 
 FILES_${PN} = " \

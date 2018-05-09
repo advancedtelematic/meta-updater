@@ -7,11 +7,12 @@ LIC_FILES_CHKSUM = "file://${WORKDIR}/LICENSE;md5=9741c346eef56131163e13b9db1241
 
 SRC_URI = " \
             file://LICENSE \
+            file://30-disable-send-ip.toml \
             "
 
 do_install_append () {
     install -m 0700 -d ${D}${libdir}/sota/conf.d
-    echo "[telemetry]\nreport_network = false\n" > ${D}${libdir}/sota/conf.d/30-disable-send-ip.toml
+    install -m 0644 ${WORKDIR}/30-disable-send-ip.toml ${D}${libdir}/sota/conf.d/30-disable-send-ip.toml
 }
 
 FILES_${PN} = " \
