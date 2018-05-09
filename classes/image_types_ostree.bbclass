@@ -165,7 +165,7 @@ IMAGE_CMD_ostreepush () {
     # Print warnings if credetials are not set or if the file has not been found.
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         if [ -e ${SOTA_PACKED_CREDENTIALS} ]; then
-            garage-push --repo=${OSTREE_REPO} \
+            garage-push -vv --repo=${OSTREE_REPO} \
                         --ref=${OSTREE_BRANCHNAME} \
                         --credentials=${SOTA_PACKED_CREDENTIALS} \
                         --cacert=${STAGING_ETCDIR_NATIVE}/ssl/certs/ca-certificates.crt
