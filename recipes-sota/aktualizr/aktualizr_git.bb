@@ -56,6 +56,11 @@ do_install_append () {
     rm -fr ${D}${libdir}/systemd
     rm -f ${D}${libdir}/sota/sota.toml # Only needed for the Debian package
     install -m 0700 -d ${D}${libdir}/sota/conf.d
+    install -m 0644 ${S}/config/sota_autoprov.toml ${D}/${libdir}/sota/sota_autoprov.toml
+    install -m 0644 ${S}/config/sota_autoprov_primary.toml ${D}/${libdir}/sota/sota_autoprov_primary.toml
+    install -m 0644 ${S}/config/sota_hsm_prov.toml ${D}/${libdir}/sota/sota_hsm_prov.toml
+    install -m 0644 ${S}/config/sota_implicit_prov.toml ${D}/${libdir}/sota/sota_implicit_prov.toml
+    install -m 0644 ${S}/config/sota_implicit_prov_ca.toml ${D}/${libdir}/sota/sota_implicit_prov_ca.toml
     install -m 0644 ${S}/config/sota_secondary.toml ${D}/${libdir}/sota/sota_secondary.toml
     install -d ${D}${systemd_unitdir}/system
     install -m 0644 ${WORKDIR}/aktualizr-secondary.socket ${D}${systemd_unitdir}/system/aktualizr-secondary.socket
@@ -106,6 +111,11 @@ FILES_${PN}-host-tools = " \
                 ${bindir}/aktualizr_implicit_writer \
                 ${bindir}/garage-deploy \
                 ${bindir}/garage-push \
+                ${libdir}/sota/sota_autoprov.toml \
+                ${libdir}/sota/sota_autoprov_primary.toml \
+                ${libdir}/sota/sota_hsm_prov.toml \
+                ${libdir}/sota/sota_implicit_prov.toml \
+                ${libdir}/sota/sota_implicit_prov_ca.toml \
                 "
 
 FILES_${PN}-secondary = " \
