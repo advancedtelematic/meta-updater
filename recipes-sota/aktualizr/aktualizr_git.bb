@@ -55,7 +55,7 @@ EXTRA_OECMAKE_append_class-native = " -DBUILD_SOTA_TOOLS=ON \
 do_install_append () {
     rm -fr ${D}${libdir}/systemd
     rm -f ${D}${libdir}/sota/sota.toml # Only needed for the Debian package
-    install -m 0700 -d ${D}${libdir}/sota/conf.d
+    install -d ${D}${libdir}/sota
     install -m 0644 ${S}/config/sota_autoprov.toml ${D}/${libdir}/sota/sota_autoprov.toml
     install -m 0644 ${S}/config/sota_autoprov_primary.toml ${D}/${libdir}/sota/sota_autoprov_primary.toml
     install -m 0644 ${S}/config/sota_hsm_prov.toml ${D}/${libdir}/sota/sota_hsm_prov.toml
@@ -65,6 +65,7 @@ do_install_append () {
     install -d ${D}${systemd_unitdir}/system
     install -m 0644 ${WORKDIR}/aktualizr-secondary.socket ${D}${systemd_unitdir}/system/aktualizr-secondary.socket
     install -m 0644 ${WORKDIR}/aktualizr-secondary.service ${D}${systemd_unitdir}/system/aktualizr-secondary.service
+    install -m 0700 -d ${D}${libdir}/sota/conf.d
     install -m 0700 -d ${D}${sysconfdir}/sota/conf.d
 }
 
@@ -75,12 +76,6 @@ do_install_append_class-target () {
 }
 
 do_install_append_class-native () {
-    install -m 0644 ${S}/config/sota_autoprov.toml ${D}/${libdir}/sota/sota_autoprov.toml
-    install -m 0644 ${S}/config/sota_autoprov_primary.toml ${D}/${libdir}/sota/sota_autoprov_primary.toml
-    install -m 0644 ${S}/config/sota_hsm_prov.toml ${D}/${libdir}/sota/sota_hsm_prov.toml
-    install -m 0644 ${S}/config/sota_implicit_prov.toml ${D}/${libdir}/sota/sota_implicit_prov.toml
-    install -m 0644 ${S}/config/sota_implicit_prov_ca.toml ${D}/${libdir}/sota/sota_implicit_prov_ca.toml
-
     install -m 0755 ${B}/src/sota_tools/garage-sign/bin/* ${D}${bindir}
     install -m 0644 ${B}/src/sota_tools/garage-sign/lib/* ${D}${libdir}
 }
