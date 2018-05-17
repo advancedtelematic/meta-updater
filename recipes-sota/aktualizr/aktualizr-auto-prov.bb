@@ -47,6 +47,7 @@ do_install() {
 }
 
 FILES_${PN} = " \
+                ${libdir}/sota/conf.d \
                 ${libdir}/sota/conf.d/20-sota.toml \
                 ${localstatedir}/sota \
                 ${localstatedir}/sota/sota_provisioning_credentials.zip \
