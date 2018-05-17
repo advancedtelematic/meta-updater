@@ -22,7 +22,7 @@ SRC_URI = " \
   file://aktualizr-secondary.socket \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "fe766d1b9fb42f74394aa3abd9ac80221669f67c"
+SRCREV = "3b89858cf8ce9a8331cc4e6a5d2b5783d2eb7ae9"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -80,7 +80,7 @@ do_install_append_class-native () {
     install -m 0644 ${B}/src/sota_tools/garage-sign/lib/* ${D}${libdir}
 }
 
-PACKAGES =+ " ${PN}-common ${PN}-examples ${PN}-host-tools ${PN}-secondary "
+PACKAGES =+ " ${PN}-examples ${PN}-host-tools ${PN}-secondary "
 
 FILES_${PN} = " \
                 ${bindir}/aktualizr \
@@ -89,10 +89,6 @@ FILES_${PN} = " \
                 ${libdir}/sota/conf.d \
                 ${systemd_unitdir}/system/aktualizr.service \
                 ${sysconfdir}/sota/conf.d \
-                "
-
-FILES_${PN}-common = " \
-                ${libdir}/sota/schemas \
                 "
 
 FILES_${PN}-examples = " \
@@ -119,9 +115,5 @@ FILES_${PN}-secondary = " \
                 ${systemd_unitdir}/system/aktualizr-secondary.socket \
                 ${systemd_unitdir}/system/aktualizr-secondary.service \
                 "
-
-# Both primary and secondary need the SQL Schemas
-RDEPENDS_${PN}_class-target =+ "${PN}-common"
-RDEPENDS_${PN}-secondary_class-target =+ "${PN}-common"
 
 # vim:set ts=4 sw=4 sts=4 expandtab:
