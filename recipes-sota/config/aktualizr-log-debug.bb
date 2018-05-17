@@ -7,16 +7,16 @@ LIC_FILES_CHKSUM = "file://${WORKDIR}/LICENSE;md5=9741c346eef56131163e13b9db1241
 
 SRC_URI = " \
             file://LICENSE \
-            file://90-log-debug.toml \
+            file://05-log-debug.toml \
             "
 
 do_install_append () {
     install -m 0700 -d ${D}${libdir}/sota/conf.d
-    install -m 0644 ${WORKDIR}/90-log-debug.toml ${D}${libdir}/sota/conf.d/90-log-debug.toml
+    install -m 0644 ${WORKDIR}/05-log-debug.toml ${D}${libdir}/sota/conf.d/05-log-debug.toml
 }
 
 FILES_${PN} = " \
-                ${libdir}/sota/conf.d/90-log-debug.toml \
+                ${libdir}/sota/conf.d/05-log-debug.toml \
                 "
 
 # vim:set ts=4 sw=4 sts=4 expandtab:
