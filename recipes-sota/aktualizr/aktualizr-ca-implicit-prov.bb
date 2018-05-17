@@ -63,9 +63,10 @@ do_install() {
 }
 
 FILES_${PN} = " \
-                ${localstatedir}/sota/* \
+                ${libdir}/sota/conf.d \
                 ${libdir}/sota/conf.d/20-sota.toml \
                 ${libdir}/sota/root.crt \
+                ${localstatedir}/sota/* \
                 "
 
 # vim:set ts=4 sw=4 sts=4 expandtab:

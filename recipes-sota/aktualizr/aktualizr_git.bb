@@ -86,8 +86,8 @@ FILES_${PN} = " \
                 ${bindir}/aktualizr \
                 ${bindir}/aktualizr-info \
                 ${bindir}/aktualizr-check-discovery \
-                ${libdir}/sota/conf.d \
                 ${systemd_unitdir}/system/aktualizr.service \
+                ${libdir}/sota/conf.d \
                 ${sysconfdir}/sota/conf.d \
                 "
 

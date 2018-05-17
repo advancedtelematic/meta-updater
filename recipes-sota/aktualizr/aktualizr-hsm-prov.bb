@@ -26,6 +26,7 @@ do_install() {
 }
 
 FILES_${PN} = " \
+                ${libdir}/sota/conf.d \
                 ${libdir}/sota/conf.d/20-sota.toml \
                 "
 
