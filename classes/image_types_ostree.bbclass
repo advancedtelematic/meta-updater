@@ -119,12 +119,6 @@ IMAGE_CMD_ostree () {
         ln -sf var/roothome root
     fi
 
-    # Creating boot directories is required for "ostree admin deploy"
-
-    mkdir -p boot/loader.0
-    mkdir -p boot/loader.1
-    ln -sf boot/loader.0 boot/loader
-
     checksum=`sha256sum ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} | cut -f 1 -d " "`
 
     cp ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} boot/vmlinuz-${checksum}
