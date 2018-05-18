@@ -7,8 +7,6 @@
 # boot scripts, kernel and initramfs images
 #
 
-OSTREE_BOOTLOADER ??= 'u-boot'
-
 do_image_otaimg[depends] += "e2fsprogs-native:do_populate_sysroot \
 			${@'grub:do_populate_sysroot' if d.getVar('OSTREE_BOOTLOADER', True) == 'grub' else ''} \
 			${@'virtual/bootloader:do_deploy' if d.getVar('OSTREE_BOOTLOADER', True) == 'u-boot' else ''}"
@@ -103,6 +101,8 @@ IMAGE_CMD_otaimg () {
 		mv ${HOME_TMP}/var/local ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
 		# Create /var/sota if it doesn't exist yet
 		mkdir -p ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota || true
+		# Ensure the permissions are correctly set
+		chmod 700 ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota
 		mv ${HOME_TMP}/usr/homedirs/home ${PHYS_SYSROOT}/ || true
 		# Ensure that /var/local exists (AGL symlinks /usr/local to /var/local)
 		install -d ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/local

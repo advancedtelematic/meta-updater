@@ -1,15 +1,4 @@
 = Contributing
 
-We welcome pull requests from everyone. Here are some notes that are useful for people working on meta-updater (this repository) and https://github.com/advancedtelematic/aktualizr[aktualizr].
+We welcome pull requests from everyone. It may be helpful to read the README and other documentation for link:README.adoc[this repo], https://github.com/advancedtelematic/aktualizr[aktualizr], and the https://github.com/advancedtelematic/updater-repo/[updater-repo], particularly the sections and development and debugging.
 
-== Options for local.conf/site.conf
-
-[options="header"]
-|======================
-| Option                              | Effect
-| `require classes/sota_bleeding.inc` | Always build the latest master of Aktualizr
-| `BRANCH_pn-aktualizr = "mybranch"`
-`BRANCH_pn-aktualizr-native = "mybranch"` | Build `mybranch` of Aktualizr (note that both of these need to be set). This will normally be used with `require classes/sota_bleeding.inc`
-| `SRCREV_pn-aktualizr = "1004efa3f86cef90c012b34620992b5762b741e3"`
-`SRCREV_pn-aktualizr-native = "1004efa3f86cef90c012b34620992b5762b741e3"` | Build the specified revision of Aktualizr (note that both of these need to be set).
-| `TOOLCHAIN_HOST_TASK_append = " nativesdk-cmake "` | Use with `bitbake -c populate_sdk core-image-minimal` to build a SDK
