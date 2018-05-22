@@ -15,7 +15,11 @@ def print_deps(tinfoil, abcd_file, rn):
         info = tinfoil.get_recipe_info(rn)
     except:
         # fails on hostperl-runtime-native, virtual/libintl-native, grep-native, virtual/libiconv-native
-        print('failing on: %s' % rn)
+        print('Failed to get recipe info for: %s' % rn)
+        return []
+    if not info:
+        # fails on the above and virtual/crypt-native
+        print('No recipe info found for: %s' % rn)
         return []
     append_files = tinfoil.get_file_appends(info.fn)
     appends = True
