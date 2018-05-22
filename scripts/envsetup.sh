@@ -26,8 +26,8 @@ METADIR="${SOURCEDIR}/../.."
 if [[ ! -f "${BUILDDIR}/conf/local.conf" ]]; then
   source "$METADIR/poky/oe-init-build-env" "$BUILDDIR"
   echo "METADIR  := \"\${@os.path.abspath('${METADIR}')}\"" >> conf/bblayers.conf
-  cat "${METADIR}/meta-updater/conf/include/bblayers/sota.inc" >> conf/bblayers.conf
-  cat "${METADIR}/meta-updater/conf/include/bblayers/sota_${MACHINE}.inc" >> conf/bblayers.conf
+  cat "${METADIR}/meta-updater/meta-sota/conf/include/bblayers/sota.inc" >> conf/bblayers.conf
+  cat "${METADIR}/meta-updater/meta-sota/conf/include/bblayers/sota_${MACHINE}.inc" >> conf/bblayers.conf
   echo "MACHINE = \"${MACHINE}\"" >> conf/local.conf
   echo "DISTRO = \"poky-sota-systemd\"" >> conf/local.conf
 else
