@@ -1,0 +1,47 @@
+From 855282cc487f2afa6771d33b0d036ad637e87d1b Mon Sep 17 00:00:00 2001
+From: Leon Anavi <leon.anavi@konsulko.com>
+Date: Tue, 20 Feb 2018 19:31:55 +0200
+Subject: [PATCH] qemu-x86.h: Set up environment for OSTree integration
+
+Rebase Anton's patch for setting up envieronment
+for OSTree integration for QEMU.
+
+Co-Authored-By: Anton Gerasimov <anton@advancedtelematic.com>
+Signed-off-by: Leon Anavi <leon.anavi@konsulko.com>
+---
+ include/configs/qemu-x86.h | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+
+diff --git a/include/configs/qemu-x86.h b/include/configs/qemu-x86.h
+index 01072f8..755fb65 100644
+--- a/include/configs/qemu-x86.h
++++ b/include/configs/qemu-x86.h
+@@ -45,4 +45,25 @@
+ #define CONFIG_SPL_BOARD_LOAD_IMAGE
+ #define BOOT_DEVICE_BOARD		11
+ 
++#undef CONFIG_BOOTARGS
++
++#define CONFIG_BOOTARGS "root=/dev/hda2 console=ttyS0"
++
++#undef CONFIG_BOOTDELAY
++#define CONFIG_BOOTDELAY 3
++
++#undef CONFIG_BOOTCOMMAND
++#define CONFIG_BOOTCOMMAND "run loadenv;" \
++			   "setenv bootargs $bootargs\" console=ttyS0 root=/dev/ram0 rw rootfstype=ext4 rootwait rootdelay=2 ostree_root=/dev/hda ramdisk_size=16384 \";" \
++			   "ext2load ide 0 $loadaddr \"/boot\"$kernel_image;" \
++			   "ext2load ide 0 $ramdiskaddr \"/boot\"$ramdisk_image;" \
++			   "zboot $loadaddr - $ramdiskaddr $filesize"
++
++#undef CONFIG_EXTRA_ENV_SETTINGS
++#define CONFIG_EXTRA_ENV_SETTINGS "kernel_image=/bzImage\0" \
++				  "ramdisk_image=/initrd\0" \
++				  "ramdiskaddr=0x4000000\0" \
++				  "bootdelay=3\0" \
++				  "loadenv=if ext2load ide 0 $loadaddr /boot/loader/uEnv.txt; then env import -t $loadaddr $filesize; fi;"
++
+ #endif	/* __CONFIG_H */
+-- 
+2.7.4
+
