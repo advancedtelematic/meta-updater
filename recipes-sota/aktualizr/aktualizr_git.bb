@@ -5,7 +5,7 @@ SECTION = "base"
 LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=9741c346eef56131163e13b9db1241b3"
 
-DEPENDS = "boost curl openssl libarchive libsodium asn1c-native "
+DEPENDS = "boost curl openssl libarchive libsodium asn1c-native sqlite3 "
 DEPENDS_append_class-target = "ostree ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', ' libp11', '', d)} "
 DEPENDS_append_class-native = "glib-2.0-native "
 
@@ -22,7 +22,7 @@ SRC_URI = " \
   file://aktualizr-secondary.socket \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "930d8eef6eb584686654601c056d7c9c6fca3048"
+SRCREV = "3b89858cf8ce9a8331cc4e6a5d2b5783d2eb7ae9"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -37,9 +37,20 @@ SYSTEMD_SERVICE_${PN}-secondary = "aktualizr-secondary.socket"
 
 BBCLASSEXTEND =+ "native"
 
-EXTRA_OECMAKE = "-DWARNING_AS_ERROR=OFF -DCMAKE_BUILD_TYPE=Release -DAKTUALIZR_VERSION=${PV} "
-EXTRA_OECMAKE_append_class-target = " -DBUILD_OSTREE=ON -DBUILD_ISOTP=ON ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', '-DBUILD_P11=ON', '', d)} "
-EXTRA_OECMAKE_append_class-native = " -DBUILD_SOTA_TOOLS=ON -DBUILD_OSTREE=OFF -DBUILD_SYSTEMD=OFF "
+require garage-sign-version.inc
+
+EXTRA_OECMAKE = "-DWARNING_AS_ERROR=OFF \
+                 -DCMAKE_BUILD_TYPE=Release \
+                 -DAKTUALIZR_VERSION=${PV} \
+                 -DBUILD_LOAD_TESTS=OFF"
+EXTRA_OECMAKE_append_class-target = " -DBUILD_OSTREE=ON \
+                                      -DBUILD_ISOTP=ON \
+                                      ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', '-DBUILD_P11=ON', '', d)} "
+EXTRA_OECMAKE_append_class-native = " -DBUILD_SOTA_TOOLS=ON \
+                                      -DBUILD_OSTREE=OFF \
+                                      -DBUILD_SYSTEMD=OFF \
+                                      -DGARAGE_SIGN_VERSION=${GARAGE_SIGN_VERSION} \
+                                      -DGARAGE_SIGN_SHA256=${GARAGE_SIGN_SHA256}"
 
 do_install_append () {
     rm -fr ${D}${libdir}/systemd
@@ -54,30 +65,30 @@ do_install_append () {
     install -d ${D}${systemd_unitdir}/system
     install -m 0644 ${WORKDIR}/aktualizr-secondary.socket ${D}${systemd_unitdir}/system/aktualizr-secondary.socket
     install -m 0644 ${WORKDIR}/aktualizr-secondary.service ${D}${systemd_unitdir}/system/aktualizr-secondary.service
+    install -m 0700 -d ${D}${libdir}/sota/conf.d
+    install -m 0700 -d ${D}${sysconfdir}/sota/conf.d
 }
 
 do_install_append_class-target () {
-    install -d ${D}${systemd_unitdir}/system
+    install -m 0755 -d ${D}${systemd_unitdir}/system
     aktualizr_service=${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'serialcan', '${WORKDIR}/aktualizr-serialcan.service', '${WORKDIR}/aktualizr.service', d)}
     install -m 0644 ${aktualizr_service} ${D}${systemd_unitdir}/system/aktualizr.service
 }
 
 do_install_append_class-native () {
-    install -m 0755 ${B}/src/sota_tools/garage-sign-prefix/src/garage-sign/bin/* ${D}${bindir}
-    install -m 0644 ${B}/src/sota_tools/garage-sign-prefix/src/garage-sign/lib/* ${D}${libdir}
+    install -m 0755 ${B}/src/sota_tools/garage-sign/bin/* ${D}${bindir}
+    install -m 0644 ${B}/src/sota_tools/garage-sign/lib/* ${D}${libdir}
 }
 
-PACKAGES =+ " ${PN}-common ${PN}-examples ${PN}-host-tools ${PN}-secondary "
+PACKAGES =+ " ${PN}-examples ${PN}-host-tools ${PN}-secondary "
 
 FILES_${PN} = " \
                 ${bindir}/aktualizr \
                 ${bindir}/aktualizr-info \
                 ${bindir}/aktualizr-check-discovery \
                 ${systemd_unitdir}/system/aktualizr.service \
-                "
-
-FILES_${PN}-common = " \
-                ${libdir}/sota/schemas \
+                ${libdir}/sota/conf.d \
+                ${sysconfdir}/sota/conf.d \
                 "
 
 FILES_${PN}-examples = " \
@@ -104,9 +115,5 @@ FILES_${PN}-secondary = " \
                 ${systemd_unitdir}/system/aktualizr-secondary.socket \
                 ${systemd_unitdir}/system/aktualizr-secondary.service \
                 "
-
-# Both primary and secondary need the SQL Schemas
-RDEPENDS_${PN}_class-target =+ "${PN}-common"
-RDEPENDS_${PN}-secondary_class-target =+ "${PN}-common"
 
 # vim:set ts=4 sw=4 sts=4 expandtab:
