@@ -15,6 +15,8 @@ PR = "1"
 
 S = "${WORKDIR}/git"
 
+CLEANBROKEN = "1"
+
 BBCLASSEXTEND = "native"
 
 DEPENDS += "attr libarchive glib-2.0 pkgconfig gpgme libgsystem fuse e2fsprogs gtk-doc-native curl xz"
