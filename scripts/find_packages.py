@@ -70,6 +70,11 @@ def main():
         tinfoil.prepare()
         abcd_file.write('packages:\n')
 
+        # Does NOT include garage-sign, anything used only for testing (i.e.
+        # strace and gtest), any of the git submodules, all of which are also
+        # only used for testing (tuf-test-vectors, isotp-c, ostreesysroot,
+        # and HdrHistogram_c), or any other third party modules included
+        # directly into the source tree (jsoncpp, open62541, picojson)
         recipes_to_check = ['aktualizr',
                             'aktualizr-native',
                             'aktualizr-auto-prov',
@@ -78,7 +83,10 @@ def main():
                             'aktualizr-hsm-prov',
                             'aktualizr-disable-send-ip',
                             'aktualizr-example-interface',
-                            'aktualizr-log-debug']
+                            'aktualizr-log-debug',
+                            'libp11', # BUILD_P11 (HSM) only
+                            'dpkg', # BUILD_DEB only
+                            'systemd'] # BUILD_SYSTEMD only
 
         for recipe in recipes_to_check:
             depends = print_deps(tinfoil, abcd_file, recipe)
