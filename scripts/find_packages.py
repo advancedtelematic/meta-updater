@@ -4,9 +4,10 @@ import os.path
 import sys
 
 scripts_path = os.path.dirname(os.path.realpath(__file__))
-lib_path = os.path.abspath(scripts_path + '/../../poky/bitbake/lib')
-sys.path = sys.path + [lib_path]
+bb_lib_path = os.path.abspath(scripts_path + '/../../poky/bitbake/lib')
+sys.path = sys.path + [bb_lib_path]
 
+import bb.fetch2
 import bb.tinfoil
 
 
@@ -46,8 +47,14 @@ def print_deps(tinfoil, abcd_file, rn):
     abcd_file.write('  homepage_url: "%s"\n' % homepage)
     abcd_file.write('  source_artifact:\n')
     for src in src_uri:
-        # TODO: Get full path of patches?
-        abcd_file.write('  - "%s"\n' % src)
+        if src[0:7] == 'file://':
+            # TODO: Get full path of patches and other files within the source
+            # repo, not just the filesystem?
+            fetch = bb.fetch2.Fetch([], data)
+            local = fetch.localpath(src)
+            abcd_file.write('  - "%s"\n' % local)
+        else:
+            abcd_file.write('  - "%s"\n' % src)
     # TODO: Check more than the first and not just git
     if src_uri and 'git' in src_uri[0]:
         abcd_file.write('  vcs:\n')
