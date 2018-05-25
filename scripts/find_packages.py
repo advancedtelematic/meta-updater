@@ -46,7 +46,13 @@ def print_deps(tinfoil, abcd_file, rn):
         abcd_file.write('  description: "%s"\n' % description)
     abcd_file.write('  homepage_url: "%s"\n' % homepage)
     abcd_file.write('  source_artifact:\n')
+    repos = []
     for src in src_uri:
+        # Strip options.
+        # TODO: ignore files with apply=false?
+        semi_pos = src.find(';')
+        if semi_pos > 0:
+            src = src[:semi_pos]
         if src[0:7] == 'file://':
             # TODO: Get full path of patches and other files within the source
             # repo, not just the filesystem?
@@ -55,18 +61,27 @@ def print_deps(tinfoil, abcd_file, rn):
             abcd_file.write('  - "%s"\n' % local)
         else:
             abcd_file.write('  - "%s"\n' % src)
-    # TODO: Check more than the first and not just git
-    if src_uri and 'git' in src_uri[0]:
+            if src[0:7] != 'http://' and src[0:8] != 'https://' and src[0:6] != 'ftp://' and src[0:6] != 'ssh://':
+                repos.append(src)
+    if len(repos) > 1:
+        print('Multiple repos not fully supported yet. Pacakge: %s' % info.pn)
+    for repo in repos:
+        colon_pos = repo.find(':')
         abcd_file.write('  vcs:\n')
-        abcd_file.write('    type: "git"\n')
-        abcd_file.write('    url: "%s"\n' % src_uri[0])
+        vcs_type = repo[:colon_pos]
+        if vcs_type == 'gitsm':
+            vcs_type = 'git'
+        abcd_file.write('    type: "%s"\n' % vcs_type)
+        abcd_file.write('    url: "%s"\n' % repo[colon_pos + 3:])
+        # TODO: Actually support multiple repos here:
         abcd_file.write('    revision: "%s"\n' % srcrev)
         abcd_file.write('    branch: "%s"\n' % branch)
 
     abcd_file.write('  dependencies:\n')
     for dep in depends:
         abcd_file.write('  - "%s"\n' % dep)
-        # TODO: continue nesting here?
+        # TODO: search for transitive dependencies here? Each dependency will
+        # get checked for its own dependencies sooner or later.
 
     return depends
 
