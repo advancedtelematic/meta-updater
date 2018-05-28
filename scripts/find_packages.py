@@ -110,6 +110,9 @@ def main():
                             'dpkg', # BUILD_DEB only
                             'systemd'] # BUILD_SYSTEMD only
 
+        # Iterate through the list of recipes to check. Append any dependencies
+        # found that aren't already in the list. As long as we only add to the
+        # list, it should be safe.
         for recipe in recipes_to_check:
             depends = print_deps(tinfoil, abcd_file, recipe)
             for dep in depends:
