@@ -53,12 +53,6 @@ Although `aglsetup.sh` hooks provide reasonable defaults for SOTA-related variab
 
 === Build problems
 
-Multilib systems may require adding this line to `local.conf`:
-
-....
-HOSTTOOLS += "x86_64-linux-gnu-gcc"
-....
-
 Ubuntu users that encounter an error due to missing `Python.h` should install `libpython2.7-dev` on their host machine.
 
 == Supported boards
