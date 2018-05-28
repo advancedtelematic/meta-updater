@@ -14,7 +14,7 @@ import bb.tinfoil
 def print_deps(tinfoil, abcd_file, rn):
     try:
         info = tinfoil.get_recipe_info(rn)
-    except:
+    except Exception:
         # fails on hostperl-runtime-native, virtual/libintl-native, grep-native, virtual/libiconv-native
         print('Failed to get recipe info for: %s' % rn)
         return []
@@ -50,10 +50,9 @@ def print_deps(tinfoil, abcd_file, rn):
     for src in src_uri:
         # Strip options.
         # TODO: ignore files with apply=false?
-        semi_pos = src.find(';')
-        if semi_pos > 0:
-            src = src[:semi_pos]
-        if src[0:7] == 'file://':
+        src = src.split(';', maxsplit=1)[0]
+        src_type = src.split('://', maxsplit=1)[0]
+        if src_type == 'file':
             # TODO: Get full path of patches and other files within the source
             # repo, not just the filesystem?
             fetch = bb.fetch2.Fetch([], data)
@@ -61,18 +60,17 @@ def print_deps(tinfoil, abcd_file, rn):
             abcd_file.write('  - "%s"\n' % local)
         else:
             abcd_file.write('  - "%s"\n' % src)
-            if src[0:7] != 'http://' and src[0:8] != 'https://' and src[0:6] != 'ftp://' and src[0:6] != 'ssh://':
+            if src_type != 'http' and src_type != 'https' and src_type != 'ftp' and src_type != 'ssh':
                 repos.append(src)
     if len(repos) > 1:
         print('Multiple repos not fully supported yet. Pacakge: %s' % info.pn)
     for repo in repos:
-        colon_pos = repo.find(':')
+        vcs_type, url = repo.split('://', maxsplit=1)
         abcd_file.write('  vcs:\n')
-        vcs_type = repo[:colon_pos]
         if vcs_type == 'gitsm':
             vcs_type = 'git'
         abcd_file.write('    type: "%s"\n' % vcs_type)
-        abcd_file.write('    url: "%s"\n' % repo[colon_pos + 3:])
+        abcd_file.write('    url: "%s"\n' % url)
         # TODO: Actually support multiple repos here:
         abcd_file.write('    revision: "%s"\n' % srcrev)
         abcd_file.write('    branch: "%s"\n' % branch)
