@@ -15,11 +15,9 @@ def print_deps(tinfoil, abcd_file, rn):
     try:
         info = tinfoil.get_recipe_info(rn)
     except Exception:
-        # fails on hostperl-runtime-native, virtual/libintl-native, grep-native, virtual/libiconv-native
         print('Failed to get recipe info for: %s' % rn)
         return []
     if not info:
-        # fails on the above and virtual/crypt-native
         print('No recipe info found for: %s' % rn)
         return []
     append_files = tinfoil.get_file_appends(info.fn)
@@ -88,6 +86,11 @@ def main():
     abcd_manifest = 'manifest.abcd'
     with open(abcd_manifest, "w") as abcd_file, bb.tinfoil.Tinfoil() as tinfoil:
         tinfoil.prepare()
+        # These are the packages that bitbake assumes are provided by the host
+        # system. They do not have recipes, so searching tinfoil for them will
+        # not work. Anyway, by nature they are not included in code we release,
+        # only used by it.
+        assume_provided = tinfoil.config_data.getVar('ASSUME_PROVIDED').split()
         abcd_file.write('packages:\n')
 
         # Does NOT include garage-sign, anything used only for testing (i.e.
@@ -114,7 +117,7 @@ def main():
         for recipe in recipes_to_check:
             depends = print_deps(tinfoil, abcd_file, recipe)
             for dep in depends:
-                if dep not in recipes_to_check:
+                if dep not in recipes_to_check and dep not in assume_provided:
                     recipes_to_check.append(dep)
 
 
