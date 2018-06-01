@@ -439,8 +439,7 @@ class HsmTests(OESelftestTestCase):
         # Strip off line ending.
         value = stdout.decode()[:-1]
         self.assertEqual(value, machine,
-                         'MACHINE does not match hostname: ' + machine + ', ' + value +
-                         '\nIs tianocore ovmf installed?')
+                         'MACHINE does not match hostname: ' + machine + ', ' + value)
         print(value)
         print('Checking output of aktualizr-info:')
         ran_ok = False
