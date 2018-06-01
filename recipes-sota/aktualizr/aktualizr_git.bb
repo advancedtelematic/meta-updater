@@ -12,6 +12,8 @@ DEPENDS_append_class-native = "glib-2.0-native "
 RDEPENDS_${PN}_class-target = "lshw "
 RDEPENDS_${PN}_append_class-target = "${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'serialcan', ' slcand-start', '', d)} "
 RDEPENDS_${PN}_append_class-target = "${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', ' softhsm softhsm-testtoken', '', d)}"
+RDEPENDS_${PN}_append_class-target = " ${@oe.utils.ifelse(d.getVar('OSTREE_BOOTLOADER', True) == 'u-boot', 'u-boot-fw-utils', '')}"
+RDEPENDS_${PN}_append_class-target = " ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'ubootenv', '  aktualizr-uboot-env-rollback', '', d)} "
 
 RDEPENDS_${PN}_append_class-target = " ${PN}-tools "
 RDEPENDS_${PN}-secondary_append_class-target = " ${PN}-tools "
@@ -66,6 +68,7 @@ do_install_append () {
     install -m 0644 ${S}/config/sota_implicit_prov.toml ${D}/${libdir}/sota/sota_implicit_prov.toml
     install -m 0644 ${S}/config/sota_implicit_prov_ca.toml ${D}/${libdir}/sota/sota_implicit_prov_ca.toml
     install -m 0644 ${S}/config/sota_secondary.toml ${D}/${libdir}/sota/sota_secondary.toml
+    install -m 0644 ${S}/config/sota_uboot_env.toml ${D}/${libdir}/sota/sota_uboot_env.toml
     install -d ${D}${systemd_unitdir}/system
     install -m 0644 ${WORKDIR}/aktualizr-secondary.socket ${D}${systemd_unitdir}/system/aktualizr-secondary.socket
     install -m 0644 ${WORKDIR}/aktualizr-secondary.service ${D}${systemd_unitdir}/system/aktualizr-secondary.service
@@ -113,6 +116,7 @@ FILES_${PN}-host-tools = " \
                 ${libdir}/sota/sota_hsm_prov.toml \
                 ${libdir}/sota/sota_implicit_prov.toml \
                 ${libdir}/sota/sota_implicit_prov_ca.toml \
+                ${libdir}/sota/sota_uboot_env.toml \
                 "
 
 FILES_${PN}-tools = " \
