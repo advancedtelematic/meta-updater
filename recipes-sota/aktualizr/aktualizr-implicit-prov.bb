@@ -19,15 +19,19 @@ require credentials.inc
 
 do_install() {
     install -m 0700 -d ${D}${libdir}/sota/conf.d
+    install -m 0644 ${STAGING_DIR_NATIVE}${libdir}/sota/sota_implicit_prov.toml \
+        ${D}${libdir}/sota/conf.d/20-sota_implicit_prov.toml
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         aktualizr_implicit_writer -c ${SOTA_PACKED_CREDENTIALS} \
-            -i ${STAGING_DIR_NATIVE}${libdir}/sota/sota_implicit_prov.toml -o ${D}${libdir}/sota/conf.d/20-sota.toml -p ${D}
+            -i ${STAGING_DIR_NATIVE}${libdir}/sota/sota_implicit_prov.toml \
+            -o ${D}${libdir}/sota/conf.d/30-implicit_server.toml -p ${D}
     fi
 }
 
 FILES_${PN} = " \
                 ${libdir}/sota/conf.d \
-                ${libdir}/sota/conf.d/20-sota.toml \
+                ${libdir}/sota/conf.d/20-implicit_prov.toml \
+                ${libdir}/sota/conf.d/30-implicit_server.toml \
                 ${libdir}/sota/root.crt \
                 "
 

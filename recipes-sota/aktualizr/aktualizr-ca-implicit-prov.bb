@@ -52,19 +52,20 @@ do_install() {
     fi
 
     install -m 0700 -d ${D}${localstatedir}/sota
-    install -m 0644 ${STAGING_DIR_NATIVE}${libdir}/sota/sota_implicit_prov_ca.toml ${D}${libdir}/sota/conf.d/20-sota.toml
+    install -m 0644 ${STAGING_DIR_NATIVE}${libdir}/sota/sota_implicit_prov_ca.toml \
+        ${D}${libdir}/sota/conf.d/20-sota_implicit_prov_ca.toml
     aktualizr_cert_provider --credentials ${SOTA_PACKED_CREDENTIALS} \
                             --device-ca ${SOTA_CACERT_PATH} \
                             --device-ca-key ${SOTA_CAKEY_PATH} \
                             --root-ca \
                             --server-url \
                             --local ${D}${localstatedir}/sota \
-                            --config ${D}${libdir}/sota/conf.d/20-sota.toml
+                            --config ${STAGING_DIR_NATIVE}${libdir}/sota/sota_implicit_prov_ca.toml
 }
 
 FILES_${PN} = " \
                 ${libdir}/sota/conf.d \
-                ${libdir}/sota/conf.d/20-sota.toml \
+                ${libdir}/sota/conf.d/20-sota_implicit_prov_ca.toml \
                 ${libdir}/sota/root.crt \
                 ${localstatedir}/sota/* \
                 "

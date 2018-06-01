@@ -35,7 +35,8 @@ do_install() {
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         aktualizr_toml=${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'secondary-network', 'sota_autoprov_primary.toml', 'sota_autoprov.toml', d)}
 
-        install -m 0644 ${STAGING_DIR_NATIVE}${libdir}/sota/${aktualizr_toml} ${D}${libdir}/sota/conf.d/20-sota.toml
+        install -m 0644 ${STAGING_DIR_NATIVE}${libdir}/sota/${aktualizr_toml} \
+            ${D}${libdir}/sota/conf.d/20-${aktualizr_toml}.toml
 
         # deploy SOTA credentials
         if [ -e ${SOTA_PACKED_CREDENTIALS} ]; then
@@ -48,7 +49,7 @@ do_install() {
 
 FILES_${PN} = " \
                 ${libdir}/sota/conf.d \
-                ${libdir}/sota/conf.d/20-sota.toml \
+                ${libdir}/sota/conf.d/20-${aktualizr_toml}.toml \
                 ${localstatedir}/sota \
                 ${localstatedir}/sota/sota_provisioning_credentials.zip \
                 "
