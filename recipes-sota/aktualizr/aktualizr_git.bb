@@ -99,6 +99,7 @@ FILES_${PN}-examples = " \
                 "
 
 FILES_${PN}-host-tools = " \
+                ${bindir}/aktualizr-repo \
                 ${bindir}/aktualizr_cert_provider \
                 ${bindir}/aktualizr_implicit_writer \
                 ${bindir}/garage-deploy \
