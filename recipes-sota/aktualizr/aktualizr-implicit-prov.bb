@@ -1,5 +1,5 @@
 SUMMARY = "Aktualizr configuration for implicit provisioning"
-DESCRIPTION = "Systemd service and configurations for implicitly provisioning Aktualizr, the SOTA Client application written in C++"
+DESCRIPTION = "Configuration for implicitly provisioning Aktualizr, the SOTA Client application written in C++"
 HOMEPAGE = "https://github.com/advancedtelematic/aktualizr"
 SECTION = "base"
 LICENSE = "MPL-2.0"
