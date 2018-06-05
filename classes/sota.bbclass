@@ -29,6 +29,11 @@ OSTREE_OSNAME ?= "poky"
 OSTREE_INITRAMFS_IMAGE ?= "initramfs-ostree-image"
 OSTREE_BOOTLOADER ??= 'u-boot'
 
+OSTREE_IMAGE_SYSROOT ?= "${WORKDIR}/ota-sysroot"
+OSTREE_IMAGE_SYSROOT[doc] = "The location of the sysroot from which filesystem image is created with otaimage wic source plugin. \
+    The sysroot itself is populated from OSTREE_REPO by otaimg image type."
+WICVARS_append = " OSTREE_IMAGE_SYSROOT"
+
 GARAGE_SIGN_REPO ?= "${DEPLOY_DIR_IMAGE}/garage_sign_repo"
 GARAGE_SIGN_KEYNAME ?= "garage-key"
 GARAGE_TARGET_NAME ?= "${OSTREE_BRANCHNAME}"

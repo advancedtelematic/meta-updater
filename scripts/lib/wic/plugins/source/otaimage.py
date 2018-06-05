@@ -19,14 +19,15 @@ import logging
 import os
 import sys
 
-from wic.plugins.source.rawcopy import RawCopyPlugin
+from wic.plugins.source.rawcopy import SourcePlugin
 from wic.misc import get_bitbake_var
 
 logger = logging.getLogger('wic')
 
-class OTAImagePlugin(RawCopyPlugin):
+class OTAImagePlugin(SourcePlugin):
     """
-    Add an already existing filesystem image to the partition layout.
+    Add an OSTree enabled image rootfs to filesystem layout.
+    This depends on otaimg image type, which in turn depends on ostree image type.
     """
 
     name = 'otaimage'
@@ -36,22 +37,15 @@ class OTAImagePlugin(RawCopyPlugin):
                              oe_builddir, bootimg_dir, kernel_dir,
                              rootfs_dir, native_sysroot):
         """
-        Called to do the actual content population for a partition i.e. it
-        'prepares' the partition to be incorporated into the image.
+        Basically passes sysroot prepared by otaimg image type to Partition to
+        create filesystem image from.
         """
-        bootimg_dir = get_bitbake_var("DEPLOY_DIR_IMAGE")
-        if not bootimg_dir:
-            logger.error("Couldn't find DEPLOY_DIR_IMAGE, exiting\n")
 
-        logger.debug('Bootimg dir: %s' % bootimg_dir)
+        ota_sysroot = get_bitbake_var('OSTREE_IMAGE_SYSROOT')
+        if not ota_sysroot:
+            logger.error("Couldn't find OSTREE_IMAGE_SYSROOT, exiting")
 
-        src = bootimg_dir + "/" + get_bitbake_var("IMAGE_LINK_NAME") + ".otaimg"
+        ota_sysroot = os.path.realpath(ota_sysroot)
 
-        logger.debug('Preparing partition using image %s' % (src))
-        source_params['file'] = src
-
-        super(OTAImagePlugin, cls).do_prepare_partition(part, source_params,
-                                                         cr, cr_workdir, oe_builddir,
-                                                         bootimg_dir, kernel_dir,
-                                                         rootfs_dir, native_sysroot)
-
+        # prepare rootfs image from ota_sysroot
+        part.prepare_rootfs(cr_workdir, oe_builddir, ota_sysroot, native_sysroot)
