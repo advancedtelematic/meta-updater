@@ -10,7 +10,8 @@ DEPENDS_append_class-target = "ostree ${@bb.utils.contains('SOTA_CLIENT_FEATURES
 DEPENDS_append_class-native = "glib-2.0-native "
 
 RDEPENDS_${PN}_class-target = "lshw "
-RDEPENDS_${PN}_append_class-target = " ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'serialcan', '  slcand-start', '', d)} "
+RDEPENDS_${PN}_append_class-target = "${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'serialcan', ' slcand-start', '', d)} "
+RDEPENDS_${PN}_append_class-target = "${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', ' softhsm softhsm-testtoken', '', d)}"
 
 PV = "1.0+git${SRCPV}"
 PR = "7"
@@ -22,7 +23,7 @@ SRC_URI = " \
   file://aktualizr-secondary.socket \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "3b89858cf8ce9a8331cc4e6a5d2b5783d2eb7ae9"
+SRCREV = "114dc6c519ca9a605d73ad292821348607d0fa12"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -98,6 +99,7 @@ FILES_${PN}-examples = " \
                 "
 
 FILES_${PN}-host-tools = " \
+                ${bindir}/aktualizr-repo \
                 ${bindir}/aktualizr_cert_provider \
                 ${bindir}/aktualizr_implicit_writer \
                 ${bindir}/garage-deploy \
