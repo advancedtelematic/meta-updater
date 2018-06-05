@@ -1,1 +1,0 @@
-SYSROOT_DIRS += "${sysconfdir}"

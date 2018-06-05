@@ -1,5 +1,5 @@
 SUMMARY = "Aktualizr configuration for implicit provisioning with CA"
-DESCRIPTION = "Systemd service and configurations for implicitly provisioning Aktualizr using externally provided or generated CA"
+DESCRIPTION = "Configuration for implicitly provisioning Aktualizr using externally provided or generated CA"
 
 # WARNING: it is NOT a production solution. The secure way to provision devices is to create certificate request directly on the device
 #  (either with HSM/TPM or with software) and then sign it with a CA stored on a disconnected machine
@@ -36,7 +36,7 @@ do_install() {
         SOTA_CACERT_PATH=${DEPLOY_DIR_IMAGE}/CA/cacert.pem
         SOTA_CAKEY_PATH=${DEPLOY_DIR_IMAGE}/CA/ca.private.pem
         mkdir -p ${DEPLOY_DIR_IMAGE}/CA
-        bbwarn "SOTA_CACERT_PATH is not specified, use default one at $SOTA_CACERT_PATH" 
+        bbwarn "SOTA_CACERT_PATH is not specified, use default one at $SOTA_CACERT_PATH"
 
         if [ ! -f ${SOTA_CACERT_PATH} ]; then
             bbwarn "${SOTA_CACERT_PATH} does not exist, generate a new CA"
@@ -52,19 +52,20 @@ do_install() {
     fi
 
     install -m 0700 -d ${D}${localstatedir}/sota
-    install -m 0644 ${STAGING_DIR_NATIVE}${libdir}/sota/sota_implicit_prov_ca.toml ${D}${libdir}/sota/conf.d/20-sota.toml
+    install -m 0644 ${STAGING_DIR_NATIVE}${libdir}/sota/sota_implicit_prov_ca.toml \
+        ${D}${libdir}/sota/conf.d/20-sota_implicit_prov_ca.toml
     aktualizr_cert_provider --credentials ${SOTA_PACKED_CREDENTIALS} \
                             --device-ca ${SOTA_CACERT_PATH} \
                             --device-ca-key ${SOTA_CAKEY_PATH} \
                             --root-ca \
                             --server-url \
                             --local ${D}${localstatedir}/sota \
-                            --config ${D}${libdir}/sota/conf.d/20-sota.toml
+                            --config ${STAGING_DIR_NATIVE}${libdir}/sota/sota_implicit_prov_ca.toml
 }
 
 FILES_${PN} = " \
                 ${libdir}/sota/conf.d \
-                ${libdir}/sota/conf.d/20-sota.toml \
+                ${libdir}/sota/conf.d/20-sota_implicit_prov_ca.toml \
                 ${libdir}/sota/root.crt \
                 ${localstatedir}/sota/* \
                 "
