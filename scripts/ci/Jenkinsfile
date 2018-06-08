@@ -1,0 +1,27 @@
+pipeline {
+  agent any
+  stages {
+    stage('checkout') {
+      steps {
+        checkout([$class: 'RepoScm',
+            manifestRepositoryUrl: 'https://github.com/advancedtelematic/updater-repo',
+            manifestBranch: null,
+            manifestFile: null,
+            manifestGroup: null,
+            mirrorDir: null,
+            jobs: 0,
+            depth: 0,
+            localManifest: null,
+            destinationDir: 'updater-repo',
+            repoUrl: null,
+            currentBranch: false,
+            resetFirst: true,
+            quiet: false,
+            trace: false,
+            showAllChanges: false,
+        ])
+      }
+    }
+  }
+}
+// vim: set ft=groovy tabstop=2 shiftwidth=2 expandtab:
