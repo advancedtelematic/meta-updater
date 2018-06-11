@@ -8,7 +8,7 @@ python () {
     with zipfile.ZipFile(d.getVar("SOTA_PACKED_CREDENTIALS", True), 'r') as zip_ref:
         try:
             with zip_ref.open('tufrepo.url', mode='r') as url_file:
-                url = url_file.read().decode() + '/health/version'
+                url = url_file.read().decode().strip(' \t\n') + '/health/version'
         except (KeyError, ValueError, RuntimeError):
             return
     r = urllib.request.urlopen(url)
