@@ -1,12 +1,20 @@
 pipeline {
-  agent any
+  agent none
+  environment {
+    TEST_LOCAL_CONF_APPEND = 'scripts/ci/local.conf.append'
+    TEST_AKTUALIZR_DIR = '.'
+    TEST_AKTUALIZR_BRANCH = 'aktualizr/master'
+  }
   stages {
     stage('checkout') {
+      agent {
+        label 'bitbake'
+      }
       steps {
         checkout([$class: 'RepoScm',
             manifestRepositoryUrl: 'https://github.com/advancedtelematic/updater-repo',
             manifestBranch: null,
-            manifestFile: null,
+            manifestFile: 'master.xml',
             manifestGroup: null,
             mirrorDir: null,
             jobs: 0,
@@ -20,6 +28,23 @@ pipeline {
             trace: false,
             showAllChanges: false,
         ])
+
+        // override meta-updater commit with currently tested branch
+        sh '''
+           META_UPDATER_COMMIT=$(git rev-parse HEAD)
+           cd updater-repo/meta-updater
+           git checkout $META_UPDATER_COMMIT
+           '''
+      }
+    }
+    stage('build-core-image-minimal') {
+      agent {
+        label 'bitbake'
+      }
+      steps {
+        sh 'scripts/ci/configure.sh'
+
+        sh 'scripts/ci/build.sh core-image-minimal'
       }
     }
   }
