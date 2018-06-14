@@ -141,7 +141,7 @@ class AutoProvTests(OESelftestTestCase):
         if re.search(layer, result.output) is None:
             # Assume the directory layout for finding other layers. We could also
             # make assumptions by using 'show-layers', but either way, if the
-            # layers we need aren't where we expect them, we are out of like.
+            # layers we need aren't where we expect them, we are out of luck.
             path = os.path.abspath(os.path.dirname(__file__))
             metadir = path + "/../../../../../"
             self.meta_qemu = metadir + layer
@@ -204,7 +204,7 @@ class RpiTests(OESelftestTestCase):
         result = runCmd('bitbake-layers show-layers')
         # Assume the directory layout for finding other layers. We could also
         # make assumptions by using 'show-layers', but either way, if the
-        # layers we need aren't where we expect them, we are out of like.
+        # layers we need aren't where we expect them, we are out of luck.
         path = os.path.abspath(os.path.dirname(__file__))
         metadir = path + "/../../../../../"
         if re.search(layer_python, result.output) is None:
@@ -277,7 +277,7 @@ class GrubTests(OESelftestTestCase):
         result = runCmd('bitbake-layers show-layers')
         # Assume the directory layout for finding other layers. We could also
         # make assumptions by using 'show-layers', but either way, if the
-        # layers we need aren't where we expect them, we are out of like.
+        # layers we need aren't where we expect them, we are out of luck.
         path = os.path.abspath(os.path.dirname(__file__))
         metadir = path + "/../../../../../"
         if re.search(layer_intel, result.output) is None:
@@ -339,7 +339,7 @@ class ImplProvTests(OESelftestTestCase):
         if re.search(layer, result.output) is None:
             # Assume the directory layout for finding other layers. We could also
             # make assumptions by using 'show-layers', but either way, if the
-            # layers we need aren't where we expect them, we are out of like.
+            # layers we need aren't where we expect them, we are out of luck.
             path = os.path.abspath(os.path.dirname(__file__))
             metadir = path + "/../../../../../"
             self.meta_qemu = metadir + layer
@@ -409,7 +409,7 @@ class HsmTests(OESelftestTestCase):
         if re.search(layer, result.output) is None:
             # Assume the directory layout for finding other layers. We could also
             # make assumptions by using 'show-layers', but either way, if the
-            # layers we need aren't where we expect them, we are out of like.
+            # layers we need aren't where we expect them, we are out of luck.
             path = os.path.abspath(os.path.dirname(__file__))
             metadir = path + "/../../../../../"
             self.meta_qemu = metadir + layer
@@ -527,7 +527,7 @@ class SecondaryTests(OESelftestTestCase):
         if re.search(layer, result.output) is None:
             # Assume the directory layout for finding other layers. We could also
             # make assumptions by using 'show-layers', but either way, if the
-            # layers we need aren't where we expect them, we are out of like.
+            # layers we need aren't where we expect them, we are out of luck.
             path = os.path.abspath(os.path.dirname(__file__))
             metadir = path + "/../../../../../"
             self.meta_qemu = metadir + layer
@@ -572,7 +572,7 @@ class PrimaryTests(OESelftestTestCase):
         if re.search(layer, result.output) is None:
             # Assume the directory layout for finding other layers. We could also
             # make assumptions by using 'show-layers', but either way, if the
-            # layers we need aren't where we expect them, we are out of like.
+            # layers we need aren't where we expect them, we are out of luck.
             path = os.path.abspath(os.path.dirname(__file__))
             metadir = path + "/../../../../../"
             self.meta_qemu = metadir + layer
