@@ -13,6 +13,9 @@ RDEPENDS_${PN}_class-target = "lshw "
 RDEPENDS_${PN}_append_class-target = "${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'serialcan', ' slcand-start', '', d)} "
 RDEPENDS_${PN}_append_class-target = "${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', ' softhsm softhsm-testtoken', '', d)}"
 
+RDEPENDS_${PN}_append_class-target = " ${PN}-tools "
+RDEPENDS_${PN}-secondary_append_class-target = " ${PN}-tools "
+
 PV = "1.0+git${SRCPV}"
 PR = "7"
 
@@ -23,7 +26,7 @@ SRC_URI = " \
   file://aktualizr-secondary.socket \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "17c2eea66ebddbf47a37d66df7a0441225bd0db6"
+SRCREV = "9f538a8a411ca917184fe11a6cf92e5ebf9efc61"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -81,7 +84,7 @@ do_install_append_class-native () {
     install -m 0644 ${B}/src/sota_tools/garage-sign/lib/* ${D}${libdir}
 }
 
-PACKAGES =+ " ${PN}-examples ${PN}-host-tools ${PN}-secondary "
+PACKAGES =+ " ${PN}-examples ${PN}-host-tools ${PN}-tools ${PN}-secondary "
 
 FILES_${PN} = " \
                 ${bindir}/aktualizr \
@@ -109,6 +112,10 @@ FILES_${PN}-host-tools = " \
                 ${libdir}/sota/sota_hsm_prov.toml \
                 ${libdir}/sota/sota_implicit_prov.toml \
                 ${libdir}/sota/sota_implicit_prov_ca.toml \
+                "
+
+FILES_${PN}-tools = " \
+                ${bindir}/aktualizr-check-discovery \
                 "
 
 FILES_${PN}-secondary = " \
