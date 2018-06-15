@@ -554,7 +554,7 @@ class SecondaryTests(OESelftestTestCase):
 
     def test_secondary_listening(self):
         print('Checking aktualizr-secondary service is listening')
-        stdout, stderr, retcode = self.qemu_command('echo test | nc localhost 9030')
+        stdout, stderr, retcode = self.qemu_command('aktualizr-check-discovery')
         self.assertEqual(retcode, 0, "Unable to connect to secondary")
 
 
