@@ -2,8 +2,8 @@ pipeline {
   agent none
   environment {
     TEST_LOCAL_CONF_APPEND = 'scripts/ci/local.conf.append'
-    TEST_AKTUALIZR_DIR = '.'
-    TEST_AKTUALIZR_BRANCH = 'aktualizr/master'
+    TEST_AKTUALIZR_DIR = 'aktualizr'
+    TEST_AKTUALIZR_BRANCH = 'origin/master'
   }
   stages {
     stage('checkout') {
@@ -11,6 +11,15 @@ pipeline {
         label 'bitbake'
       }
       steps {
+        dir('aktualizr') {
+          checkout([$class: 'GitSCM',
+              userRemoteConfigs: [[url: 'https://github.com/advancedtelematic/aktualizr']],
+              branches: [[name: '*/master']],
+              changelog: true,
+              poll: true,
+          ])
+        }
+
         checkout([$class: 'RepoScm',
             manifestRepositoryUrl: 'https://github.com/advancedtelematic/updater-repo',
             manifestBranch: null,
