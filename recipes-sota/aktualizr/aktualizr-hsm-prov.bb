@@ -23,7 +23,6 @@ do_install() {
         ${D}${libdir}/sota/conf.d/20-sota_hsm_prov.toml
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         aktualizr_implicit_writer -c ${SOTA_PACKED_CREDENTIALS} --no-root-ca \
-            -i ${STAGING_DIR_NATIVE}${libdir}/sota/sota_hsm_prov.toml \
             -o ${D}${libdir}/sota/conf.d/30-implicit_server.toml -p ${D}
     fi
 }
