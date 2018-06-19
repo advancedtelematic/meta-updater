@@ -122,7 +122,14 @@ IMAGE_CMD_ostree () {
     checksum=`sha256sum ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} | cut -f 1 -d " "`
 
     cp ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} boot/vmlinuz-${checksum}
-    cp ${DEPLOY_DIR_IMAGE}/${INITRAMFS_IMAGE_NAME}.${INITRAMFS_FSTYPES} boot/initramfs-${checksum}
+
+    if [ "${KERNEL_IMAGETYPE}" = "fitImage" ]; then
+        # this is a hack for ostree not to override init= in kernel cmdline -
+        # make it think that the initramfs is present (while it is in FIT image)
+        touch boot/initramfs-${checksum}
+    else
+        cp ${DEPLOY_DIR_IMAGE}/${INITRAMFS_IMAGE_NAME}.${INITRAMFS_FSTYPES} boot/initramfs-${checksum}
+    fi
 
     # Copy image manifest
     cat ${IMAGE_MANIFEST} | cut -d " " -f1,3 > usr/package.manifest
