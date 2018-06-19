@@ -348,6 +348,7 @@ class ImplProvTests(OESelftestTestCase):
             self.meta_qemu = None
         self.append_config('MACHINE = "qemux86-64"')
         self.append_config('SOTA_CLIENT_PROV = " aktualizr-implicit-prov "')
+        runCmd('bitbake -c cleanall aktualizr aktualizr-implicit-prov')
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
     def tearDownLocal(self):
@@ -419,6 +420,7 @@ class HsmTests(OESelftestTestCase):
         self.append_config('MACHINE = "qemux86-64"')
         self.append_config('SOTA_CLIENT_PROV = "aktualizr-hsm-prov"')
         self.append_config('SOTA_CLIENT_FEATURES = "hsm"')
+        runCmd('bitbake -c cleanall aktualizr aktualizr-hsm-prov')
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
     def tearDownLocal(self):
