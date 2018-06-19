@@ -1,0 +1,61 @@
+pipeline {
+  agent none
+  environment {
+    TEST_LOCAL_CONF_APPEND = 'scripts/ci/local.conf.append'
+    TEST_AKTUALIZR_DIR = 'aktualizr'
+    TEST_AKTUALIZR_BRANCH = 'origin/master'
+  }
+  stages {
+    stage('checkout') {
+      agent {
+        label 'bitbake'
+      }
+      steps {
+        dir('aktualizr') {
+          checkout([$class: 'GitSCM',
+              userRemoteConfigs: [[url: 'https://github.com/advancedtelematic/aktualizr']],
+              branches: [[name: '*/master']],
+              changelog: true,
+              poll: true,
+          ])
+        }
+
+        checkout([$class: 'RepoScm',
+            manifestRepositoryUrl: 'https://github.com/advancedtelematic/updater-repo',
+            manifestBranch: null,
+            manifestFile: 'master.xml',
+            manifestGroup: null,
+            mirrorDir: null,
+            jobs: 0,
+            depth: 0,
+            localManifest: null,
+            destinationDir: 'updater-repo',
+            repoUrl: null,
+            currentBranch: false,
+            resetFirst: true,
+            quiet: false,
+            trace: false,
+            showAllChanges: false,
+        ])
+
+        // override meta-updater commit with currently tested branch
+        sh '''
+           META_UPDATER_COMMIT=$(git rev-parse HEAD)
+           cd updater-repo/meta-updater
+           git checkout $META_UPDATER_COMMIT
+           '''
+      }
+    }
+    stage('build-core-image-minimal') {
+      agent {
+        label 'bitbake'
+      }
+      steps {
+        sh 'scripts/ci/configure.sh'
+
+        sh 'scripts/ci/build.sh core-image-minimal'
+      }
+    }
+  }
+}
+// vim: set ft=groovy tabstop=2 shiftwidth=2 expandtab:
