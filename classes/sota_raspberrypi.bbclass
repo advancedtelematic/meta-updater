@@ -2,6 +2,7 @@ RPI_USE_U_BOOT_sota = "1"
 
 KERNEL_CLASSES_append_sota = " kernel-fitimage"
 KERNEL_IMAGETYPE_sota = "fitImage"
+OSTREE_KERNEL = "${KERNEL_IMAGETYPE}-${INITRAMFS_IMAGE}-${MACHINE}.bin"
 
 PREFERRED_PROVIDER_virtual/bootloader_sota ?= "u-boot"
 UBOOT_ENTRYPOINT_sota ?= "0x00008000"
