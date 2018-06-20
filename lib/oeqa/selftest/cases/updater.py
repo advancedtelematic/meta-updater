@@ -193,6 +193,49 @@ class AutoProvTests(OESelftestTestCase):
                       'Legacy secondary initialization failed: ' + stderr.decode() + stdout.decode())
 
 
+class ManualControlTests(OESelftestTestCase):
+
+    def setUpLocal(self):
+        layer = "meta-updater-qemux86-64"
+        result = runCmd('bitbake-layers show-layers')
+        if re.search(layer, result.output) is None:
+            # Assume the directory layout for finding other layers. We could also
+            # make assumptions by using 'show-layers', but either way, if the
+            # layers we need aren't where we expect them, we are out of like.
+            path = os.path.abspath(os.path.dirname(__file__))
+            metadir = path + "/../../../../../"
+            self.meta_qemu = metadir + layer
+            runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
+        else:
+            self.meta_qemu = None
+        self.append_config('MACHINE = "qemux86-64"')
+        self.append_config('SOTA_CLIENT_PROV = " aktualizr-auto-prov "')
+        self.append_config('SYSTEMD_AUTO_ENABLE_aktualizr = "disable"')
+        self.qemu, self.s = qemu_launch(machine='qemux86-64')
+
+    def tearDownLocal(self):
+        qemu_terminate(self.s)
+        if self.meta_qemu:
+            runCmd('bitbake-layers remove-layer "%s"' % self.meta_qemu, ignore_status=True)
+
+    def qemu_command(self, command):
+        return qemu_send_command(self.qemu.ssh_port, command)
+
+    def test_manual_running_mode_once(self):
+        """
+        Disable the systemd service then run aktualizr manually
+        """
+        sleep(20)
+        stdout, stderr, retcode = self.qemu_command('aktualizr-info')
+        self.assertIn(b'Fetched metadata: no', stdout,
+                      'Aktualizr should not have run yet' + stderr.decode() + stdout.decode())
+
+        stdout, stderr, retcode = self.qemu_command('aktualizr --running-mode=once')
+
+        stdout, stderr, retcode = self.qemu_command('aktualizr-info')
+        self.assertIn(b'Fetched metadata: yes', stdout,
+                      'Aktualizr should have run' + stderr.decode() + stdout.decode())
+
 class RpiTests(OESelftestTestCase):
 
     def setUpLocal(self):
