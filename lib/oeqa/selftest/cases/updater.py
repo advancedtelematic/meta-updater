@@ -115,8 +115,8 @@ class AktualizrToolsTests(OESelftestTestCase):
         bb_vars = get_bb_vars(['SOTA_PACKED_CREDENTIALS', 'T'], 'aktualizr-native')
         creds = bb_vars['SOTA_PACKED_CREDENTIALS']
         temp_dir = bb_vars['T']
-        bb_vars_prov = get_bb_vars(['STAGING_DIR_NATIVE', 'libdir'], 'aktualizr-implicit-prov')
-        config = bb_vars_prov['STAGING_DIR_NATIVE'] + bb_vars_prov['libdir'] + '/sota/sota_implicit_prov.toml'
+        bb_vars_prov = get_bb_vars(['STAGING_DIR_HOST', 'libdir'], 'aktualizr-implicit-prov')
+        config = bb_vars_prov['STAGING_DIR_HOST'] + bb_vars_prov['libdir'] + '/sota/sota_implicit_prov.toml'
 
         akt_native_run(self, 'aktualizr_cert_provider -c {creds} -r -l {temp} -g {config}'
                        .format(creds=creds, temp=temp_dir, config=config))
@@ -141,7 +141,7 @@ class AutoProvTests(OESelftestTestCase):
         if re.search(layer, result.output) is None:
             # Assume the directory layout for finding other layers. We could also
             # make assumptions by using 'show-layers', but either way, if the
-            # layers we need aren't where we expect them, we are out of like.
+            # layers we need aren't where we expect them, we are out of luck.
             path = os.path.abspath(os.path.dirname(__file__))
             metadir = path + "/../../../../../"
             self.meta_qemu = metadir + layer
@@ -204,7 +204,7 @@ class RpiTests(OESelftestTestCase):
         result = runCmd('bitbake-layers show-layers')
         # Assume the directory layout for finding other layers. We could also
         # make assumptions by using 'show-layers', but either way, if the
-        # layers we need aren't where we expect them, we are out of like.
+        # layers we need aren't where we expect them, we are out of luck.
         path = os.path.abspath(os.path.dirname(__file__))
         metadir = path + "/../../../../../"
         if re.search(layer_python, result.output) is None:
@@ -277,7 +277,7 @@ class GrubTests(OESelftestTestCase):
         result = runCmd('bitbake-layers show-layers')
         # Assume the directory layout for finding other layers. We could also
         # make assumptions by using 'show-layers', but either way, if the
-        # layers we need aren't where we expect them, we are out of like.
+        # layers we need aren't where we expect them, we are out of luck.
         path = os.path.abspath(os.path.dirname(__file__))
         metadir = path + "/../../../../../"
         if re.search(layer_intel, result.output) is None:
@@ -339,7 +339,7 @@ class ImplProvTests(OESelftestTestCase):
         if re.search(layer, result.output) is None:
             # Assume the directory layout for finding other layers. We could also
             # make assumptions by using 'show-layers', but either way, if the
-            # layers we need aren't where we expect them, we are out of like.
+            # layers we need aren't where we expect them, we are out of luck.
             path = os.path.abspath(os.path.dirname(__file__))
             metadir = path + "/../../../../../"
             self.meta_qemu = metadir + layer
@@ -348,6 +348,7 @@ class ImplProvTests(OESelftestTestCase):
             self.meta_qemu = None
         self.append_config('MACHINE = "qemux86-64"')
         self.append_config('SOTA_CLIENT_PROV = " aktualizr-implicit-prov "')
+        runCmd('bitbake -c cleanall aktualizr aktualizr-implicit-prov')
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
     def tearDownLocal(self):
@@ -392,8 +393,8 @@ class ImplProvTests(OESelftestTestCase):
         # Run cert_provider.
         bb_vars = get_bb_vars(['SOTA_PACKED_CREDENTIALS'], 'aktualizr-native')
         creds = bb_vars['SOTA_PACKED_CREDENTIALS']
-        bb_vars_prov = get_bb_vars(['STAGING_DIR_NATIVE', 'libdir'], 'aktualizr-implicit-prov')
-        config = bb_vars_prov['STAGING_DIR_NATIVE'] + bb_vars_prov['libdir'] + '/sota/sota_implicit_prov.toml'
+        bb_vars_prov = get_bb_vars(['STAGING_DIR_HOST', 'libdir'], 'aktualizr-implicit-prov')
+        config = bb_vars_prov['STAGING_DIR_HOST'] + bb_vars_prov['libdir'] + '/sota/sota_implicit_prov.toml'
 
         akt_native_run(self, 'aktualizr_cert_provider -c {creds} -t root@localhost -p {port} -s -g {config}'
                        .format(creds=creds, port=self.qemu.ssh_port, config=config))
@@ -409,7 +410,7 @@ class HsmTests(OESelftestTestCase):
         if re.search(layer, result.output) is None:
             # Assume the directory layout for finding other layers. We could also
             # make assumptions by using 'show-layers', but either way, if the
-            # layers we need aren't where we expect them, we are out of like.
+            # layers we need aren't where we expect them, we are out of luck.
             path = os.path.abspath(os.path.dirname(__file__))
             metadir = path + "/../../../../../"
             self.meta_qemu = metadir + layer
@@ -419,6 +420,7 @@ class HsmTests(OESelftestTestCase):
         self.append_config('MACHINE = "qemux86-64"')
         self.append_config('SOTA_CLIENT_PROV = "aktualizr-hsm-prov"')
         self.append_config('SOTA_CLIENT_FEATURES = "hsm"')
+        runCmd('bitbake -c cleanall aktualizr aktualizr-hsm-prov')
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
     def tearDownLocal(self):
@@ -473,8 +475,8 @@ class HsmTests(OESelftestTestCase):
         # Run cert_provider.
         bb_vars = get_bb_vars(['SOTA_PACKED_CREDENTIALS'], 'aktualizr-native')
         creds = bb_vars['SOTA_PACKED_CREDENTIALS']
-        bb_vars_prov = get_bb_vars(['STAGING_DIR_NATIVE', 'libdir'], 'aktualizr-hsm-prov')
-        config = bb_vars_prov['STAGING_DIR_NATIVE'] + bb_vars_prov['libdir'] + '/sota/sota_hsm_prov.toml'
+        bb_vars_prov = get_bb_vars(['STAGING_DIR_HOST', 'libdir'], 'aktualizr-hsm-prov')
+        config = bb_vars_prov['STAGING_DIR_HOST'] + bb_vars_prov['libdir'] + '/sota/sota_hsm_prov.toml'
 
         akt_native_run(self, 'aktualizr_cert_provider -c {creds} -t root@localhost -p {port} -r -s -g {config}'
                        .format(creds=creds, port=self.qemu.ssh_port, config=config))
@@ -527,7 +529,7 @@ class SecondaryTests(OESelftestTestCase):
         if re.search(layer, result.output) is None:
             # Assume the directory layout for finding other layers. We could also
             # make assumptions by using 'show-layers', but either way, if the
-            # layers we need aren't where we expect them, we are out of like.
+            # layers we need aren't where we expect them, we are out of luck.
             path = os.path.abspath(os.path.dirname(__file__))
             metadir = path + "/../../../../../"
             self.meta_qemu = metadir + layer
@@ -554,7 +556,7 @@ class SecondaryTests(OESelftestTestCase):
 
     def test_secondary_listening(self):
         print('Checking aktualizr-secondary service is listening')
-        stdout, stderr, retcode = self.qemu_command('echo test | nc localhost 9030')
+        stdout, stderr, retcode = self.qemu_command('aktualizr-check-discovery')
         self.assertEqual(retcode, 0, "Unable to connect to secondary")
 
 
@@ -572,7 +574,7 @@ class PrimaryTests(OESelftestTestCase):
         if re.search(layer, result.output) is None:
             # Assume the directory layout for finding other layers. We could also
             # make assumptions by using 'show-layers', but either way, if the
-            # layers we need aren't where we expect them, we are out of like.
+            # layers we need aren't where we expect them, we are out of luck.
             path = os.path.abspath(os.path.dirname(__file__))
             metadir = path + "/../../../../../"
             self.meta_qemu = metadir + layer
