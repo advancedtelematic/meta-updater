@@ -1,7 +1,6 @@
 pipeline {
   agent none
   environment {
-    TEST_LOCAL_CONF_APPEND = 'scripts/ci/local.conf.append'
     TEST_AKTUALIZR_DIR = 'aktualizr'
     TEST_AKTUALIZR_BRANCH = 'aktualizr/master'
     TEST_BITBAKE_COMMON_DIR = "${env.HOME}/bitbake-common"
