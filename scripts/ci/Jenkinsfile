@@ -1,9 +1,10 @@
 pipeline {
   agent none
   environment {
+    TEST_AKTUALIZR_REMOTE = 'aktualizr'
     TEST_AKTUALIZR_DIR = 'aktualizr'
-    TEST_AKTUALIZR_BRANCH = 'aktualizr/master'
-    TEST_BITBAKE_COMMON_DIR = "${env.HOME}/bitbake-common"
+    TEST_AKTUALIZR_BRANCH = 'master'
+    TEST_BITBAKE_COMMON_DIR = "/opt/jenkins/bitbake-common"
   }
   stages {
     stage('checkout') {
@@ -41,6 +42,9 @@ pipeline {
             showAllChanges: false,
         ])
 
+        // ignore bitbake build directories in docker
+        sh 'echo \'build*\' > .dockerignore'
+
         // override meta-updater commit with currently tested branch
         sh '''
            META_UPDATER_COMMIT=$(git rev-parse HEAD)
@@ -53,6 +57,7 @@ pipeline {
       agent {
         dockerfile {
           filename 'scripts/ci/Dockerfile.bitbake'
+          args '-v /opt/jenkins/bitbake-common:/opt/jenkins/bitbake-common'
         }
       }
       steps {
