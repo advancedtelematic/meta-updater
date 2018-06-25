@@ -1,3 +1,6 @@
+// This CI setup checks out aktualizr, meta-updater and updater-repo and builds
+// master branches whenever a change is pushed to any of these
+
 pipeline {
   agent none
   environment {
