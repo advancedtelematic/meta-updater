@@ -69,6 +69,17 @@ pipeline {
         sh 'scripts/ci/build.sh core-image-minimal'
       }
     }
+    stage('oe-selftest') {
+      agent {
+        dockerfile {
+          filename 'scripts/ci/Dockerfile.bitbake'
+          args '-v /opt/jenkins/bitbake-common:/opt/jenkins/bitbake-common'
+        }
+      }
+      steps {
+        sh 'scripts/ci/oe-selftest.sh'
+      }
+    }
   }
 }
 // vim: set ft=groovy tabstop=2 shiftwidth=2 expandtab:
