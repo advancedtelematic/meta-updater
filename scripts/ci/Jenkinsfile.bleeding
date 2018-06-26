@@ -56,27 +56,21 @@ pipeline {
            '''
       }
     }
-    stage('build-core-image-minimal') {
+    stage('build-core-image-minimal+oe-selftest') {
       agent {
         dockerfile {
           filename 'scripts/ci/Dockerfile.bitbake'
           args '-v /opt/jenkins/bitbake-common:/opt/jenkins/bitbake-common'
         }
+      }
+      environment {
+        TEST_AKTUALIZR_CREDENTIALS = credentials('garage-credentials')
       }
       steps {
         sh 'scripts/ci/configure.sh'
 
         sh 'scripts/ci/build.sh core-image-minimal'
-      }
-    }
-    stage('oe-selftest') {
-      agent {
-        dockerfile {
-          filename 'scripts/ci/Dockerfile.bitbake'
-          args '-v /opt/jenkins/bitbake-common:/opt/jenkins/bitbake-common'
-        }
-      }
-      steps {
+
         sh 'scripts/ci/oe-selftest.sh'
       }
     }
