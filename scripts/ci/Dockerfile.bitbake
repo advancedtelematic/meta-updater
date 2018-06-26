@@ -18,6 +18,7 @@ RUN apt-get update -q && apt-get install -qy \
      libpython-dev \
      libsdl1.2-dev \
      locales \
+     ovmf \
      procps \
      python \
      python3 \
