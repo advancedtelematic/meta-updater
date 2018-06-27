@@ -12,7 +12,29 @@ import bb.fetch2
 import bb.tinfoil
 
 
-def print_deps(tinfoil, abcd_file, rn):
+PRINT_PROGRESS = True
+SKIP_BUILD_TOOLS = True
+KNOWN_BUILD_TOOLS = ['virtual/x86_64-poky-linux-gcc', # gcc-cross-x86_64
+                     'virtual/x86_64-poky-linux-compilerlibs', # gcc-runtime
+                     'virtual/libc', # glibc
+                     'virtual/libintl', # glibc
+                     'virtual/libiconv', # glibc
+                     'virtual/crypt', # glibc
+                     'autoconf-native',
+                     'automake-native',
+                     'libtool-native',
+                     'gnu-config-native',
+                     'm4-native',
+                     'texinfo-dummy-native',
+                     'gettext-minimal-native',
+                     'libtool-cross',
+                     'gettext-native',
+                     'util-linux-native',
+                     'pkgconfig-native',
+                     'makedepend-native']
+
+
+def get_recipe_info(tinfoil, rn):
     try:
         info = tinfoil.get_recipe_info(rn)
     except Exception:
@@ -24,33 +46,43 @@ def print_deps(tinfoil, abcd_file, rn):
     append_files = tinfoil.get_file_appends(info.fn)
     appends = True
     data = tinfoil.parse_recipe_file(info.fn, appends, append_files)
+    data.pn = info.pn
+    data.pv = info.pv
+    return data
+
+
+def print_package(manifest_file, data, is_project):
     src_uri = data.getVar('SRC_URI').split()
     lic = data.getVar('LICENSE')
     summary = data.getVar('SUMMARY')
-    description = data.getVar('DESCRIPTION')
     homepage = data.getVar('HOMEPAGE')
     srcrev = data.getVar('SRCREV')
     branch = data.getVar('BRANCH')
-    depends = data.getVar('DEPENDS').split()
 
-    abcd_file.write('- id:\n')
-    abcd_file.write('    package_manager: "Yocto"\n')
-    abcd_file.write('    namespace: ""\n')
-    abcd_file.write('    name: "%s"\n' % info.pn)
-    abcd_file.write('    version: "%s"\n' % info.pv)
-    abcd_file.write('  declared_lics:\n')
-    abcd_file.write('  - "%s"\n' % lic)
-    if summary:
-        abcd_file.write('  description: "%s"\n' % summary)
+    if is_project:
+        manifest_file.write('  id:\n')
     else:
-        abcd_file.write('  description: "%s"\n' % description)
-    abcd_file.write('  homepage_url: "%s"\n' % homepage)
+        manifest_file.write('- id:\n')
+    manifest_file.write('    package_manager: "Yocto"\n')
+    manifest_file.write('    namespace: ""\n')
+    manifest_file.write('    name: "%s"\n' % data.pn)
+    manifest_file.write('    version: "%s"\n' % data.pv)
+    manifest_file.write('  declared_lics:\n')
+    manifest_file.write('  - "%s"\n' % lic)
+    if is_project:
+        manifest_file.write('  aliases: []\n')
+    if summary:
+        manifest_file.write('  description: "%s"\n' % summary)
+    else:
+        description = data.getVar('DESCRIPTION')
+        manifest_file.write('  description: "%s"\n' % description)
+    manifest_file.write('  homepage_url: "%s"\n' % homepage)
     # Binary artifacts almost never exist in Yocto.
-    abcd_file.write('  binary_artifact:\n')
-    abcd_file.write('    url: ""\n')
-    abcd_file.write('    hash: ""\n')
-    abcd_file.write('    hash_algorithm: ""\n')
-    abcd_file.write('  source_artifact:\n')
+    manifest_file.write('  binary_artifact:\n')
+    manifest_file.write('    url: ""\n')
+    manifest_file.write('    hash: ""\n')
+    manifest_file.write('    hash_algorithm: ""\n')
+    manifest_file.write('  source_artifact:\n')
     repos = []
     for src in src_uri:
         # Strip options.
@@ -62,57 +94,106 @@ def print_deps(tinfoil, abcd_file, rn):
             # repo, not just the filesystem?
             fetch = bb.fetch2.Fetch([], data)
             local = fetch.localpath(src)
-            abcd_file.write('  - "%s"\n' % local)
+            manifest_file.write('  - "%s"\n' % local)
         else:
-            abcd_file.write('  - "%s"\n' % src)
+            manifest_file.write('  - "%s"\n' % src)
             if src_type != 'http' and src_type != 'https' and src_type != 'ftp' and src_type != 'ssh':
                 repos.append(src)
     if len(repos) > 1:
         print('Multiple repos for one package are not supported. Package: %s' % info.pn)
     for repo in repos:
         vcs_type, url = repo.split('://', maxsplit=1)
-        abcd_file.write('  vcs:\n')
+        manifest_file.write('  vcs:\n')
         if vcs_type == 'gitsm':
             vcs_type = 'git'
-        abcd_file.write('    type: "%s"\n' % vcs_type)
-        abcd_file.write('    url: "%s"\n' % url)
+        manifest_file.write('    type: "%s"\n' % vcs_type)
+        manifest_file.write('    url: "%s"\n' % url)
         # TODO: Actually support multiple repos here:
-        abcd_file.write('    revision: "%s"\n' % srcrev)
-        abcd_file.write('    branch: "%s"\n' % branch)
+        # TODO: catch and replace AUTOINC?
+        manifest_file.write('    revision: "%s"\n' % srcrev)
+        manifest_file.write('    branch: "%s"\n' % branch)
 
-    abcd_file.write('  dependencies:\n')
+
+def find_dependencies(manifest_file, tinfoil, assume_provided, recipe_info, packages, rn, order):
+    data = recipe_info[rn]
+    depends = data.depends
+
+    # order == 1 is for the initial recipe. We've already printed its
+    # information, so skip it.
+    if order > 1:
+        spaces = '  ' * order
+        manifest_file.write('%s- namespace: ""\n' % spaces)
+        manifest_file.write('%s  name: "%s"\n' % (spaces, data.pn))
+        manifest_file.write('%s  version: "%s"\n' % (spaces, data.pv))
+        if not depends:
+            manifest_file.write('%s  dependencies: []\n' % spaces)
+        else:
+            manifest_file.write('%s  dependencies:\n' % spaces)
+
+    if PRINT_PROGRESS:
+        # Print high-order dependencies as a form of logging/progress notifcation.
+        if order == 2:
+            print(rn)
+        if order == 3:
+            print('  ' + rn)
+
+    # First find all dependencies not seen yet to our master list.
     for dep in depends:
-        abcd_file.write('  - "%s"\n' % dep)
-        # TODO: search for transitive dependencies here? Each dependency will
-        # get checked for its own dependencies sooner or later.
+        if dep not in packages and dep not in assume_provided:
+            packages.append(dep)
+            dep_data = get_recipe_info(tinfoil, dep)
+            # Do this once now to reduce the number of bitbake calls.
+            dep_data.depends = dep_data.getVar('DEPENDS').split()
+            recipe_info[dep] = dep_data
+    # Then recursively analyze all of the dependencies for the current recipe.
+    for dep in depends:
+        if dep not in assume_provided:
+            find_dependencies(manifest_file, tinfoil, assume_provided, recipe_info, packages, dep, order + 1)
 
-    return depends
+    if order > 1:
+        manifest_file.write('%s  errors: []\n' % spaces)
 
 
 def main():
-    parser = ArgumentParser(description='Find all dependencies of one or more packages.')
-    parser.add_argument('packages', metavar='package', nargs='+',
-                        help='a package to investigate')
+    parser = ArgumentParser(description='Find all dependencies of a recipe.')
+    parser.add_argument('recipe', metavar='recipe', help='a recipe to investigate')
     args = parser.parse_args()
-    recipes_to_check = args.packages
-    abcd_manifest = 'manifest.yml'
-    with open(abcd_manifest, "w") as abcd_file, bb.tinfoil.Tinfoil() as tinfoil:
+    rn = args.recipe
+    with open(rn + '-dependencies.yml', "w") as manifest_file, bb.tinfoil.Tinfoil() as tinfoil:
         tinfoil.prepare()
         # These are the packages that bitbake assumes are provided by the host
         # system. They do not have recipes, so searching tinfoil for them will
-        # not work. Anyway, by nature they are not included in code we release,
-        # only used by it.
+        # not work. Anyway, by nature they are only build tools and will not be
+        # distributed in an image.
         assume_provided = tinfoil.config_data.getVar('ASSUME_PROVIDED').split()
-        abcd_file.write('packages:\n')
+        if SKIP_BUILD_TOOLS:
+            assume_provided.extend(KNOWN_BUILD_TOOLS)
 
-        # Iterate through the list of recipes to check. Append any dependencies
-        # found that aren't already in the list. As long as we only add to the
-        # list, it should be safe.
-        for recipe in recipes_to_check:
-            depends = print_deps(tinfoil, abcd_file, recipe)
-            for dep in depends:
-                if dep not in recipes_to_check and dep not in assume_provided:
-                    recipes_to_check.append(dep)
+        manifest_file.write('project:\n')
+        data = get_recipe_info(tinfoil, rn)
+        data.depends = []
+        depends = data.getVar('DEPENDS').split()
+        for dep in depends:
+            if dep not in assume_provided:
+                data.depends.append(dep)
+        print_package(manifest_file, data, is_project=True)
+        manifest_file.write('  scopes:\n')
+        manifest_file.write('  - name: "all"\n')
+        manifest_file.write('    delivered: true\n')
+        manifest_file.write('    dependencies:\n')
+
+        recipe_info = dict([(rn, data)])
+        packages = []
+        find_dependencies(manifest_file, tinfoil, assume_provided, recipe_info, packages, rn, order=1)
+
+        manifest_file.write('packages:\n')
+
+        # Iterate through the list of packages found to print out their full
+        # information. Skip the initial recipe since we already printed it out.
+        for p in packages:
+            if p is not rn:
+                data = recipe_info[p]
+                print_package(manifest_file, data, is_project=False)
 
 
 if __name__ == "__main__":
