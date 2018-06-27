@@ -1,24 +1,31 @@
+// This CI setup checks out aktualizr, meta-updater and updater-repo and builds
+// master branches whenever a change is pushed to any of these
+
 pipeline {
   agent none
   environment {
-    TEST_LOCAL_CONF_APPEND = 'scripts/ci/local.conf.append'
+    TEST_AKTUALIZR_REMOTE = 'aktualizr'
     TEST_AKTUALIZR_DIR = 'aktualizr'
-    TEST_AKTUALIZR_BRANCH = 'origin/master'
+    TEST_AKTUALIZR_BRANCH = 'master'
+    TEST_BITBAKE_COMMON_DIR = "/opt/jenkins/bitbake-common"
   }
   stages {
     stage('checkout') {
-      agent {
-        label 'bitbake'
-      }
+      agent any
       steps {
-        dir('aktualizr') {
-          checkout([$class: 'GitSCM',
-              userRemoteConfigs: [[url: 'https://github.com/advancedtelematic/aktualizr']],
-              branches: [[name: '*/master']],
-              changelog: true,
-              poll: true,
-          ])
-        }
+        checkout([$class: 'GitSCM',
+            userRemoteConfigs: [
+              [url: 'https://github.com/advancedtelematic/aktualizr', name: 'aktualizr']
+            ],
+            branches: [[name: 'refs/heads/master']],
+            extensions: [
+              [$class: 'DisableRemotePoll'],
+              [$class: 'PruneStaleBranch'],
+              [$class: 'RelativeTargetDirectory',
+                relativeTargetDir: 'aktualizr'
+              ]
+            ],
+        ])
 
         checkout([$class: 'RepoScm',
             manifestRepositoryUrl: 'https://github.com/advancedtelematic/updater-repo',
@@ -38,6 +45,9 @@ pipeline {
             showAllChanges: false,
         ])
 
+        // ignore bitbake build directories in docker
+        sh 'echo \'build*\' > .dockerignore'
+
         // override meta-updater commit with currently tested branch
         sh '''
            META_UPDATER_COMMIT=$(git rev-parse HEAD)
@@ -48,7 +58,10 @@ pipeline {
     }
     stage('build-core-image-minimal') {
       agent {
-        label 'bitbake'
+        dockerfile {
+          filename 'scripts/ci/Dockerfile.bitbake'
+          args '-v /opt/jenkins/bitbake-common:/opt/jenkins/bitbake-common'
+        }
       }
       steps {
         sh 'scripts/ci/configure.sh'

@@ -1,5 +1,0 @@
-SANITY_TESTED_DISTROS = ""
-SRCREV_pn-aktualizr = "$<rev-sha1>"
-SRCREV_pn-aktualizr-native = "${SRCREV_pn-aktualizr}"
-BRANCH_pn-aktualizr = "$<rev-branch>"
-BRANCH_pn-aktualizr-native = "${BRANCH_pn-aktualizr}"

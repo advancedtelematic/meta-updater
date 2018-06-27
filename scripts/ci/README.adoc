@@ -1,0 +1,14 @@
+= Jenkins setup for running meta-updater CI
+
+As bitbake is quite resource-hungry, there are some special steps that are
+needed to run Jenkins CI tasks:
+
+- docker should be installed and the `jenkins` unix user should belong to
+  the `docker` group
+- `/opt/jenkins` should exist and have `jenkins:jenkins` permissions, it
+  will be mapped as a volume on the same location in the docker build
+  container
+
+Note that for nodes running Jenkins slaves as a docker container, the
+`/opt/jenkins` directory must exist on the host system as well, with
+permissions matching the user and groupd ids in Jenkins' docker
