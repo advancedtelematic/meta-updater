@@ -1,8 +1,16 @@
 // This CI setup checks out aktualizr, meta-updater and updater-repo and builds
 // master branches whenever a change is pushed to any of these
 
+// define these for docker image creation
+node {
+  // might cause some problems:
+  // https://stackoverflow.com/questions/44805076/setting-build-args-for-dockerfile-agent-using-a-jenkins-declarative-pipeline
+  JENKINS_UID = sh(returnStdout: true, script: 'id -u').trim()
+  JENKINS_GID = sh(returnStdout: true, script: 'id -g').trim()
+}
+
 pipeline {
-  agent none
+  agent any
   environment {
     TEST_AKTUALIZR_REMOTE = 'aktualizr'
     TEST_AKTUALIZR_DIR = 'aktualizr'
@@ -11,8 +19,8 @@ pipeline {
   }
   stages {
     stage('checkout') {
-      agent any
       steps {
+
         checkout([$class: 'GitSCM',
             userRemoteConfigs: [
               [url: 'https://github.com/advancedtelematic/aktualizr', name: 'aktualizr']
@@ -61,6 +69,8 @@ pipeline {
         dockerfile {
           filename 'scripts/ci/Dockerfile.bitbake'
           args '-v /opt/jenkins/bitbake-common:/opt/jenkins/bitbake-common'
+          additionalBuildArgs "--build-arg uid=${JENKINS_UID} --build-arg gid=${JENKINS_GID}"
+          reuseNode true
         }
       }
       environment {
