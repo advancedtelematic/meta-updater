@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from argparse import ArgumentParser
 import os.path
 import sys
 
@@ -34,6 +35,7 @@ def print_deps(tinfoil, abcd_file, rn):
 
     abcd_file.write('- id:\n')
     abcd_file.write('    package_manager: "Yocto"\n')
+    abcd_file.write('    namespace: ""\n')
     abcd_file.write('    name: "%s"\n' % info.pn)
     abcd_file.write('    version: "%s"\n' % info.pv)
     abcd_file.write('  declared_lics:\n')
@@ -43,6 +45,11 @@ def print_deps(tinfoil, abcd_file, rn):
     else:
         abcd_file.write('  description: "%s"\n' % description)
     abcd_file.write('  homepage_url: "%s"\n' % homepage)
+    # Binary artifacts almost never exist in Yocto.
+    abcd_file.write('  binary_artifact:\n')
+    abcd_file.write('    url: ""\n')
+    abcd_file.write('    hash: ""\n')
+    abcd_file.write('    hash_algorithm: ""\n')
     abcd_file.write('  source_artifact:\n')
     repos = []
     for src in src_uri:
@@ -61,7 +68,7 @@ def print_deps(tinfoil, abcd_file, rn):
             if src_type != 'http' and src_type != 'https' and src_type != 'ftp' and src_type != 'ssh':
                 repos.append(src)
     if len(repos) > 1:
-        print('Multiple repos not fully supported yet. Pacakge: %s' % info.pn)
+        print('Multiple repos for one package are not supported. Package: %s' % info.pn)
     for repo in repos:
         vcs_type, url = repo.split('://', maxsplit=1)
         abcd_file.write('  vcs:\n')
@@ -83,7 +90,12 @@ def print_deps(tinfoil, abcd_file, rn):
 
 
 def main():
-    abcd_manifest = 'manifest.abcd'
+    parser = ArgumentParser(description='Find all dependencies of one or more packages.')
+    parser.add_argument('packages', metavar='package', nargs='+',
+                        help='a package to investigate')
+    args = parser.parse_args()
+    recipes_to_check = args.packages
+    abcd_manifest = 'manifest.yml'
     with open(abcd_manifest, "w") as abcd_file, bb.tinfoil.Tinfoil() as tinfoil:
         tinfoil.prepare()
         # These are the packages that bitbake assumes are provided by the host
@@ -92,24 +104,6 @@ def main():
         # only used by it.
         assume_provided = tinfoil.config_data.getVar('ASSUME_PROVIDED').split()
         abcd_file.write('packages:\n')
-
-        # Does NOT include garage-sign, anything used only for testing (i.e.
-        # strace and gtest), any of the git submodules, all of which are also
-        # only used for testing (tuf-test-vectors, isotp-c, ostreesysroot,
-        # and HdrHistogram_c), or any other third party modules included
-        # directly into the source tree (jsoncpp, open62541, picojson)
-        recipes_to_check = ['aktualizr',
-                            'aktualizr-native',
-                            'aktualizr-auto-prov',
-                            'aktualizr-implicit-prov',
-                            'aktualizr-ca-implicit-prov',
-                            'aktualizr-hsm-prov',
-                            'aktualizr-disable-send-ip',
-                            'aktualizr-example-interface',
-                            'aktualizr-log-debug',
-                            'libp11', # BUILD_P11 (HSM) only
-                            'dpkg', # BUILD_DEB only
-                            'systemd'] # BUILD_SYSTEMD only
 
         # Iterate through the list of recipes to check. Append any dependencies
         # found that aren't already in the list. As long as we only add to the
