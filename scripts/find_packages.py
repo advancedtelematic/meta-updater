@@ -16,6 +16,8 @@ PRINT_PROGRESS = True
 SKIP_BUILD_TOOLS = True
 KNOWN_BUILD_TOOLS = ['virtual/x86_64-poky-linux-gcc', # gcc-cross-x86_64
                      'virtual/x86_64-poky-linux-compilerlibs', # gcc-runtime
+                     'virtual/i586-poky-linux-gcc', # gcc-cross-i586
+                     'virtual/i586-poky-linux-compilerlibs', # gcc-runtime
                      'virtual/libc', # glibc
                      'virtual/libintl', # glibc
                      'virtual/libiconv', # glibc
