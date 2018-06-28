@@ -118,7 +118,18 @@ def print_package(manifest_file, data, is_project):
 
 def find_dependencies(manifest_file, tinfoil, assume_provided, recipe_info, packages, rn, order):
     data = recipe_info[rn]
-    depends = data.depends
+    # Filter out packages from the assume_provided list.
+    depends = []
+    for dep in data.depends:
+        if dep not in assume_provided:
+            depends.append(dep)
+
+    if PRINT_PROGRESS:
+        # Print high-order dependencies as a form of logging/progress notifcation.
+        if order == 2:
+            print(rn)
+        if order == 3:
+            print('  ' + rn)
 
     # order == 1 is for the initial recipe. We've already printed its
     # information, so skip it.
@@ -132,25 +143,18 @@ def find_dependencies(manifest_file, tinfoil, assume_provided, recipe_info, pack
         else:
             manifest_file.write('%s  dependencies:\n' % spaces)
 
-    if PRINT_PROGRESS:
-        # Print high-order dependencies as a form of logging/progress notifcation.
-        if order == 2:
-            print(rn)
-        if order == 3:
-            print('  ' + rn)
-
     # First find all dependencies not seen yet to our master list.
     for dep in depends:
-        if dep not in packages and dep not in assume_provided:
+        if dep not in packages:
             packages.append(dep)
             dep_data = get_recipe_info(tinfoil, dep)
             # Do this once now to reduce the number of bitbake calls.
             dep_data.depends = dep_data.getVar('DEPENDS').split()
             recipe_info[dep] = dep_data
+
     # Then recursively analyze all of the dependencies for the current recipe.
     for dep in depends:
-        if dep not in assume_provided:
-            find_dependencies(manifest_file, tinfoil, assume_provided, recipe_info, packages, dep, order + 1)
+        find_dependencies(manifest_file, tinfoil, assume_provided, recipe_info, packages, dep, order + 1)
 
     if order > 1:
         manifest_file.write('%s  errors: []\n' % spaces)
@@ -187,7 +191,10 @@ def main():
             manifest_file.write('  scopes:\n')
             manifest_file.write('  - name: "all"\n')
             manifest_file.write('    delivered: true\n')
-            manifest_file.write('    dependencies:\n')
+            if not data.depends:
+                manifest_file.write('    dependencies: []\n')
+            else:
+                manifest_file.write('    dependencies:\n')
 
             recipe_info = dict([(rn, data)])
             packages = []
