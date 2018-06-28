@@ -159,7 +159,7 @@ def main():
     parser.add_argument('recipe', metavar='recipe', help='a recipe to investigate')
     args = parser.parse_args()
     rn = args.recipe
-    with open(rn + '-dependencies.yml', "w") as manifest_file, bb.tinfoil.Tinfoil() as tinfoil:
+    with bb.tinfoil.Tinfoil() as tinfoil:
         tinfoil.prepare()
         # These are the packages that bitbake assumes are provided by the host
         # system. They do not have recipes, so searching tinfoil for them will
@@ -169,31 +169,36 @@ def main():
         if SKIP_BUILD_TOOLS:
             assume_provided.extend(KNOWN_BUILD_TOOLS)
 
-        manifest_file.write('project:\n')
         data = get_recipe_info(tinfoil, rn)
-        data.depends = []
-        depends = data.getVar('DEPENDS').split()
-        for dep in depends:
-            if dep not in assume_provided:
-                data.depends.append(dep)
-        print_package(manifest_file, data, is_project=True)
-        manifest_file.write('  scopes:\n')
-        manifest_file.write('  - name: "all"\n')
-        manifest_file.write('    delivered: true\n')
-        manifest_file.write('    dependencies:\n')
+        if not data:
+            print('Nothing to do!')
+            return
 
-        recipe_info = dict([(rn, data)])
-        packages = []
-        find_dependencies(manifest_file, tinfoil, assume_provided, recipe_info, packages, rn, order=1)
+        with open(rn + '-dependencies.yml', "w") as manifest_file:
+            manifest_file.write('project:\n')
+            data.depends = []
+            depends = data.getVar('DEPENDS').split()
+            for dep in depends:
+                if dep not in assume_provided:
+                    data.depends.append(dep)
+            print_package(manifest_file, data, is_project=True)
+            manifest_file.write('  scopes:\n')
+            manifest_file.write('  - name: "all"\n')
+            manifest_file.write('    delivered: true\n')
+            manifest_file.write('    dependencies:\n')
 
-        manifest_file.write('packages:\n')
+            recipe_info = dict([(rn, data)])
+            packages = []
+            find_dependencies(manifest_file, tinfoil, assume_provided, recipe_info, packages, rn, order=1)
 
-        # Iterate through the list of packages found to print out their full
-        # information. Skip the initial recipe since we already printed it out.
-        for p in packages:
-            if p is not rn:
-                data = recipe_info[p]
-                print_package(manifest_file, data, is_project=False)
+            manifest_file.write('packages:\n')
+
+            # Iterate through the list of packages found to print out their full
+            # information. Skip the initial recipe since we already printed it out.
+            for p in packages:
+                if p is not rn:
+                    data = recipe_info[p]
+                    print_package(manifest_file, data, is_project=False)
 
 
 if __name__ == "__main__":
