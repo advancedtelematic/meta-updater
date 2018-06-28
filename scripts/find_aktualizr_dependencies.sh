@@ -9,16 +9,15 @@ parentdir="$(dirname "$0")"
 # any other third party modules included directly into the source tree
 # (jsoncpp, open62541, picojson). Also check libp11, dpkg, and systemd since
 # those are common dependencies not enabled by default.
-${parentdir}/find_packages.py aktualizr \
-                              aktualizr-native \
-                              aktualizr-auto-prov \
-                              aktualizr-implicit-prov \
-                              aktualizr-ca-implicit-prov \
-                              aktualizr-hsm-prov \
-                              aktualizr-disable-send-ip \
-                              aktualizr-example-interface \
-                              aktualizr-log-debug \
-                              libp11 \
-                              dpkg \
-                              systemd
+${parentdir}/find_dependencies.py aktualizr
+${parentdir}/find_dependencies.py aktualizr-auto-prov
+${parentdir}/find_dependencies.py aktualizr-implicit-prov
+${parentdir}/find_dependencies.py aktualizr-ca-implicit-prov
+${parentdir}/find_dependencies.py aktualizr-hsm-prov
+${parentdir}/find_dependencies.py aktualizr-disable-send-ip
+${parentdir}/find_dependencies.py aktualizr-example-interface
+${parentdir}/find_dependencies.py aktualizr-log-debug
+${parentdir}/find_dependencies.py libp11
+${parentdir}/find_dependencies.py dpkg
+${parentdir}/find_dependencies.py systemd
 
