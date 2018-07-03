@@ -7,13 +7,12 @@ DESCRIPTION = "Configuration for implicitly provisioning Aktualizr using externa
 HOMEPAGE = "https://github.com/advancedtelematic/aktualizr"
 SECTION = "base"
 LICENSE = "MPL-2.0"
-LIC_FILES_CHKSUM = "file://${WORKDIR}/LICENSE;md5=9741c346eef56131163e13b9db1241b3"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7f619bab123dad"
 
 DEPENDS = "aktualizr-native openssl-native"
 RDEPENDS_${PN} = "aktualizr"
 
 SRC_URI = " \
-  file://LICENSE \
   file://ca.cnf \
   "
 PV = "1.0"

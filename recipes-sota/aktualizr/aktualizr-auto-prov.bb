@@ -3,15 +3,14 @@ DESCRIPTION = "Configuration for automatically provisioning Aktualizr, the SOTA 
 HOMEPAGE = "https://github.com/advancedtelematic/aktualizr"
 SECTION = "base"
 LICENSE = "MPL-2.0"
-LIC_FILES_CHKSUM = "file://${WORKDIR}/LICENSE;md5=9741c346eef56131163e13b9db1241b3"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7f619bab123dad"
+
 DEPENDS = "aktualizr-native zip-native"
 RDEPENDS_${PN} = "aktualizr"
 PV = "1.0"
 PR = "6"
 
-SRC_URI = " \
-  file://LICENSE \
-  "
+SRC_URI = ""
 
 require environment.inc
 require credentials.inc
