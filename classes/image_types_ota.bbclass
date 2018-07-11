@@ -7,13 +7,8 @@
 # boot scripts, kernel and initramfs images
 #
 
-do_image_ota_ext4[depends] += "e2fsprogs-native:do_populate_sysroot \
-			${@'grub:do_populate_sysroot' if d.getVar('OSTREE_BOOTLOADER', True) == 'grub' else ''} \
-			${@'virtual/bootloader:do_deploy' if d.getVar('OSTREE_BOOTLOADER', True) == 'u-boot' else ''}"
 
-do_image_ota_tar[depends] += "e2fsprogs-native:do_populate_sysroot \
-			${@'grub:do_populate_sysroot' if d.getVar('OSTREE_BOOTLOADER', True) == 'grub' else ''} \
-			${@'virtual/bootloader:do_deploy' if d.getVar('OSTREE_BOOTLOADER', True) == 'u-boot' else ''}"
+do_image_ota_ext4[depends] += "e2fsprogs-native:do_populate_sysroot"
 
 calculate_size () {
 	BASE=$1
@@ -152,6 +147,8 @@ create_ota () {
 		tar -cf ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg.tar -C ${OTA_SYSROOT} .
 		rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg.tar
 		ln -s ${IMAGE_NAME}.otaimg.tar ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg.tar
+		# To fit in with the rest of yocto's image utils, we create a rootfs.ota-tar in the deploy dir
+		cp ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg.tar ${IMGDEPLOYDIR}/${IMAGE_NAME}.rootfs.ota-tar
 	else
 		rm -rf ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg*
 		bbfatal "create_ota Function called with unknown or unspecified FS_TYPE of ${FS_TYPE}. Failing!"
@@ -174,7 +171,9 @@ IMAGE_CMD_ota-tar () {
 }
 
 do_otasetup[doc] = "Sets up the base ota rootfs used for subsequent image generation"
-do_otasetup[depends] += "virtual/fakeroot-native:do_populate_sysroot"
+do_otasetup[depends] += "virtual/fakeroot-native:do_populate_sysroot \
+			${@'grub:do_populate_sysroot' if d.getVar('OSTREE_BOOTLOADER', True) == 'grub' else ''} \
+			${@'virtual/bootloader:do_deploy' if d.getVar('OSTREE_BOOTLOADER', True) == 'u-boot' else ''}"
 
 addtask do_otasetup after do_image_ostree before do_image_ota_ext4 do_image_ota_tar
 

@@ -14,7 +14,7 @@ IMAGE_INSTALL_append_sota = " ostree os-release ${SOTA_CLIENT} ${SOTA_CLIENT_PRO
 IMAGE_CLASSES += " image_types_ostree image_types_ota"
 
 IMAGE_FSTYPES += "${@bb.utils.contains('DISTRO_FEATURES', 'sota', 'ostreepush garagesign garagecheck ota-ext4 wic', ' ', d)}"
-IMAGE_FSTYPES += "${@bb.utils.contains('BUILD_OTA_TARBALL', '1', 'ota-tar', ' ', d)}"
+IMAGE_FSTYPES += "${@bb.utils.contains('BUILD_OTA_TARBALL', '1', 'ota-tar ota-tar.xz', ' ', d)}"
 
 PACKAGECONFIG_append_pn-curl = " ssl"
 PACKAGECONFIG_remove_pn-curl = "gnutls"
