@@ -15,6 +15,9 @@ RDEPENDS_${PN}_append_class-target = "${@bb.utils.contains('SOTA_CLIENT_FEATURES
 RDEPENDS_${PN}_append_class-target = " ${@oe.utils.ifelse(d.getVar('OSTREE_BOOTLOADER', True) == 'u-boot', 'u-boot-fw-utils', '')}"
 RDEPENDS_${PN}_append_class-target = " ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'ubootenv', '  aktualizr-uboot-env-rollback', '', d)} "
 
+RDEPENDS_${PN}_append_class-target = " ${PN}-tools "
+RDEPENDS_${PN}-secondary_append_class-target = " ${PN}-tools "
+
 PV = "1.0+git${SRCPV}"
 PR = "7"
 
@@ -25,7 +28,7 @@ SRC_URI = " \
   file://aktualizr-secondary.socket \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "767098f45e2e05d5bbd817f9b3b3aa44844da8ec"
+SRCREV = "e9faff35ffa8c31cbf3c5fb1c3c6ed4f5f50e500"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -85,7 +88,7 @@ do_install_append_class-native () {
     install -m 0644 ${B}/src/sota_tools/garage-sign/lib/* ${D}${libdir}
 }
 
-PACKAGES =+ " ${PN}-examples ${PN}-host-tools ${PN}-secondary "
+PACKAGES =+ " ${PN}-examples ${PN}-host-tools ${PN}-tools ${PN}-secondary "
 
 FILES_${PN} = " \
                 ${bindir}/aktualizr \
@@ -114,6 +117,10 @@ FILES_${PN}-host-tools = " \
                 ${libdir}/sota/sota_implicit_prov.toml \
                 ${libdir}/sota/sota_implicit_prov_ca.toml \
                 ${libdir}/sota/sota_uboot_env.toml \
+                "
+
+FILES_${PN}-tools = " \
+                ${bindir}/aktualizr-check-discovery \
                 "
 
 FILES_${PN}-secondary = " \
