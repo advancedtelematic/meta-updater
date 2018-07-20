@@ -41,7 +41,6 @@ do_mount_fs sysfs /sys
 do_mount_fs devtmpfs /dev
 do_mount_fs devpts /dev/pts
 do_mount_fs tmpfs /dev/shm
-do_mount_fs tmpfs /tmp
 do_mount_fs tmpfs /run
 
 # check if smack is active (and if so, mount smackfs)
@@ -63,23 +62,10 @@ mount "$ostree_sysroot" /sysroot || {
 	sleep 5
 	mount "$ostree_sysroot" /sysroot || bail_out "Unable to mount $ostree_sysroot as physical sysroot"
 }
+
 ostree-prepare-root /sysroot
 
-# move mounted devices to new root
-cd /sysroot
-for x in dev proc run; do
-	log_info "Moving /$x to new rootfs"
-	mount -o move "/$x" "$x"
-done
+log_info "Switching to rootfs"
+exec switch_root /sysroot /sbin/init
 
-# switch to new rootfs
-log_info "Switching to new rootfs"
-mkdir -p run/initramfs
-
-pivot_root . run/initramfs || bail_out "pivot_root failed."
-
-log_info "Launching target init"
-
-exec chroot . sh -c 'umount /run/initramfs; exec /sbin/init' \
-	  <dev/console >dev/console 2>&1
-
+bail_out "Failed to switch_root to $ostree_sysroot"
