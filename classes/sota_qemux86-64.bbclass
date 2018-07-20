@@ -4,7 +4,7 @@ IMAGE_FSTYPES_remove = "wic"
 PREFERRED_PROVIDER_virtual/bootloader_sota = "u-boot"
 UBOOT_MACHINE_sota = "qemu-x86_defconfig"
 OSTREE_BOOTLOADER ?= "u-boot"
-INITRAMFS_FSTYPES ?= "ext4.gz"
+INITRAMFS_FSTYPES ?= "cpio.gz"
 
 OSTREE_KERNEL_ARGS ?= "ramdisk_size=16384 rw rootfstype=ext4 rootwait rootdelay=2 ostree_root=/dev/hda"
 
