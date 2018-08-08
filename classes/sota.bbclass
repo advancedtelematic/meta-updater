@@ -1,6 +1,7 @@
+export BUILD_OTA_TARBALL
 python __anonymous() {
     if bb.utils.contains('DISTRO_FEATURES', 'sota', True, False, d):
-        d.appendVarFlag("do_image_wic", "depends", " %s:do_image_otaimg" % d.getVar("IMAGE_BASENAME", True))
+        d.appendVarFlag("do_image_wic", "depends", " %s:do_image_ota_ext4" % d.getVar("IMAGE_BASENAME", True))
 }
 
 OVERRIDES .= "${@bb.utils.contains('DISTRO_FEATURES', 'sota', ':sota', '', d)}"
@@ -11,7 +12,9 @@ SOTA_CLIENT ??= "aktualizr"
 SOTA_CLIENT_PROV ??= "aktualizr-auto-prov"
 IMAGE_INSTALL_append_sota = " ostree os-release ${SOTA_CLIENT} ${SOTA_CLIENT_PROV}"
 IMAGE_CLASSES += " image_types_ostree image_types_ota"
-IMAGE_FSTYPES += "${@bb.utils.contains('DISTRO_FEATURES', 'sota', 'ostreepush garagesign garagecheck otaimg wic', ' ', d)}"
+
+IMAGE_FSTYPES += "${@bb.utils.contains('DISTRO_FEATURES', 'sota', 'ostreepush garagesign garagecheck ota-ext4 wic', ' ', d)}"
+IMAGE_FSTYPES += "${@bb.utils.contains('BUILD_OTA_TARBALL', '1', 'ota-tar ota-tar.xz', ' ', d)}"
 
 PACKAGECONFIG_append_pn-curl = " ssl"
 PACKAGECONFIG_remove_pn-curl = "gnutls"

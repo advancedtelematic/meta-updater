@@ -7,9 +7,8 @@
 # boot scripts, kernel and initramfs images
 #
 
-do_image_otaimg[depends] += "e2fsprogs-native:do_populate_sysroot \
-			${@'grub:do_populate_sysroot' if d.getVar('OSTREE_BOOTLOADER', True) == 'grub' else ''} \
-			${@'virtual/bootloader:do_deploy' if d.getVar('OSTREE_BOOTLOADER', True) == 'u-boot' else ''}"
+
+do_image_ota_ext4[depends] += "e2fsprogs-native:do_populate_sysroot"
 
 calculate_size () {
 	BASE=$1
@@ -51,92 +50,132 @@ export OSTREE_BOOTLOADER
 
 export GARAGE_TARGET_NAME
 
-IMAGE_CMD_otaimg () {
-	if ${@bb.utils.contains('IMAGE_FSTYPES', 'otaimg', 'true', 'false', d)}; then
-		if [ -z "$OSTREE_REPO" ]; then
-			bbfatal "OSTREE_REPO should be set in your local.conf"
-		fi
+export OTA_SYSROOT="${WORKDIR}/ota-sysroot"
 
-		if [ -z "$OSTREE_OSNAME" ]; then
-			bbfatal "OSTREE_OSNAME should be set in your local.conf"
-		fi
+## Common OTA image setup
+fakeroot do_otasetup () {
+	
+	if [ -z "$OSTREE_REPO" ]; then
+		bbfatal "OSTREE_REPO should be set in your local.conf"
+	fi
 
-		if [ -z "$OSTREE_BRANCHNAME" ]; then
-			bbfatal "OSTREE_BRANCHNAME should be set in your local.conf"
-		fi
+	if [ -z "$OSTREE_OSNAME" ]; then
+		bbfatal "OSTREE_OSNAME should be set in your local.conf"
+	fi
 
+	if [ -z "$OSTREE_BRANCHNAME" ]; then
+		bbfatal "OSTREE_BRANCHNAME should be set in your local.conf"
+	fi
 
-		PHYS_SYSROOT=`mktemp -d ${WORKDIR}/ota-sysroot-XXXXX`
+	# HaX! Since we are using a peristent directory, we need to be sure to clean it on run.
+	mkdir -p ${OTA_SYSROOT}
+	rm -rf ${OTA_SYSROOT}/*
 
-		ostree admin --sysroot=${PHYS_SYSROOT} init-fs ${PHYS_SYSROOT}
-		ostree admin --sysroot=${PHYS_SYSROOT} os-init ${OSTREE_OSNAME}
+	ostree admin --sysroot=${OTA_SYSROOT} init-fs ${OTA_SYSROOT}
+	ostree admin --sysroot=${OTA_SYSROOT} os-init ${OSTREE_OSNAME}
+	mkdir -p ${OTA_SYSROOT}/boot/loader.0
+	ln -s loader.0 ${OTA_SYSROOT}/boot/loader
 
-		mkdir -p ${PHYS_SYSROOT}/boot/loader.0
-		ln -s loader.0 ${PHYS_SYSROOT}/boot/loader
+	if [ "${OSTREE_BOOTLOADER}" = "grub" ]; then
+		mkdir -p ${OTA_SYSROOT}/boot/grub2
+		ln -s ../loader/grub.cfg ${OTA_SYSROOT}/boot/grub2/grub.cfg
+	elif [ "${OSTREE_BOOTLOADER}" = "u-boot" ]; then
+		touch ${OTA_SYSROOT}/boot/loader/uEnv.txt
+	else
+		bberror "Invalid bootloader: ${OSTREE_BOOTLOADER}"
+	fi;
 
-		if [ "${OSTREE_BOOTLOADER}" = "grub" ]; then
-			mkdir -p ${PHYS_SYSROOT}/boot/grub2
-			ln -s ../loader/grub.cfg ${PHYS_SYSROOT}/boot/grub2/grub.cfg
-		elif [ "${OSTREE_BOOTLOADER}" = "u-boot" ]; then
-			touch ${PHYS_SYSROOT}/boot/loader/uEnv.txt
-		else
-			bberror "Invalid bootloader: ${OSTREE_BOOTLOADER}"
-		fi;
+	ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME})
 
-		ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME})
+	ostree --repo=${OTA_SYSROOT}/ostree/repo pull-local --remote=${OSTREE_OSNAME} ${OSTREE_REPO} ${ostree_target_hash}
+	export OSTREE_BOOT_PARTITION="/boot"
+	kargs_list=""
+	for arg in ${OSTREE_KERNEL_ARGS}; do
+		kargs_list="${kargs_list} --karg-append=$arg"
+	done
 
-		ostree --repo=${PHYS_SYSROOT}/ostree/repo pull-local --remote=${OSTREE_OSNAME} ${OSTREE_REPO} ${ostree_target_hash}
-		export OSTREE_BOOT_PARTITION="/boot"
-		kargs_list=""
-		for arg in ${OSTREE_KERNEL_ARGS}; do
-			kargs_list="${kargs_list} --karg-append=$arg"
-		done
+	ostree admin --sysroot=${OTA_SYSROOT} deploy ${kargs_list} --os=${OSTREE_OSNAME} ${ostree_target_hash}
 
-		ostree admin --sysroot=${PHYS_SYSROOT} deploy ${kargs_list} --os=${OSTREE_OSNAME} ${ostree_target_hash}
+	# Copy deployment /home and /var/sota to sysroot
+	HOME_TMP=`mktemp -d ${WORKDIR}/home-tmp-XXXXX`
 
-		# Copy deployment /home and /var/sota to sysroot
-		HOME_TMP=`mktemp -d ${WORKDIR}/home-tmp-XXXXX`
-		tar --xattrs --xattrs-include='*' -C ${HOME_TMP} -xf ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2 ./usr/homedirs ./var/sota ./var/local || true
-		mv ${HOME_TMP}/var/sota ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
-		mv ${HOME_TMP}/var/local ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
-		# Create /var/sota if it doesn't exist yet
-		mkdir -p ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota || true
-		# Ensure the permissions are correctly set
-		chmod 700 ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota
-		mv ${HOME_TMP}/usr/homedirs/home ${PHYS_SYSROOT}/ || true
-		# Ensure that /var/local exists (AGL symlinks /usr/local to /var/local)
-		install -d ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/local
-		# Set package version for the first deployment
-		target_version=${ostree_target_hash}
-		if [ -n "${GARAGE_TARGET_VERSION}" ]; then
-			target_version=${GARAGE_TARGET_VERSION}
-		fi
-		echo "{\"${ostree_target_hash}\":\"${GARAGE_TARGET_NAME}-${target_version}\"}" > ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota/installed_versions
+	tar --xattrs --xattrs-include='*' -C ${HOME_TMP} -xf ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2 ./usr/homedirs ./var/sota ./var/local || true
+	mv ${HOME_TMP}/var/sota ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
+	mv ${HOME_TMP}/var/local ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
+	# Create /var/sota if it doesn't exist yet
+	mkdir -p ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota || true
+	# Ensure the permissions are correctly set
+	chmod 700 ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota
+	mv ${HOME_TMP}/usr/homedirs/home ${OTA_SYSROOT}/ || true
+	# Ensure that /var/local exists (AGL symlinks /usr/local to /var/local)
+	install -d ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/local
+	# Set package version for the first deployment
+	target_version=${ostree_target_hash}
+	if [ -n "${GARAGE_TARGET_VERSION}" ]; then
+		target_version=${GARAGE_TARGET_VERSION}
+	fi
+	echo "{\"${ostree_target_hash}\":\"${GARAGE_TARGET_NAME}-${target_version}\"}" > ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota/installed_versions
+	echo "All done. Cleaning up dir: ${HOME_TMP}"
+	rm -rf ${HOME_TMP}
+}
 
-		rm -rf ${HOME_TMP}
+## Specific image creation
+create_ota () {
+	FS_TYPE=${1}
+	# Calculate image type
+	OTA_ROOTFS_SIZE=$(calculate_size `du -ks $OTA_SYSROOT | cut -f 1`  "${IMAGE_OVERHEAD_FACTOR}" "${IMAGE_ROOTFS_SIZE}" "${IMAGE_ROOTFS_MAXSIZE}" `expr ${IMAGE_ROOTFS_EXTRA_SPACE}` "${IMAGE_ROOTFS_ALIGNMENT}")
 
-		# Calculate image type
-		OTA_ROOTFS_SIZE=$(calculate_size `du -ks $PHYS_SYSROOT | cut -f 1`  "${IMAGE_OVERHEAD_FACTOR}" "${IMAGE_ROOTFS_SIZE}" "${IMAGE_ROOTFS_MAXSIZE}" `expr ${IMAGE_ROOTFS_EXTRA_SPACE}` "${IMAGE_ROOTFS_ALIGNMENT}")
+	if [ $OTA_ROOTFS_SIZE -lt 0 ]; then
+		exit -1
+	fi
+	eval local COUNT=\"0\"
+	eval local MIN_COUNT=\"60\"
+	if [ $OTA_ROOTFS_SIZE -lt $MIN_COUNT ]; then
+		eval COUNT=\"$MIN_COUNT\"
+	fi
 
-		if [ $OTA_ROOTFS_SIZE -lt 0 ]; then
-			exit -1
-		fi
-		eval local COUNT=\"0\"
-		eval local MIN_COUNT=\"60\"
-		if [ $OTA_ROOTFS_SIZE -lt $MIN_COUNT ]; then
-			eval COUNT=\"$MIN_COUNT\"
-		fi
-
-		# create image
+	# create image
+	if [ "${FS_TYPE}" = "ext4" ]; then
 		rm -rf ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg
 		sync
-		dd if=/dev/zero of=${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg seek=$OTA_ROOTFS_SIZE count=$COUNT bs=1024
-		mkfs.ext4 -O ^64bit ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg -L otaroot -d ${PHYS_SYSROOT}
-		rm -rf ${PHYS_SYSROOT}
-
+		dd if=/dev/zero of=${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg seek=${OTA_ROOTFS_SIZE} count=$COUNT bs=1024
+		mkfs.ext4 -O ^64bit ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg -L otaroot -d ${OTA_SYSROOT}
 		rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg
 		ln -s ${IMAGE_NAME}.otaimg ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg
+	elif [ "${FS_TYPE}" = "tar" ]; then
+		rm -rf ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg.tar
+		tar -cf ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg.tar -C ${OTA_SYSROOT} .
+		rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg.tar
+		ln -s ${IMAGE_NAME}.otaimg.tar ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg.tar
+		# To fit in with the rest of yocto's image utils, we create a rootfs.ota-tar in the deploy dir
+		cp ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg.tar ${IMGDEPLOYDIR}/${IMAGE_NAME}.rootfs.ota-tar
+	else
+		rm -rf ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg*
+		bbfatal "create_ota Function called with unknown or unspecified FS_TYPE of ${FS_TYPE}. Failing!"
 	fi
 }
 
-IMAGE_TYPEDEP_otaimg = "ostree"
+IMAGE_CMD_ota-ext4 () {
+
+	if ${@bb.utils.contains('IMAGE_FSTYPES', 'ota-ext4', 'true', 'false', d)}; then
+		# create ext4
+		create_ota "ext4"
+	fi
+}
+
+IMAGE_CMD_ota-tar () {
+	if ${@bb.utils.contains('IMAGE_FSTYPES', 'ota-tar', 'true', 'false', d)}; then
+		# create tarball
+		create_ota "tar"
+	fi
+}
+
+do_otasetup[doc] = "Sets up the base ota rootfs used for subsequent image generation"
+do_otasetup[depends] += "virtual/fakeroot-native:do_populate_sysroot \
+			${@'grub:do_populate_sysroot' if d.getVar('OSTREE_BOOTLOADER', True) == 'grub' else ''} \
+			${@'virtual/bootloader:do_deploy' if d.getVar('OSTREE_BOOTLOADER', True) == 'u-boot' else ''}"
+
+addtask do_otasetup after do_image_ostree before do_image_ota_ext4 do_image_ota_tar
+
+IMAGE_TYPEDEP_ota-ext4 = "ostree"
+IMAGE_TYPEDEP_ota-tar = "ostree"
