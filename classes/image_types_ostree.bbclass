@@ -128,7 +128,7 @@ IMAGE_CMD_ostree () {
         # make it think that the initramfs is present (while it is in FIT image)
         touch boot/initramfs-${checksum}
     else
-        cp ${DEPLOY_DIR_IMAGE}/${INITRAMFS_IMAGE_NAME}.${INITRAMFS_FSTYPES} boot/initramfs-${checksum}
+        cp ${DEPLOY_DIR_IMAGE}/${INITRAMFS_IMAGE}-${MACHINE}.${INITRAMFS_FSTYPES} boot/initramfs-${checksum}
     fi
 
     # Copy image manifest
