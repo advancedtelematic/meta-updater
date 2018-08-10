@@ -28,7 +28,7 @@ SRC_URI = " \
   file://aktualizr-secondary.socket \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "e9faff35ffa8c31cbf3c5fb1c3c6ed4f5f50e500"
+SRCREV = "a94a15e31f3b973966b1afc9081fc1b17a3b9d48"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -103,6 +103,7 @@ FILES_${PN}-examples = " \
                 ${libdir}/sota/demo_secondary.json \
                 ${bindir}/example-interface \
                 ${bindir}/isotp-test-interface \
+                ${bindir}/hmi_stub \
                 "
 
 FILES_${PN}-host-tools = " \
