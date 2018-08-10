@@ -5,6 +5,7 @@ do_image_ostree[depends] += "ostree-native:do_populate_sysroot \
                         coreutils-native:do_populate_sysroot \
                         unzip-native:do_populate_sysroot \
                         virtual/kernel:do_deploy \
+                        ${INITRAMFS_IMAGE}:do_image_complete \
 "
 
 export OSTREE_REPO
