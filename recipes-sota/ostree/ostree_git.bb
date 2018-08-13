@@ -7,10 +7,9 @@ inherit autotools pkgconfig systemd bash-completion gobject-introspection
 
 SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master"
 
-SRCREV="854a823e05d6fe8b610c02c2a71eaeb2bf1e98a6"
+SRCREV="3e96ec9811b5cfc5481f8b6b06c8d34d9a35408e"
 
-PV = "v2017.13"
-PR = "2"
+PV = "v2018.7"
 
 S = "${WORKDIR}/git"
 
@@ -33,7 +32,7 @@ SYSROOT_DIR = "${STAGING_DIR_TARGET}"
 SYSROOT_DIR_class-native = "${STAGING_DIR_NATIVE}"
 do_configure[vardeps] += "SYSROOT_DIR"
 
-SYSTEMD_SERVICE_${PN} = "ostree-prepare-root.service ostree-remount.service"
+SYSTEMD_SERVICE_${PN} = "ostree-prepare-root.service ostree-remount.service ostree-finalize-staged.service"
 
 export BUILD_SYS
 export HOST_SYS
