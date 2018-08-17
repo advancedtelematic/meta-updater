@@ -15,7 +15,7 @@ S = "${WORKDIR}/git"
 
 BBCLASSEXTEND = "native"
 
-DEPENDS += "attr libarchive libcap glib-2.0 gpgme libgsystem fuse e2fsprogs curl xz"
+DEPENDS += "attr bison libarchive libcap glib-2.0 gpgme libgsystem fuse e2fsprogs curl xz"
 DEPENDS += "${@bb.utils.filter('DISTRO_FEATURES', 'systemd', d)}"
 RDEPENDS_${PN}-dracut = "bash"
 
