@@ -9,7 +9,7 @@ SUMMARY = "Hardware lister"
 HOMEPAGE = "http://ezix.org/project/wiki/HardwareLiSter"
 SECTION = "console/tools"
 LICENSE = "GPLv2+"
-LIC_FILES_CHKSUM = "file://COPYING;md5=94d55d512a9ba36caa9b7df079bae19f"
+LIC_FILES_CHKSUM = "file://COPYING;md5=b234ee4d69f5fce4486a80fdaf4a4263"
 DEPENDS = "pciutils \
     usbutils"
 COMPATIBLE_HOST = "(i.86|x86_64|arm|aarch64).*-linux"
@@ -19,8 +19,8 @@ SRC_URI="http://ezix.org/software/files/lshw-B.${PV}.tar.gz \
     file://ldflags.patch \
     "
 
-SRC_URI[md5sum] = "67479167add605e8f001097c30e96d0d"
-SRC_URI[sha256sum] = "809882429555b93259785cc261dbff04c16c93d064db5f445a51945bc47157cb"
+SRC_URI[md5sum] = "a5feb796cb302850eaf5b4530888e3ed"
+SRC_URI[sha256sum] = "eb9cc053fa0f1e78685cb695596e73931bfb55d2377e3bc3b8b94aff4c5a489c"
 
 S="${WORKDIR}/lshw-B.${PV}"
 
