@@ -115,7 +115,7 @@ class QemuCommand(object):
         else:
             cmdline.append('-nographic')
         if self.kvm:
-            cmdline.append('-enable-kvm')
+            cmdline += ['-enable-kvm', '-cpu', 'host']
         else:
             cmdline += ['-cpu', 'Haswell']
         if self.overlay:
