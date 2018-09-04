@@ -193,7 +193,7 @@ IMAGE_CMD_ostreepush () {
 }
 
 IMAGE_TYPEDEP_garagesign = "ostreepush"
-do_image_garage_sign[depends] += "aktualizr-native:do_populate_sysroot"
+do_image_garagesign[depends] += "aktualizr-native:do_populate_sysroot"
 IMAGE_CMD_garagesign () {
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         # if credentials are issued by a server that doesn't support offline signing, exit silently
@@ -219,6 +219,8 @@ IMAGE_CMD_garagesign () {
         target_version=${ostree_target_hash}
         if [ -n "${GARAGE_TARGET_VERSION}" ]; then
             target_version=${GARAGE_TARGET_VERSION}
+        elif [ -e "${STAGING_DATADIR_NATIVE}/target_version" ]; then
+            target_version=$(cat "${STAGING_DATADIR_NATIVE}/target_version")
         fi
 
         # Push may fail due to race condition when multiple build machines try to push simultaneously
