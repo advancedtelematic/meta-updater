@@ -11,11 +11,12 @@ DEPENDS_append_class-native = "glib-2.0-native "
 
 RDEPENDS_${PN}_class-target = "lshw "
 RDEPENDS_${PN}_append_class-target = "${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'serialcan', ' slcand-start', '', d)} "
-RDEPENDS_${PN}_append_class-target = "${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', ' softhsm softhsm-testtoken', '', d)}"
 RDEPENDS_${PN}_append_class-target = " ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'ubootenv', ' u-boot-fw-utils aktualizr-uboot-env-rollback', '', d)} "
 
 RDEPENDS_${PN}_append_class-target = " ${PN}-tools "
 RDEPENDS_${PN}-secondary_append_class-target = " ${PN}-tools "
+
+RDEPENDS_${PN}_class-target = " openssl-bin "
 
 PV = "1.0+git${SRCPV}"
 PR = "7"
@@ -27,8 +28,8 @@ SRC_URI = " \
   file://aktualizr-secondary.socket \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "090c463c6f1ec7a7ceae963cd7b4ba99aa74e1f5"
-BRANCH ?= "master"
+SRCREV = "097c763ab4b4b057fa6bedfdac2049e53df93539"
+BRANCH ?= "feat/OTA-719/split-provision"
 
 S = "${WORKDIR}/git"
 
@@ -64,7 +65,6 @@ do_install_append () {
     install -m 0644 ${S}/config/sota_autoprov.toml ${D}/${libdir}/sota/sota_autoprov.toml
     install -m 0644 ${S}/config/sota_autoprov_primary.toml ${D}/${libdir}/sota/sota_autoprov_primary.toml
     install -m 0644 ${S}/config/sota_hsm_prov.toml ${D}/${libdir}/sota/sota_hsm_prov.toml
-    install -m 0644 ${S}/config/sota_implicit_prov.toml ${D}/${libdir}/sota/sota_implicit_prov.toml
     install -m 0644 ${S}/config/sota_implicit_prov_ca.toml ${D}/${libdir}/sota/sota_implicit_prov_ca.toml
     install -m 0644 ${S}/config/sota_secondary.toml ${D}/${libdir}/sota/sota_secondary.toml
     install -m 0644 ${S}/config/sota_uboot_env.toml ${D}/${libdir}/sota/sota_uboot_env.toml
@@ -113,7 +113,6 @@ FILES_${PN}-host-tools = " \
                 ${libdir}/sota/sota_autoprov.toml \
                 ${libdir}/sota/sota_autoprov_primary.toml \
                 ${libdir}/sota/sota_hsm_prov.toml \
-                ${libdir}/sota/sota_implicit_prov.toml \
                 ${libdir}/sota/sota_implicit_prov_ca.toml \
                 ${libdir}/sota/sota_uboot_env.toml \
                 "
