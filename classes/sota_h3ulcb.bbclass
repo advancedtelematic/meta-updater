@@ -5,4 +5,4 @@ EXTRA_IMAGEDEPENDS_append_sota = " renesas-ota-bootfiles"
 IMAGE_BOOT_FILES_sota += "renesas-ota-bootfiles/*"
 
 OSTREE_BOOTLOADER ?= "u-boot"
-UBOOT_MACHINE_sota = "m3ulcb_defconfig"
+UBOOT_MACHINE_sota = "h3ulcb_defconfig"
