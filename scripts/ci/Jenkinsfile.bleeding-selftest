@@ -64,7 +64,7 @@ pipeline {
            '''
       }
     }
-    stage('build-core-image-minimal') {
+    stage('build-core-image-minimal+oe-selftest') {
       agent {
         dockerfile {
           filename 'scripts/ci/Dockerfile.bitbake'
@@ -80,6 +80,8 @@ pipeline {
         sh 'scripts/ci/configure.sh'
 
         sh 'scripts/ci/build.sh core-image-minimal'
+
+        sh 'scripts/ci/oe-selftest.sh'
       }
     }
   }
