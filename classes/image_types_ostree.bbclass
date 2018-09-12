@@ -32,6 +32,12 @@ IMAGE_CMD_ostree () {
 
     cd ${OSTREE_ROOTFS}
 
+    for d in var/*; do
+      if [ "${d}" != "var/local" ]; then
+        rm -rf ${d}
+      fi
+    done
+
     # Create sysroot directory to which physical sysroot will be mounted
     mkdir sysroot
     ln -sf sysroot/ostree ostree
