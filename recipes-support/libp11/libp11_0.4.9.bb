@@ -11,7 +11,7 @@ RDEPENDS_${PN} += " opensc"
 
 SRC_URI = "git://github.com/OpenSC/libp11.git \
            file://0001-Workaround-for-a-buggy-version-of-openssl-1.0.2m.patch"
-SRCREV = "da725ab727342083478150a203a3c80c4551feb4"
+SRCREV = "e1210903291b1de9eabcad26e740a4b2fbcca692"
 
 S = "${WORKDIR}/git"
 
