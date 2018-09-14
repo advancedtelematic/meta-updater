@@ -99,13 +99,15 @@ fakeroot do_otasetup () {
 	# Copy deployment /home and /var/sota to sysroot
 	HOME_TMP=`mktemp -d ${WORKDIR}/home-tmp-XXXXX`
 
-	tar --xattrs --xattrs-include='*' -C ${HOME_TMP} -xf ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2 ./usr/homedirs ./var/sota ./var/local || true
-	mv ${HOME_TMP}/var/sota ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
-	mv ${HOME_TMP}/var/local ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
+	tar --xattrs --xattrs-include='*' -C ${HOME_TMP} -xf ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2 ./usr/homedirs ./var/local || true
+
+	cp -a ${IMAGE_ROOTFS}/var/sota ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
 	# Create /var/sota if it doesn't exist yet
 	mkdir -p ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota || true
 	# Ensure the permissions are correctly set
 	chmod 700 ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota
+
+	mv ${HOME_TMP}/var/local ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
 	mv ${HOME_TMP}/usr/homedirs/home ${OTA_SYSROOT}/ || true
 	# Ensure that /var/local exists (AGL symlinks /usr/local to /var/local)
 	install -d ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/local
