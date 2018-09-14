@@ -18,7 +18,7 @@ S = "${WORKDIR}/git"
 inherit autotools pkgconfig
 
 # Currently, Makefile dependencies are incorrectly defined which causes build errors
-# The number of jobs is high
+# if the number of jobs is high
 # See https://github.com/OpenSC/libp11/issues/94
 PARALLEL_MAKE = ""
 EXTRA_OECONF = "--disable-static"
@@ -28,12 +28,12 @@ do_install_append () {
     rm -rf ${D}${docdir}/${BPN}
 }
 
-FILES_${PN} = "${libdir}/engines/pkcs11.so \
-               ${libdir}/engines/libpkcs11${SOLIBS} \
+FILES_${PN} = "${libdir}/engines*/pkcs11.so \
+               ${libdir}/engines*/libpkcs11${SOLIBS} \
                ${libdir}/libp11${SOLIBS}"
 
 FILES_${PN}-dev = " \
-                   ${libdir}/engines/libpkcs11${SOLIBSDEV} \
+                   ${libdir}/engines*/libpkcs11${SOLIBSDEV} \
                    ${libdir}/libp11${SOLIBSDEV} \
                    ${libdir}/pkgconfig/libp11.pc \
                    /usr/include"
