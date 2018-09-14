@@ -103,7 +103,7 @@ fakeroot do_otasetup () {
 
 	cp -a ${IMAGE_ROOTFS}/var/sota ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
 	# Create /var/sota if it doesn't exist yet
-	mkdir -p ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota || true
+	mkdir -p ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota
 	# Ensure the permissions are correctly set
 	chmod 700 ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota
 
@@ -116,7 +116,8 @@ fakeroot do_otasetup () {
 	if [ -n "${GARAGE_TARGET_VERSION}" ]; then
 		target_version=${GARAGE_TARGET_VERSION}
 	fi
-	echo "{\"${ostree_target_hash}\":\"${GARAGE_TARGET_NAME}-${target_version}\"}" > ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota/installed_versions
+	mkdir -p ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota/import
+	echo "{\"${ostree_target_hash}\":\"${GARAGE_TARGET_NAME}-${target_version}\"}" > ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota/import/installed_versions
 	echo "All done. Cleaning up dir: ${HOME_TMP}"
 	rm -rf ${HOME_TMP}
 }
