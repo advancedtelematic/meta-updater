@@ -65,7 +65,6 @@ IMAGE_CMD_otaimg () {
 			bbfatal "OSTREE_BRANCHNAME should be set in your local.conf"
 		fi
 
-
 		PHYS_SYSROOT=`mktemp -d ${WORKDIR}/ota-sysroot-XXXXX`
 
 		ostree admin --sysroot=${PHYS_SYSROOT} init-fs ${PHYS_SYSROOT}
@@ -96,13 +95,15 @@ IMAGE_CMD_otaimg () {
 
 		# Copy deployment /home and /var/sota to sysroot
 		HOME_TMP=`mktemp -d ${WORKDIR}/home-tmp-XXXXX`
-		tar --xattrs --xattrs-include='*' -C ${HOME_TMP} -xf ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2 ./usr/homedirs ./var/sota ./var/local || true
-		mv ${HOME_TMP}/var/sota ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
-		mv ${HOME_TMP}/var/local ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
+		tar --xattrs --xattrs-include='*' -C ${HOME_TMP} -xf ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2 ./usr/homedirs ./var/local || true
+
+		cp -a ${IMAGE_ROOTFS}/var/sota ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
 		# Create /var/sota if it doesn't exist yet
 		mkdir -p ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota || true
 		# Ensure the permissions are correctly set
 		chmod 700 ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota
+
+		mv ${HOME_TMP}/var/local ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
 		mv ${HOME_TMP}/usr/homedirs/home ${PHYS_SYSROOT}/ || true
 		# Ensure that /var/local exists (AGL symlinks /usr/local to /var/local)
 		install -d ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/local
@@ -112,7 +113,6 @@ IMAGE_CMD_otaimg () {
 			target_version=${GARAGE_TARGET_VERSION}
 		fi
 		echo "{\"${ostree_target_hash}\":\"${GARAGE_TARGET_NAME}-${target_version}\"}" > ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota/installed_versions
-
 		rm -rf ${HOME_TMP}
 
 		# Calculate image type
