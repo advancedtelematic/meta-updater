@@ -16,8 +16,6 @@ RDEPENDS_${PN}_append_class-target = " ${@bb.utils.contains('SOTA_CLIENT_FEATURE
 RDEPENDS_${PN}_append_class-target = " ${PN}-tools "
 RDEPENDS_${PN}-secondary_append_class-target = " ${PN}-tools "
 
-RDEPENDS_${PN}_class-target = " openssl-bin "
-
 PV = "1.0+git${SRCPV}"
 PR = "7"
 
@@ -28,7 +26,7 @@ SRC_URI = " \
   file://aktualizr-secondary.socket \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "097c763ab4b4b057fa6bedfdac2049e53df93539"
+SRCREV = "803fa9f75ed96993775dc0aa5e65e71920125157"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
