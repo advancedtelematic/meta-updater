@@ -5,7 +5,7 @@ if pkcs11-tool --module=/usr/lib/softhsm/libsofthsm2.so -O; then
 	exit 0
 fi
 
-if ! ls /var/sota/import/pkey.pem /var/sota/import/client.pem /var/sota/import/pkey.pem; then
+if ! ls /var/sota/import/pkey.pem /var/sota/import/client.pem; then
 	# Key/certificate pair is not present, repeat
 	exit 1
 fi

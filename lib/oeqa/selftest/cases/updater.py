@@ -226,8 +226,8 @@ class ManualControlTests(OESelftestTestCase):
         Disable the systemd service then run aktualizr manually
         """
         sleep(20)
-        stdout, stderr, retcode = self.qemu_command('aktualizr-info --allow-migrate')
-        self.assertIn(b'Fetched metadata: no', stdout,
+        stdout, stderr, retcode = self.qemu_command('aktualizr-info')
+        self.assertIn(b'Can\'t open database', stdout,
                       'Aktualizr should not have run yet' + stderr.decode() + stdout.decode())
 
         stdout, stderr, retcode = self.qemu_command('aktualizr --running-mode=once')

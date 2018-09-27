@@ -99,7 +99,7 @@ IMAGE_CMD_otaimg () {
 
 		cp -a ${IMAGE_ROOTFS}/var/sota ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
 		# Create /var/sota if it doesn't exist yet
-		mkdir -p ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota || true
+		mkdir -p ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota
 		# Ensure the permissions are correctly set
 		chmod 700 ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota
 
@@ -112,7 +112,9 @@ IMAGE_CMD_otaimg () {
 		if [ -n "${GARAGE_TARGET_VERSION}" ]; then
 			target_version=${GARAGE_TARGET_VERSION}
 		fi
-		echo "{\"${ostree_target_hash}\":\"${GARAGE_TARGET_NAME}-${target_version}\"}" > ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota/installed_versions
+		mkdir -p ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota/import
+		echo "{\"${ostree_target_hash}\":\"${GARAGE_TARGET_NAME}-${target_version}\"}" > ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota/import/installed_versions
+
 		rm -rf ${HOME_TMP}
 
 		# Calculate image type
