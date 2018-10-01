@@ -10,6 +10,8 @@ HOSTTOOLS_NONFATAL += "java"
 
 SOTA_CLIENT ??= "aktualizr"
 SOTA_CLIENT_PROV ??= "aktualizr-auto-prov"
+SOTA_DEPLOY_CREDENTIALS ?= "1"
+
 IMAGE_INSTALL_append_sota = " ostree os-release ${SOTA_CLIENT} ${SOTA_CLIENT_PROV}"
 IMAGE_CLASSES += " image_types_ostree image_types_ota"
 

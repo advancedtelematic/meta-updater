@@ -6,7 +6,7 @@ LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7f619bab123dad"
 
 DEPENDS = "aktualizr-native zip-native"
-RDEPENDS_${PN} = "aktualizr"
+RDEPENDS_${PN}_append = "${@' aktualizr-auto-prov-creds' if d.getVar('SOTA_DEPLOY_CREDENTIALS', True) == '1' else ''}"
 PV = "1.0"
 PR = "6"
 
@@ -31,19 +31,10 @@ do_install() {
 
     install -m 0700 -d ${D}${libdir}/sota/conf.d
     install -m 0700 -d ${D}${localstatedir}/sota
-    if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
-        aktualizr_toml=${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'secondary-network', 'sota_autoprov_primary.toml', 'sota_autoprov.toml', d)}
+    aktualizr_toml=${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'secondary-network', 'sota_autoprov_primary.toml', 'sota_autoprov.toml', d)}
 
-        install -m 0644 ${STAGING_DIR_NATIVE}${libdir}/sota/${aktualizr_toml} \
-            ${D}${libdir}/sota/conf.d/20-${aktualizr_toml}
-
-        # deploy SOTA credentials
-        if [ -e ${SOTA_PACKED_CREDENTIALS} ]; then
-            cp ${SOTA_PACKED_CREDENTIALS} ${D}${localstatedir}/sota/sota_provisioning_credentials.zip
-            # Device should not be able to push data to treehub
-            zip -d ${D}${localstatedir}/sota/sota_provisioning_credentials.zip treehub.json
-        fi
-    fi
+    install -m 0644 ${STAGING_DIR_NATIVE}${libdir}/sota/${aktualizr_toml} \
+        ${D}${libdir}/sota/conf.d/20-${aktualizr_toml}
 }
 
 FILES_${PN} = " \
