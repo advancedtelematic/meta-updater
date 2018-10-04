@@ -15,6 +15,9 @@ RAMDISK_EXT ?= ".${OSTREE_INITRAMFS_FSTYPES}"
 
 OSTREE_KERNEL ??= "${KERNEL_IMAGETYPE}"
 
+OSTREE_COMMIT_SUBJECT ??= "Commit-id: ${IMAGE_NAME}"
+OSTREE_COMMIT_BODY ??= ""
+
 export SYSTEMD_USED = "${@oe.utils.ifelse(d.getVar('VIRTUAL-RUNTIME_init_manager', True) == 'systemd', 'true', '')}"
 
 IMAGE_CMD_ostree () {
@@ -160,8 +163,9 @@ IMAGE_CMD_ostree () {
            --tree=dir=${OSTREE_ROOTFS} \
            --skip-if-unchanged \
            --branch=${OSTREE_BRANCHNAME} \
-           --subject="Commit-id: ${IMAGE_NAME}"
-
+           --subject="${OSTREE_COMMIT_SUBJECT}" \
+           --body="${OSTREE_COMMIT_BODY}"
+    
     rm -rf ${OSTREE_ROOTFS}
 }
 
