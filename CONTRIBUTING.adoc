@@ -3,3 +3,15 @@
 We welcome pull requests from anyone. The master branch is the primary branch for development, and if you wish to add new functionality, it probably belongs there. We attempt to maintain recent previous branches and welcome bug fixes and backports for those. Currently, the actively maintained branches are sumo, rocko, and pyro. Previously, morty was also a stable branch, but it has not been updated or actively maintained for a while.
 
 If you are developing with meta-updater, it may be helpful to read the README and other documentation for link:README.adoc[this repo], https://github.com/advancedtelematic/aktualizr[aktualizr], and the https://github.com/advancedtelematic/updater-repo/[updater-repo], particularly the sections about development and debugging.
+
+== Contributor checklist
+
+* OTA-enabled build succeeds at least for one platform, the resulted image boots. This check is absolutely necessary for every pull request unless it only touches documentation.
+* If your change is touching platform code (like `classes/sota_<platform>.bbclass`), please check build and update on this particular platform.
+* oe-selftest succeeds. To test meta-updater, run `oe-selftest -r updater` from a build directory with `MACHINE` set to `qemux86-64`.
+* Updates are forwards- and backwards-compatible. You should be able to update an OTA-enabled build before the change is applied to the version with change applied and vice versa. One should pay double attention to the compatibility when bootloader code is affected.
+
+We understand that making all these tests might be overly tedious taking in account build times in Yocto. Please add a comment to your PR describing the tests you've made.
+
+== Approval
+PR approval should be accompanied by a comment describing what tests have been made by the reviewer.
