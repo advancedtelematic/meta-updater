@@ -48,7 +48,6 @@ EXTRA_OECMAKE = "-DWARNING_AS_ERROR=OFF \
                  -DAKTUALIZR_VERSION=${PV} \
                  -DBUILD_LOAD_TESTS=OFF"
 EXTRA_OECMAKE_append_class-target = " -DBUILD_OSTREE=ON \
-                                      -DBUILD_ISOTP=ON \
                                       ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', '-DBUILD_P11=ON', '', d)} "
 EXTRA_OECMAKE_append_class-native = " -DBUILD_SOTA_TOOLS=ON \
                                       -DBUILD_OSTREE=OFF \
