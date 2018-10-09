@@ -1,5 +1,4 @@
-# Writes uses repo manifest version as a target version
-#
+# Writes target version to be used by garage-sign
 
 HOSTTOOLS += " git "
 

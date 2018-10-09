@@ -167,6 +167,16 @@ There are a few settings that can be controlled in `local.conf` to simplify the 
 | `TOOLCHAIN_HOST_TASK_append = " nativesdk-cmake "` | Use with `bitbake -c populate_sdk core-image-minimal` to build an SDK. See the https://github.com/advancedtelematic/aktualizr#developing-against-an-openembedded-system[aktualizr repo] for more information.
 |======================
 
+=== Overriding target version
+*Warning: overriding target version is a dangerous operation, make sure you understand this section completely before doing it.*
+
+Every time you build an image with `SOTA_PACKED_CREDENTIALS` set, a new entry in your Uptane metadata is created and you can see it in the OTA Garage UI if you're using one. Normally this version will be equal to OSTree hash of your root file system. If you want it to be different though you can override is using one of two methods:
+
+1. Set `GARAGE_TARGET_VERSION` variable in your `local.conf`.
+2. Write a recipe or a bbclass to write the desired version to `${STAGING_DATADIR_NATIVE}/target_version`. An example of such bbclass can be found in `classes/target_version_example.bbclass`.
+
+Please note that [target name, target version] pairs are expected to be unique in the system. If you build a new target with the same target version as a previously build one, the old package will be overwritten on the update server. It can have unpredictable effect on devices that have this version installed, it is not guaranteed that information will be reported correctly for such devices or that you will be able to update them (we're doing our best though). The easiest way to avoid problems is to make sure that your overriding version is as unique as OSTree commit hash.
+
 == QA with oe-selftest
 
 This layer relies on the test framework oe-selftest for quality assurance. Follow the steps below to run the tests:
