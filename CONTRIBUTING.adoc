@@ -6,12 +6,14 @@ If you are developing with meta-updater, it may be helpful to read the README an
 
 == Contributor checklist
 
-* OTA-enabled build succeeds at least for one platform, the resulted image boots. This check is absolutely necessary for every pull request unless it only touches documentation.
-* If your change is touching platform code (like `classes/sota_<platform>.bbclass`), please check build and update on this particular platform.
+* OTA-enabled build succeeds at least for one platform, the resulted image boots, and an update can be installed. This check is absolutely necessary for every pull request unless it only touches documentation.
+* If your change touches platform code (like `classes/sota_<platform>.bbclass`), please check building and updating on this particular platform.
 * oe-selftest succeeds. To test meta-updater, run `oe-selftest -r updater` from a build directory with `MACHINE` set to `qemux86-64`.
 * Updates are forwards- and backwards-compatible. You should be able to update an OTA-enabled build before the change is applied to the version with change applied and vice versa. One should pay double attention to the compatibility when bootloader code is affected.
+* The patch/branch should be based on the latest version of the target branch. This may mean that rebasing is necessary if other PRs are merged before yours is approved.
 
-We understand that making all these tests might be overly tedious taking in account build times in Yocto. Please add a comment to your PR describing the tests you've made.
+We understand that completing all these tasks might be overly tedious due to build times in Yocto. Please add a comment to your PR describing the tests you've done.
 
 == Approval
-PR approval should be accompanied by a comment describing what tests have been made by the reviewer.
+
+PR approval should be accompanied by a comment describing what tests have been done by the reviewer.
