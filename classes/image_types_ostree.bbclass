@@ -219,8 +219,10 @@ IMAGE_CMD_garagesign () {
         target_version=${ostree_target_hash}
         if [ -n "${GARAGE_TARGET_VERSION}" ]; then
             target_version=${GARAGE_TARGET_VERSION}
+            bbwarn "Target version is overriden with GARAGE_TARGET_VERSION variable. It is a dangerous operation, make sure you've read the respective secion in meta-updater/README.adoc"
         elif [ -e "${STAGING_DATADIR_NATIVE}/target_version" ]; then
             target_version=$(cat "${STAGING_DATADIR_NATIVE}/target_version")
+            bbwarn "Target version is overriden with target_version file. It is a dangerous operation, make sure you've read the respective secion in meta-updater/README.adoc"
         fi
 
         # Push may fail due to race condition when multiple build machines try to push simultaneously
