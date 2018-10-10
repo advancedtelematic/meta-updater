@@ -3,10 +3,9 @@ DESCRIPTION = "Configures aktualizr to disable IP reporting to the server"
 HOMEPAGE = "https://github.com/advancedtelematic/aktualizr"
 SECTION = "base"
 LICENSE = "MPL-2.0"
-LIC_FILES_CHKSUM = "file://${WORKDIR}/LICENSE;md5=9741c346eef56131163e13b9db1241b3"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7f619bab123dad"
 
 SRC_URI = " \
-            file://LICENSE \
             file://30-disable-send-ip.toml \
             "
 
