@@ -26,7 +26,7 @@ SRC_URI = " \
   file://aktualizr-secondary.socket \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "512ad74c0b5339ca7775d8c9461b565a9e6ff5b3"
+SRCREV = "6b0114e4fad0619d16ed2063e8ff10e3fb8500f2"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -48,7 +48,6 @@ EXTRA_OECMAKE = "-DWARNING_AS_ERROR=OFF \
                  -DAKTUALIZR_VERSION=${PV} \
                  -DBUILD_LOAD_TESTS=OFF"
 EXTRA_OECMAKE_append_class-target = " -DBUILD_OSTREE=ON \
-                                      -DBUILD_ISOTP=ON \
                                       ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', '-DBUILD_P11=ON', '', d)} "
 EXTRA_OECMAKE_append_class-native = " -DBUILD_SOTA_TOOLS=ON \
                                       -DBUILD_OSTREE=OFF \
@@ -97,8 +96,6 @@ FILES_${PN} = " \
 
 FILES_${PN}-examples = " \
                 ${libdir}/sota/demo_secondary.json \
-                ${bindir}/example-interface \
-                ${bindir}/isotp-test-interface \
                 ${bindir}/hmi_stub \
                 "
 

@@ -150,8 +150,6 @@ class AutoProvTests(OESelftestTestCase):
             self.meta_qemu = None
         self.append_config('MACHINE = "qemux86-64"')
         self.append_config('SOTA_CLIENT_PROV = " aktualizr-auto-prov "')
-        # Test aktualizr-example-interface package.
-        self.append_config('IMAGE_INSTALL_append = " aktualizr-examples aktualizr-example-interface "')
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
     def tearDownLocal(self):
@@ -185,12 +183,6 @@ class AutoProvTests(OESelftestTestCase):
         self.assertTrue(ran_ok, 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
 
         verifyProvisioned(self, machine)
-        # Test aktualizr-example-interface package.
-        stdout, stderr, retcode = self.qemu_command('aktualizr-info')
-        self.assertIn(b'hardware ID: example1', stdout,
-                      'Legacy secondary initialization failed: ' + stderr.decode() + stdout.decode())
-        self.assertIn(b'hardware ID: example2', stdout,
-                      'Legacy secondary initialization failed: ' + stderr.decode() + stdout.decode())
 
 
 class ManualControlTests(OESelftestTestCase):
@@ -561,6 +553,7 @@ class HsmTests(OESelftestTestCase):
                          p11_err.decode() + p11_out.decode() + hsm_err.decode() + hsm_out.decode())
 
         verifyProvisioned(self, machine)
+
 
 class SecondaryTests(OESelftestTestCase):
     @classmethod
