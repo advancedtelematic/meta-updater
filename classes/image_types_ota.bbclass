@@ -159,18 +159,11 @@ create_ota () {
 }
 
 IMAGE_CMD_ota-ext4 () {
-
-	if ${@bb.utils.contains('IMAGE_FSTYPES', 'ota-ext4', 'true', 'false', d)}; then
-		# create ext4
-		create_ota "ext4"
-	fi
+	create_ota "ext4"
 }
 
 IMAGE_CMD_ota-tar () {
-	if ${@bb.utils.contains('IMAGE_FSTYPES', 'ota-tar', 'true', 'false', d)}; then
-		# create tarball
-		create_ota "tar"
-	fi
+	create_ota "tar"
 }
 
 do_otasetup[doc] = "Sets up the base ota rootfs used for subsequent image generation"
