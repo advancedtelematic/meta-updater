@@ -175,7 +175,7 @@ Every time you build an image with `SOTA_PACKED_CREDENTIALS` set, a new entry in
 1. Set `GARAGE_TARGET_VERSION` variable in your `local.conf`.
 2. Write a recipe or a bbclass to write the desired version to `${STAGING_DATADIR_NATIVE}/target_version`. An example of such bbclass can be found in `classes/target_version_example.bbclass`.
 
-Please note that [target name, target version] pairs are expected to be unique in the system. If you build a new target with the same target version as a previously build one, the old package will be overwritten on the update server. It can have unpredictable effect on devices that have this version installed, it is not guaranteed that information will be reported correctly for such devices or that you will be able to update them (we're doing our best though). The easiest way to avoid problems is to make sure that your overriding version is as unique as OSTree commit hash.
+Please note that [target name, target version] pairs are expected to be unique in the system. If you build a new target with the same target version as a previously built one, the old package will be overwritten on the update server. It can have unpredictable effect on devices that have this version installed, and it is not guaranteed that information will be reported correctly for such devices or that you will be able to update them (we're doing our best though). The easiest way to avoid problems is to make sure that your overriding version is as unique as an OSTree commit hash.
 
 == QA with oe-selftest
 
