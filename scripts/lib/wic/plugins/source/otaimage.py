@@ -39,13 +39,13 @@ class OTAImagePlugin(RawCopyPlugin):
         Called to do the actual content population for a partition i.e. it
         'prepares' the partition to be incorporated into the image.
         """
-        bootimg_dir = get_bitbake_var("DEPLOY_DIR_IMAGE")
+        bootimg_dir = get_bitbake_var("IMGDEPLOYDIR")
         if not bootimg_dir:
             logger.error("Couldn't find DEPLOY_DIR_IMAGE, exiting\n")
 
         logger.debug('Bootimg dir: %s' % bootimg_dir)
 
-        src = bootimg_dir + "/" + get_bitbake_var("IMAGE_LINK_NAME") + ".otaimg"
+        src = bootimg_dir + "/" + get_bitbake_var("IMAGE_LINK_NAME") + ".ota-ext4"
 
         logger.debug('Preparing partition using image %s' % (src))
         source_params['file'] = src
