@@ -203,6 +203,7 @@ For more information about oe-selftest, including details about how to run indiv
 As described in <<sota-related-variables-in-localconf,SOTA-related variables in local.conf>> section you can set `SOTA_DEPLOY_CREDENTIALS` to `0` to prevent deploying credentials to the built `wic` image. In this case you get a generic image that you can use e.g. on a production line to flash a series of devices. The cost of this approach is that this image is half-baked and should be provisioned before it can connect to the backend.
 
 Provisioning procedure depends on your provisioning recipe, i.e. the value of `SOTA_CLIENT_PROV` (equal to `aktualizr-auto-prov` by default).
+
 * For `aktualizr-auto-prov` put your `credentials.zip` to `/var/sota/sota_provisioning_credentials.zip` on the filesystem of a running device. If you have the filesystem of our device mounted to your build machine, prefix all paths with `/ostree/deploy/poky` as in `/ostree/deploy/poky/var/sota/sota_provisioning_credentials.zip`.
 * For `aktualizr-ca-implicit-prov`
 ** put URL to the used backend (together with protocol prefix and port number) to `/var/sota/gateway.url`. If you're using HERE OTA Connect, you can find the URL in `autoprov.url` file in your credentials archive.
