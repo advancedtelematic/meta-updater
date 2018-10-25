@@ -46,7 +46,7 @@ bitbake agl-demo-platform
 and get as a result an `ostree_repo` folder in your images directory (`tmp/deploy/images/$\{MACHINE}/ostree_repo`). It will contain:
 
 * your OSTree repository, with the rootfs committed as an OSTree deployment,
-* an `otaimg` bootstrap image, which is an OSTree physical sysroot as a burnable filesystem image, and optionally
+* an `ota-ext4` bootstrap image, which is an OSTree physical sysroot as a burnable filesystem image, and optionally
 * some machine-dependent live images (e.g. `.wic` for Raspberry Pi or `.porter-sdimg-ota` Renesas Porter board).
 
 Although `aglsetup.sh` hooks provide reasonable defaults for SOTA-related variables, you may want to tune some of them.

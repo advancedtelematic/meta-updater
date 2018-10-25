@@ -66,7 +66,7 @@ class GeneralTests(OESelftestTestCase):
     def test_add_package(self):
         deploydir = get_bb_var('DEPLOY_DIR_IMAGE')
         imagename = get_bb_var('IMAGE_LINK_NAME', 'core-image-minimal')
-        image_path = deploydir + '/' + imagename + '.otaimg'
+        image_path = deploydir + '/' + imagename + '.ota-ext4'
         logger = logging.getLogger("selftest")
 
         logger.info('Running bitbake with man in the image package list')

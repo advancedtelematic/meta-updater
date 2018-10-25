@@ -6,7 +6,7 @@ from subprocess import check_output, CalledProcessError
 
 EXTENSIONS = {
     'intel-corei7-64': 'wic',
-    'qemux86-64': 'otaimg'
+    'qemux86-64': 'ota-ext4'
 }
 
 

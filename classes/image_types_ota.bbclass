@@ -136,21 +136,12 @@ IMAGE_CMD_ota-ext4 () {
 		eval COUNT=\"$MIN_COUNT\"
 	fi
 
-	rm -rf ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg
-	sync
-	dd if=/dev/zero of=${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg seek=${OTA_ROOTFS_SIZE} count=$COUNT bs=1024
-	mkfs.ext4 -O ^64bit ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg -L otaroot -d ${OTA_SYSROOT}
-	rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg
-	ln -s ${IMAGE_NAME}.otaimg ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg
+	dd if=/dev/zero of=${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.ota-ext4 seek=${OTA_ROOTFS_SIZE} count=$COUNT bs=1024
+	mkfs.ext4 -O ^64bit ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.ota-ext4 -L otaroot -d ${OTA_SYSROOT}
 }
 
 IMAGE_CMD_ota-tar () {
-	rm -rf ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg.tar
-	tar -cf ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg.tar -C ${OTA_SYSROOT} .
-	rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg.tar
-	ln -s ${IMAGE_NAME}.otaimg.tar ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg.tar
-	# To fit in with the rest of yocto's image utils, we create a rootfs.ota-tar in the deploy dir
-	cp ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg.tar ${IMGDEPLOYDIR}/${IMAGE_NAME}.rootfs.ota-tar
+	tar -cf ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.ota-tar -C ${OTA_SYSROOT} .
 }
 
 do_otasetup[doc] = "Sets up the base ota rootfs used for subsequent image generation"
