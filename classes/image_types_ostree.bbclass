@@ -14,6 +14,10 @@ export GARAGE_TARGET_NAME
 
 OSTREE_KERNEL ??= "${KERNEL_IMAGETYPE}"
 
+OSTREE_COMMIT_SUBJECT ??= "Commit-id: ${IMAGE_NAME}"
+OSTREE_COMMIT_BODY ??= ""
+OSTREE_UPDATE_SUMMARY ??= "0"
+
 export SYSTEMD_USED = "${@oe.utils.ifelse(d.getVar('VIRTUAL-RUNTIME_init_manager', True) == 'systemd', 'true', '')}"
 
 IMAGE_CMD_ostree () {
@@ -160,7 +164,12 @@ IMAGE_CMD_ostree () {
            --tree=dir=${OSTREE_ROOTFS} \
            --skip-if-unchanged \
            --branch=${OSTREE_BRANCHNAME} \
-           --subject="Commit-id: ${IMAGE_NAME}"
+           --subject="${OSTREE_COMMIT_SUBJECT}" \
+           --body="${OSTREE_COMMIT_BODY}"
+
+    if [ "${OSTREE_UPDATE_SUMMARY}" = "1" ]; then
+        ostree --repo=${OSTREE_REPO} summary -u
+    fi
 
     rm -rf ${OSTREE_ROOTFS}
 }
