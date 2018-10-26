@@ -26,7 +26,8 @@ SRC_URI = " \
   file://aktualizr-secondary.socket \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "6b0114e4fad0619d16ed2063e8ff10e3fb8500f2"
+
+SRCREV = "39acfec48d1cb91e7621c818ac177f6d3c73fecc"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -56,8 +57,6 @@ EXTRA_OECMAKE_append_class-native = " -DBUILD_SOTA_TOOLS=ON \
                                       -DGARAGE_SIGN_SHA256=${GARAGE_SIGN_SHA256}"
 
 do_install_append () {
-    rm -fr ${D}${libdir}/systemd
-    rm -f ${D}${libdir}/sota/sota.toml # Only needed for the Debian package
     install -d ${D}${libdir}/sota
     install -m 0644 ${S}/config/sota_autoprov.toml ${D}/${libdir}/sota/sota_autoprov.toml
     install -m 0644 ${S}/config/sota_autoprov_primary.toml ${D}/${libdir}/sota/sota_autoprov_primary.toml
@@ -95,7 +94,6 @@ FILES_${PN} = " \
                 "
 
 FILES_${PN}-examples = " \
-                ${libdir}/sota/demo_secondary.json \
                 ${bindir}/hmi_stub \
                 "
 
