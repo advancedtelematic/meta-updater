@@ -102,9 +102,6 @@ class AktualizrToolsTests(OESelftestTestCase):
         logger.info('Running bitbake to build aktualizr-native tools')
         bitbake('aktualizr-native')
 
-    def test_implicit_writer_help(self):
-        akt_native_run(self, 'aktualizr_implicit_writer --help')
-
     def test_cert_provider_help(self):
         akt_native_run(self, 'aktualizr_cert_provider --help')
 
@@ -227,6 +224,7 @@ class ManualControlTests(OESelftestTestCase):
         stdout, stderr, retcode = self.qemu_command('aktualizr-info')
         self.assertIn(b'Fetched metadata: yes', stdout,
                       'Aktualizr should have run' + stderr.decode() + stdout.decode())
+
 
 class RpiTests(OESelftestTestCase):
 
