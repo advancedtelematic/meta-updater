@@ -27,7 +27,7 @@ SRC_URI = " \
   file://aktualizr-serialcan.service \
   "
 
-SRCREV = "39acfec48d1cb91e7621c818ac177f6d3c73fecc"
+SRCREV = "3c1c77c005fc1f872f1e12080528ed6f8a32bbf3"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -100,7 +100,6 @@ FILES_${PN}-examples = " \
 FILES_${PN}-host-tools = " \
                 ${bindir}/aktualizr-repo \
                 ${bindir}/aktualizr_cert_provider \
-                ${bindir}/aktualizr_implicit_writer \
                 ${bindir}/garage-deploy \
                 ${bindir}/garage-push \
                 ${libdir}/sota/sota_autoprov.toml \
