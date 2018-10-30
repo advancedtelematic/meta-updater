@@ -14,7 +14,7 @@ If you are developing with meta-updater, it may be helpful to read the README an
 
 == Contributor checklist
 
-* OTA-enabled build succeeds at least for one platform, the resulted image boots, and an update can be installed. This check is absolutely necessary for every pull request unless it only touches documentation.
+* OTA-enabled build succeeds for at least one platform, the resulting image boots, and an update can be installed. This check is absolutely necessary for every pull request unless it only touches documentation.
 * If your change touches platform code (like `classes/sota_<platform>.bbclass`), please check building and updating on this particular platform.
 * oe-selftest succeeds. To test meta-updater, run `oe-selftest -r updater` from a build directory with `MACHINE` set to `qemux86-64`.
 * Updates are forwards- and backwards-compatible. You should be able to update an OTA-enabled build before the change is applied to the version with change applied and vice versa. One should pay double attention to the compatibility when bootloader code is affected.
