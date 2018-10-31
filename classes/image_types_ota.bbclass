@@ -115,6 +115,8 @@ fakeroot do_otasetup () {
 	target_version=${ostree_target_hash}
 	if [ -n "${GARAGE_TARGET_VERSION}" ]; then
 		target_version=${GARAGE_TARGET_VERSION}
+	elif [ -e "${STAGING_DATADIR_NATIVE}/target_version" ]; then
+		target_version=$(cat "${STAGING_DATADIR_NATIVE}/target_version")
 	fi
 	mkdir -p ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota/import
 	echo "{\"${ostree_target_hash}\":\"${GARAGE_TARGET_NAME}-${target_version}\"}" > ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota/import/installed_versions
