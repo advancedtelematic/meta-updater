@@ -26,7 +26,8 @@ SRC_URI = " \
   file://aktualizr-secondary.socket \
   file://aktualizr-serialcan.service \
   "
-SRCREV = "512ad74c0b5339ca7775d8c9461b565a9e6ff5b3"
+
+SRCREV = "3c1c77c005fc1f872f1e12080528ed6f8a32bbf3"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -49,7 +50,6 @@ EXTRA_OECMAKE = "-DWARNING_AS_ERROR=OFF \
                  -DBUILD_LOAD_TESTS=OFF \
                  -Dgtest_disable_pthreads=ON"
 EXTRA_OECMAKE_append_class-target = " -DBUILD_OSTREE=ON \
-                                      -DBUILD_ISOTP=ON \
                                       ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', '-DBUILD_P11=ON', '', d)} "
 EXTRA_OECMAKE_append_class-native = " -DBUILD_SOTA_TOOLS=ON \
                                       -DBUILD_OSTREE=OFF \
@@ -58,8 +58,6 @@ EXTRA_OECMAKE_append_class-native = " -DBUILD_SOTA_TOOLS=ON \
                                       -DGARAGE_SIGN_SHA256=${GARAGE_SIGN_SHA256}"
 
 do_install_append () {
-    rm -fr ${D}${libdir}/systemd
-    rm -f ${D}${libdir}/sota/sota.toml # Only needed for the Debian package
     install -d ${D}${libdir}/sota
     install -m 0644 ${S}/config/sota_autoprov.toml ${D}/${libdir}/sota/sota_autoprov.toml
     install -m 0644 ${S}/config/sota_autoprov_primary.toml ${D}/${libdir}/sota/sota_autoprov_primary.toml
@@ -97,16 +95,12 @@ FILES_${PN} = " \
                 "
 
 FILES_${PN}-examples = " \
-                ${libdir}/sota/demo_secondary.json \
-                ${bindir}/example-interface \
-                ${bindir}/isotp-test-interface \
                 ${bindir}/hmi_stub \
                 "
 
 FILES_${PN}-host-tools = " \
                 ${bindir}/aktualizr-repo \
                 ${bindir}/aktualizr_cert_provider \
-                ${bindir}/aktualizr_implicit_writer \
                 ${bindir}/garage-deploy \
                 ${bindir}/garage-push \
                 ${libdir}/sota/sota_autoprov.toml \
