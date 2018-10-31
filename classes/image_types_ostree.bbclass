@@ -6,6 +6,7 @@ do_image_ostree[depends] += "ostree-native:do_populate_sysroot \
                         unzip-native:do_populate_sysroot \
                         virtual/kernel:do_deploy \
                         ${OSTREE_INITRAMFS_IMAGE}:do_image_complete"
+do_image_ostree[lockfiles] += "${OSTREE_REPO}/ostree.lock"
 
 export OSTREE_REPO
 export OSTREE_BRANCHNAME
