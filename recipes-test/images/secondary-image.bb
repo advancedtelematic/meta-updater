@@ -10,9 +10,11 @@ LICENSE = "MIT"
 IMAGE_INSTALL_remove = " \
                         aktualizr \
                         aktualizr-auto-prov \
+                        aktualizr-auto-prov-creds \
                         aktualizr-ca-implicit-prov \
+                        aktualizr-ca-implicit-prov-creds \
                         aktualizr-hsm-prov \
-                        aktualizr-implicit-prov \
+                        aktualizr-uboot-env-rollback \
                         connman \
                         connman-client \
                         "
