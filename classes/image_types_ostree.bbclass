@@ -7,6 +7,7 @@ do_image_ostree[depends] += "ostree-native:do_populate_sysroot \
                         virtual/kernel:do_deploy \
                         ${INITRAMFS_IMAGE}:do_image_complete \
 "
+do_image_ostree[lockfiles] += "${OSTREE_REPO}/ostree.lock"
 
 export OSTREE_REPO
 export OSTREE_BRANCHNAME
@@ -155,7 +156,7 @@ IMAGE_CMD_ostree () {
     rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2
     ln -s ${IMAGE_NAME}.rootfs.ostree.tar.bz2 ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2
 
-    if [ ! -d ${OSTREE_REPO} ]; then
+    if ! ostree --repo=${OSTREE_REPO} refs 2>&1 > /dev/null; then
         ostree --repo=${OSTREE_REPO} init --mode=archive-z2
     fi
 
