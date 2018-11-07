@@ -13,6 +13,12 @@ Previously, some older branches were also regularly supported, and while they sh
 
 If you are developing with meta-updater, it may be helpful to read the README and other documentation for link:README.adoc[this repo], https://github.com/advancedtelematic/aktualizr[aktualizr], and the https://github.com/advancedtelematic/updater-repo/[updater-repo], particularly the sections about development and debugging.
 
+== Developer Certificate of Origin (DCO)
+
+All commits in pull requests must contain a `Signed-off-by:` line to indicate that the developer has agreed to the terms of the https://developercertificate.org[Developer Certificate of Origin]. A simple way to achieve that is to use the `-s` flag of `git commit`.
+
+New pull requests will automatically be checked by the https://probot.github.io/apps/dco/[probot/dco].
+
 == Contributor checklist
 
 * OTA-enabled build succeeds for at least one platform, the resulting image boots, and an update can be installed. This check is absolutely necessary for every pull request unless it only touches documentation.
