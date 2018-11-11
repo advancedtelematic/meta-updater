@@ -1,9 +1,7 @@
 # OSTree deployment
 
 do_image_ostree[depends] += "ostree-native:do_populate_sysroot \
-                        openssl-native:do_populate_sysroot \
                         coreutils-native:do_populate_sysroot \
-                        unzip-native:do_populate_sysroot \
                         virtual/kernel:do_deploy \
                         ${INITRAMFS_IMAGE}:do_image_complete \
 "
@@ -188,7 +186,7 @@ IMAGE_CMD_ostreepush () {
 }
 
 IMAGE_TYPEDEP_garagesign = "ostreepush"
-do_image_garagesign[depends] += "aktualizr-native:do_populate_sysroot"
+do_image_garagesign[depends] += "unzip-native:do_populate_sysroot"
 IMAGE_CMD_garagesign () {
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         # if credentials are issued by a server that doesn't support offline signing, exit silently
@@ -254,8 +252,7 @@ IMAGE_CMD_garagesign () {
     fi
 }
 
-IMAGE_TYPEDEP_garagecheck = "ostreepush garagesign"
-do_image_garagecheck[depends] += "aktualizr-native:do_populate_sysroot"
+IMAGE_TYPEDEP_garagecheck = "garagesign"
 IMAGE_CMD_garagecheck () {
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         # if credentials are issued by a server that doesn't support offline signing, exit silently
