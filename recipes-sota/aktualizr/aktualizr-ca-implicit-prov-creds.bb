@@ -33,7 +33,7 @@ do_install() {
         fi
 
         if [ -z ${SOTA_CAKEY_PATH} ]; then
-            bberror "SOTA_CAKEY_PATH should be set when using implicit provisioning"
+            bbfatal "SOTA_CAKEY_PATH should be set when using implicit provisioning"
         fi
 
         install -m 0700 -d ${D}${localstatedir}/sota
