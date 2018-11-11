@@ -79,8 +79,8 @@ IMAGE_CMD_otaimg () {
 		elif [ "${OSTREE_BOOTLOADER}" = "u-boot" ]; then
 			touch ${PHYS_SYSROOT}/boot/loader/uEnv.txt
 		else
-			bberror "Invalid bootloader: ${OSTREE_BOOTLOADER}"
-		fi;
+			bbfatal "Invalid bootloader: ${OSTREE_BOOTLOADER}"
+		fi
 
 		ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME})
 
