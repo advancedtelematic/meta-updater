@@ -112,8 +112,7 @@ IMAGE_CMD_ostree () {
 
     if [ -d root ] && [ ! -L root ]; then
         if [ "$(ls -A root)" ]; then
-            bberror "Data in /root directory is not preserved by OSTree."
-            exit 1
+            bbfatal "Data in /root directory is not preserved by OSTree."
         fi
 
         if [ -n "$SYSTEMD_USED" ]; then
@@ -197,11 +196,9 @@ IMAGE_CMD_garagesign () {
 
         java_version=$( java -version 2>&1 | awk -F '"' '/version/ {print $2}' )
         if [ "${java_version}" = "" ]; then
-            bberror "Java is required for synchronization with update backend, but is not installed on the host machine"
-            exit 1
+            bbfatal "Java is required for synchronization with update backend, but is not installed on the host machine"
         elif [ "${java_version}" \< "1.8" ]; then
-            bberror "Java version >= 8 is required for synchronization with update backend"
-            exit 1
+            bbfatal "Java version >= 8 is required for synchronization with update backend"
         fi
 
         rm -rf ${GARAGE_SIGN_REPO}
@@ -252,8 +249,7 @@ IMAGE_CMD_garagesign () {
         rm -rf ${GARAGE_SIGN_REPO}
 
         if [ "$push_success" -ne "1" ]; then
-            bberror "Couldn't push to garage repository"
-            exit 1
+            bbfatal "Couldn't push to garage repository"
         fi
     fi
 }
