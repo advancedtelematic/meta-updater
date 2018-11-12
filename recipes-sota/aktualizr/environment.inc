@@ -1,11 +1,8 @@
-export SOTA_VIRTUAL_SECONDARIES
-
 do_install_append() {
-  for sec in ${SOTA_VIRTUAL_SECONDARIES}; do
-    AKTUALIZR_PARAMETERS_VIRTUALSECS="${AKTUALIZR_PARAMETERS_VIRTUALSECS} --secondary-config $sec"
-  done
-
-  echo "AKTUALIZR_CMDLINE_PARAMETERS=${AKTUALIZR_PARAMETERS_VIRTUALSECS}" > ${D}${libdir}/sota/sota.env
+  if [ -n "${SOTA_SECONDARY_CONFIG_DIR}" ]; then
+    AKTUALIZR_CMDLINE_PARAMETERS="${AKTUALIZR_CMDLINE_PARAMETERS} --secondary-configs-dir /etc/sota/ecus"
+  fi
+  echo "AKTUALIZR_CMDLINE_PARAMETERS=${AKTUALIZR_CMDLINE_PARAMETERS}" > ${D}${libdir}/sota/sota.env
 }
 
 FILES_${PN}_append = " ${libdir}/sota/sota.env"

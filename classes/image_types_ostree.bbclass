@@ -123,11 +123,6 @@ IMAGE_CMD_ostree () {
         ln -sf var/roothome root
     fi
 
-    if [ -n "${SOTA_SECONDARY_ECUS}" ]; then
-        mkdir -p var/sota/ecus
-        cp ${SOTA_SECONDARY_ECUS} var/sota/ecus
-    fi
-
     # Creating boot directories is required for "ostree admin deploy"
 
     mkdir -p boot/loader.0
