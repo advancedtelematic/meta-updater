@@ -126,11 +126,6 @@ IMAGE_CMD_ostree () {
         ln -sf var/roothome root
     fi
 
-    if [ -n "${SOTA_SECONDARY_ECUS}" ]; then
-        mkdir -p var/sota/ecus
-        cp ${SOTA_SECONDARY_ECUS} var/sota/ecus
-    fi
-
     checksum=`sha256sum ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} | cut -f 1 -d " "`
 
     cp ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} boot/vmlinuz-${checksum}
