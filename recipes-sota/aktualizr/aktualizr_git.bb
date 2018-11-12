@@ -69,6 +69,12 @@ do_install_append () {
     install -m 0644 ${WORKDIR}/aktualizr-secondary.service ${D}${systemd_unitdir}/system/aktualizr-secondary.service
     install -m 0700 -d ${D}${libdir}/sota/conf.d
     install -m 0700 -d ${D}${sysconfdir}/sota/conf.d
+
+    if [ -n "${SOTA_SECONDARY_CONFIG_DIR}" ] && [ -e "${SOTA_SECONDARY_CONFIG_DIR}" ]; then
+        install -m 0700 -d ${D}${sysconfdir}/sota/ecus
+        install -m 0644 "${SOTA_SECONDARY_CONFIG_DIR}"/* ${D}${sysconfdir}/sota/ecus/
+    fi
+
 }
 
 do_install_append_class-target () {
@@ -91,6 +97,7 @@ FILES_${PN} = " \
                 ${systemd_unitdir}/system/aktualizr.service \
                 ${libdir}/sota/conf.d \
                 ${sysconfdir}/sota/conf.d \
+                ${sysconfdir}/sota/ecus/* \
                 "
 
 FILES_${PN}-examples = " \
