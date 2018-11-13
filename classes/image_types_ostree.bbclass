@@ -6,6 +6,7 @@ do_image_ostree[depends] += "ostree-native:do_populate_sysroot \
                         unzip-native:do_populate_sysroot \
                         virtual/kernel:do_deploy \
                         ${OSTREE_INITRAMFS_IMAGE}:do_image_complete"
+do_image_ostree[lockfiles] += "${OSTREE_REPO}/ostree.lock"
 
 export OSTREE_REPO
 export OSTREE_BRANCHNAME
@@ -122,11 +123,6 @@ IMAGE_CMD_ostree () {
         ln -sf var/roothome root
     fi
 
-    if [ -n "${SOTA_SECONDARY_ECUS}" ]; then
-        mkdir -p var/sota/ecus
-        cp ${SOTA_SECONDARY_ECUS} var/sota/ecus
-    fi
-
     # Creating boot directories is required for "ostree admin deploy"
 
     mkdir -p boot/loader.0
@@ -151,7 +147,7 @@ IMAGE_CMD_ostree () {
     rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2
     ln -s ${IMAGE_NAME}.rootfs.ostree.tar.bz2 ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2
 
-    if [ ! -d ${OSTREE_REPO} ]; then
+    if ! ostree --repo=${OSTREE_REPO} refs 2>&1 > /dev/null; then
         ostree --repo=${OSTREE_REPO} init --mode=archive-z2
     fi
 
