@@ -15,7 +15,6 @@ RDEPENDS_${PN}_append = "${@' aktualizr-ca-implicit-prov-creds' if d.getVar('SOT
 PV = "1.0"
 PR = "1"
 
-require environment.inc
 require credentials.inc
 
 do_install() {

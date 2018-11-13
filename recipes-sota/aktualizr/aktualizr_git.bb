@@ -27,7 +27,7 @@ SRC_URI = " \
   file://aktualizr-serialcan.service \
   "
 
-SRCREV = "3c1c77c005fc1f872f1e12080528ed6f8a32bbf3"
+SRCREV = "4621a15779db38531fb386478232a9e8593e53f4"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -69,6 +69,17 @@ do_install_append () {
     install -m 0644 ${WORKDIR}/aktualizr-secondary.service ${D}${systemd_unitdir}/system/aktualizr-secondary.service
     install -m 0700 -d ${D}${libdir}/sota/conf.d
     install -m 0700 -d ${D}${sysconfdir}/sota/conf.d
+
+    if [ -n "${SOTA_SECONDARY_CONFIG_DIR}" ]; then
+        if [ -d "${SOTA_SECONDARY_CONFIG_DIR}" ]; then
+            install -m 0700 -d ${D}${sysconfdir}/sota/ecus
+            install -m 0644 "${SOTA_SECONDARY_CONFIG_DIR}"/* ${D}${sysconfdir}/sota/ecus/
+            echo "[uptane]\nsecondary_configs_dir = /etc/sota/ecus/\n" > ${D}${libdir}/sota/conf.d/30-secondary-configs-dir.toml
+        else
+            bbwarn "SOTA_SECONDARY_CONFIG_DIR is set to an invalid directory (${SOTA_SECONDARY_CONFIG_DIR})"
+        fi
+    fi
+
 }
 
 do_install_append_class-target () {
@@ -91,6 +102,7 @@ FILES_${PN} = " \
                 ${systemd_unitdir}/system/aktualizr.service \
                 ${libdir}/sota/conf.d \
                 ${sysconfdir}/sota/conf.d \
+                ${sysconfdir}/sota/ecus/* \
                 "
 
 FILES_${PN}-examples = " \
