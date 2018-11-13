@@ -75,6 +75,7 @@ do_install_append () {
         if [ -d "${SOTA_SECONDARY_CONFIG_DIR}" ]; then
             install -m 0700 -d ${D}${sysconfdir}/sota/ecus
             install -m 0644 "${SOTA_SECONDARY_CONFIG_DIR}"/* ${D}${sysconfdir}/sota/ecus/
+            echo "[uptane]\nsecondary_configs_dir = /etc/sota/ecus/\n" > ${D}${libdir}/sota/conf.d/30-secondary-configs-dir.toml
         else
             bbwarn "SOTA_SECONDARY_CONFIG_DIR is set to an invalid directory (${SOTA_SECONDARY_CONFIG_DIR})"
         fi
