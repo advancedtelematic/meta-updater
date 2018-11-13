@@ -70,9 +70,13 @@ do_install_append () {
     install -m 0700 -d ${D}${libdir}/sota/conf.d
     install -m 0700 -d ${D}${sysconfdir}/sota/conf.d
 
-    if [ -n "${SOTA_SECONDARY_CONFIG_DIR}" ] && [ -e "${SOTA_SECONDARY_CONFIG_DIR}" ]; then
-        install -m 0700 -d ${D}${sysconfdir}/sota/ecus
-        install -m 0644 "${SOTA_SECONDARY_CONFIG_DIR}"/* ${D}${sysconfdir}/sota/ecus/
+    if [ -n "${SOTA_SECONDARY_CONFIG_DIR}" ]; then
+        if [ -d "${SOTA_SECONDARY_CONFIG_DIR}" ]; then
+            install -m 0700 -d ${D}${sysconfdir}/sota/ecus
+            install -m 0644 "${SOTA_SECONDARY_CONFIG_DIR}"/* ${D}${sysconfdir}/sota/ecus/
+        else
+            bbwarn "SOTA_SECONDARY_CONFIG_DIR is set to an invalid directory (${SOTA_SECONDARY_CONFIG_DIR})"
+        fi
     fi
 
 }
