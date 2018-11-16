@@ -41,16 +41,6 @@ IMAGE_CMD_ostree () {
     mkdir -p usr/rootdirs
 
     mv etc usr/
-    # Implement UsrMove
-    dirs="bin sbin lib"
-
-    for dir in ${dirs} ; do
-        if [ -d ${dir} ] && [ ! -L ${dir} ] ; then
-            mv ${dir} usr/rootdirs/
-            rm -rf ${dir}
-            ln -sf usr/rootdirs/${dir} ${dir}
-        fi
-    done
 
     if [ -n "${SYSTEMD_USED}" ]; then
         mkdir -p usr/etc/tmpfiles.d
