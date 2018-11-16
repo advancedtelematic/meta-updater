@@ -1,4 +1,5 @@
 # OSTree deployment
+inherit distro_features_check
 
 OSTREE_KERNEL ??= "${KERNEL_IMAGETYPE}"
 OSTREE_ROOTFS ??= "${WORKDIR}/ostree-rootfs"
@@ -14,6 +15,7 @@ IMAGE_CMD_TAR = "tar --xattrs --xattrs-include=*"
 CONVERSION_CMD_tar = "touch ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type}; ${IMAGE_CMD_TAR} --numeric-owner -cf ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type}.tar -C ${OTA_IMAGE_ROOTFS} . || [ $? -eq 1 ]"
 CONVERSIONTYPES_append = " tar"
 
+REQUIRED_DISTRO_FEATURES = "usrmerge"
 OTA_IMAGE_ROOTFS_task-image-ostree = "${OSTREE_ROOTFS}"
 do_image_ostree[dirs] = "${OSTREE_ROOTFS}"
 do_image_ostree[cleandirs] = "${OSTREE_ROOTFS}"
