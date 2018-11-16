@@ -37,9 +37,9 @@ do_install() {
         fi
 
         install -m 0700 -d ${D}${localstatedir}/sota
-        aktualizr_cert_provider --credentials ${SOTA_PACKED_CREDENTIALS} \
-                                --device-ca ${SOTA_CACERT_PATH} \
-                                --device-ca-key ${SOTA_CAKEY_PATH} \
+        aktualizr-cert-provider --credentials ${SOTA_PACKED_CREDENTIALS} \
+                                --fleet-ca ${SOTA_CACERT_PATH} \
+                                --fleet-ca-key ${SOTA_CAKEY_PATH} \
                                 --root-ca \
                                 --server-url \
                                 --local ${D} \
