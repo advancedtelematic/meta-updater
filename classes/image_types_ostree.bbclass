@@ -6,19 +6,14 @@ do_image_ostree[depends] += "ostree-native:do_populate_sysroot \
                         ${OSTREE_INITRAMFS_IMAGE}:do_image_complete"
 do_image_ostree[lockfiles] += "${OSTREE_REPO}/ostree.lock"
 
-export OSTREE_REPO
-export OSTREE_BRANCHNAME
-export GARAGE_TARGET_NAME
-
 RAMDISK_EXT ?= ".${OSTREE_INITRAMFS_FSTYPES}"
 
 OSTREE_KERNEL ??= "${KERNEL_IMAGETYPE}"
-
 OSTREE_COMMIT_SUBJECT ??= "Commit-id: ${IMAGE_NAME}"
 OSTREE_COMMIT_BODY ??= ""
 OSTREE_UPDATE_SUMMARY ??= "0"
 
-export SYSTEMD_USED = "${@oe.utils.ifelse(d.getVar('VIRTUAL-RUNTIME_init_manager', True) == 'systemd', 'true', '')}"
+SYSTEMD_USED = "${@oe.utils.ifelse(d.getVar('VIRTUAL-RUNTIME_init_manager', True) == 'systemd', 'true', '')}"
 
 IMAGE_CMD_ostree () {
     if [ -z "$OSTREE_REPO" ]; then
@@ -63,7 +58,7 @@ IMAGE_CMD_ostree () {
         fi
     done
 
-    if [ -n "$SYSTEMD_USED" ]; then
+    if [ -n "${SYSTEMD_USED}" ]; then
         mkdir -p usr/etc/tmpfiles.d
         tmpfiles_conf=usr/etc/tmpfiles.d/00ostree-tmpfiles.conf
         echo "d /var/rootdirs 0755 root root -" >>${tmpfiles_conf}
@@ -99,7 +94,7 @@ IMAGE_CMD_ostree () {
                 bbwarn "Data in /$dir directory is not preserved by OSTree. Consider moving it under /usr"
             fi
 
-            if [ -n "$SYSTEMD_USED" ]; then
+            if [ -n "${SYSTEMD_USED}" ]; then
                 echo "d /var/rootdirs/${dir} 0755 root root -" >>${tmpfiles_conf}
             else
                 echo "mkdir -p /var/rootdirs/${dir}; chown 755 /var/rootdirs/${dir}" >>${tmpfiles_conf}
@@ -114,7 +109,7 @@ IMAGE_CMD_ostree () {
             bbfatal "Data in /root directory is not preserved by OSTree."
         fi
 
-        if [ -n "$SYSTEMD_USED" ]; then
+        if [ -n "${SYSTEMD_USED}" ]; then
             echo "d /var/roothome 0755 root root -" >>${tmpfiles_conf}
         else
             echo "mkdir -p /var/roothome; chown 755 /var/roothome" >>${tmpfiles_conf}
