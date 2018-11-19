@@ -43,14 +43,7 @@ calculate_size () {
 	echo "${SIZE}"
 }
 
-export OSTREE_OSNAME
-export OSTREE_BRANCHNAME
-export OSTREE_REPO
-export OSTREE_BOOTLOADER
-
-export GARAGE_TARGET_NAME
-
-export OTA_SYSROOT="${WORKDIR}/ota-sysroot"
+OTA_SYSROOT = "${WORKDIR}/ota-sysroot"
 
 ## Common OTA image setup
 fakeroot do_otasetup () {
@@ -88,7 +81,6 @@ fakeroot do_otasetup () {
 	ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME})
 
 	ostree --repo=${OTA_SYSROOT}/ostree/repo pull-local --remote=${OSTREE_OSNAME} ${OSTREE_REPO} ${ostree_target_hash}
-	export OSTREE_BOOT_PARTITION="/boot"
 	kargs_list=""
 	for arg in ${OSTREE_KERNEL_ARGS}; do
 		kargs_list="${kargs_list} --karg-append=$arg"
