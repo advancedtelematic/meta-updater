@@ -655,7 +655,13 @@ def qemu_launch(efi=False, machine=None, imagename=None):
     args.dir = 'tmp/deploy/images'
     args.efi = efi
     args.machine = machine
-    args.kvm = None  # Autodetect
+    qemu_use_kvm = get_bb_var("QEMU_USE_KVM")
+    if qemu_use_kvm and \
+       (qemu_use_kvm == 'True' and 'x86' in machine or \
+        get_bb_var('MACHINE') in qemu_use_kvm.split()):
+        args.kvm = True
+    else:
+        args.kvm = None  # Autodetect
     args.no_gui = True
     args.gdb = False
     args.pcap = None
