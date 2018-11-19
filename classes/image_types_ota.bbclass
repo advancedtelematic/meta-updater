@@ -44,13 +44,6 @@ calculate_size () {
 	echo "${SIZE}"
 }
 
-export OSTREE_OSNAME
-export OSTREE_BRANCHNAME
-export OSTREE_REPO
-export OSTREE_BOOTLOADER
-
-export GARAGE_TARGET_NAME
-
 IMAGE_CMD_otaimg () {
 	if ${@bb.utils.contains('IMAGE_FSTYPES', 'otaimg', 'true', 'false', d)}; then
 		if [ -z "$OSTREE_REPO" ]; then
@@ -85,7 +78,6 @@ IMAGE_CMD_otaimg () {
 		ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME})
 
 		ostree --repo=${PHYS_SYSROOT}/ostree/repo pull-local --remote=${OSTREE_OSNAME} ${OSTREE_REPO} ${ostree_target_hash}
-		export OSTREE_BOOT_PARTITION="/boot"
 		kargs_list=""
 		for arg in ${OSTREE_KERNEL_ARGS}; do
 			kargs_list="${kargs_list} --karg-append=$arg"
