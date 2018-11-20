@@ -109,3 +109,5 @@ IMAGE_CMD_ota-ext4 () {
 	dd if=/dev/zero of=${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.ota-ext4 seek=${OTA_ROOTFS_SIZE} count=$COUNT bs=1024
 	mkfs.ext4 -O ^64bit ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.ota-ext4 -L otaroot -d ${OTA_SYSROOT}
 }
+
+do_image_wic[depends] += "${@bb.utils.contains('DISTRO_FEATURES', 'sota', '%s:do_image_ota_ext4' % d.getVar('IMAGE_BASENAME', True), '', d)}"
