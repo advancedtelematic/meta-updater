@@ -1,34 +1,27 @@
 # OSTree deployment
 
-do_image_ostree[depends] += "ostree-native:do_populate_sysroot \
-                        coreutils-native:do_populate_sysroot \
-                        virtual/kernel:do_deploy \
-                        ${INITRAMFS_IMAGE}:do_image_complete \
-"
-do_image_ostree[lockfiles] += "${OSTREE_REPO}/ostree.lock"
-
 OSTREE_KERNEL ??= "${KERNEL_IMAGETYPE}"
+OSTREE_ROOTFS ??= "${WORKDIR}/ostree-rootfs"
 OSTREE_COMMIT_SUBJECT ??= "Commit-id: ${IMAGE_NAME}"
 OSTREE_COMMIT_BODY ??= ""
 OSTREE_UPDATE_SUMMARY ??= "0"
 
+BUILD_OSTREE_TARBALL ??= "1"
+
 SYSTEMD_USED = "${@oe.utils.ifelse(d.getVar('VIRTUAL-RUNTIME_init_manager', True) == 'systemd', 'true', '')}"
 
+IMAGE_CMD_TAR = "tar --xattrs --xattrs-include=*"
+CONVERSION_CMD_tar = "touch ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type}; ${IMAGE_CMD_TAR} --numeric-owner -cf ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type}.tar -C ${OTA_IMAGE_ROOTFS} . || [ $? -eq 1 ]"
+CONVERSIONTYPES_append = " tar"
+
+OTA_IMAGE_ROOTFS_task-image-ostree = "${OSTREE_ROOTFS}"
+do_image_ostree[dirs] = "${OSTREE_ROOTFS}"
+do_image_ostree[cleandirs] = "${OSTREE_ROOTFS}"
+do_image_ostree[depends] = "coreutils-native:do_populate_sysroot virtual/kernel:do_deploy ${INITRAMFS_IMAGE}:do_image_complete"
 IMAGE_CMD_ostree () {
-    if [ -z "$OSTREE_REPO" ]; then
-        bbfatal "OSTREE_REPO should be set in your local.conf"
-    fi
-
-    if [ -z "$OSTREE_BRANCHNAME" ]; then
-        bbfatal "OSTREE_BRANCHNAME should be set in your local.conf"
-    fi
-
-    OSTREE_ROOTFS=`mktemp -du ${WORKDIR}/ostree-root-XXXXX`
-    cp -a ${IMAGE_ROOTFS} ${OSTREE_ROOTFS}
+    cp -a ${IMAGE_ROOTFS}/* ${OSTREE_ROOTFS}
     chmod a+rx ${OSTREE_ROOTFS}
     sync
-
-    cd ${OSTREE_ROOTFS}
 
     for d in var/*; do
       if [ "${d}" != "var/local" ]; then
@@ -132,17 +125,12 @@ IMAGE_CMD_ostree () {
 
     # Copy image manifest
     cat ${IMAGE_MANIFEST} | cut -d " " -f1,3 > usr/package.manifest
+}
 
-    cd ${WORKDIR}
-
-    # Create a tarball that can be then commited to OSTree repo
-    OSTREE_TAR=${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.ostree.tar.bz2
-    tar -C ${OSTREE_ROOTFS} --xattrs --xattrs-include='*' -cjf ${OSTREE_TAR} .
-    sync
-
-    rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2
-    ln -s ${IMAGE_NAME}.rootfs.ostree.tar.bz2 ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2
-
+IMAGE_TYPEDEP_ostreecommit = "ostree"
+do_image_ostreecommit[depends] += "ostree-native:do_populate_sysroot"
+do_image_ostreecommit[lockfiles] += "${WORKDIR}/${OSTREE_REPO}-commit.lock"
+IMAGE_CMD_ostreecommit () {
     if ! ostree --repo=${OSTREE_REPO} refs 2>&1 > /dev/null; then
         ostree --repo=${OSTREE_REPO} init --mode=archive-z2
     fi
@@ -158,11 +146,9 @@ IMAGE_CMD_ostree () {
     if [ "${OSTREE_UPDATE_SUMMARY}" = "1" ]; then
         ostree --repo=${OSTREE_REPO} summary -u
     fi
-
-    rm -rf ${OSTREE_ROOTFS}
 }
 
-IMAGE_TYPEDEP_ostreepush = "ostree"
+IMAGE_TYPEDEP_ostreepush = "ostreecommit"
 do_image_ostreepush[depends] += "aktualizr-native:do_populate_sysroot ca-certificates-native:do_populate_sysroot"
 IMAGE_CMD_ostreepush () {
     # Print warnings if credetials are not set or if the file has not been found.
