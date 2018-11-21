@@ -84,6 +84,7 @@ Although we have used U-Boot so far, other boot loaders can be configured work w
 * `SOTA_CLIENT_PROV` - which provisioning method to use. Valid options are https://github.com/advancedtelematic/aktualizr/blob/master/docs/automatic-provisioning.adoc[`aktualizr-auto-prov`], https://github.com/advancedtelematic/aktualizr/blob/master/docs/implicit-provisioning.adoc[`aktualizr-ca-implicit-prov`], and https://github.com/advancedtelematic/aktualizr/blob/master/docs/hsm-provisioning.adoc[`aktualizr-hsm-prov`]. The default is `aktualizr-auto-prov`. This can also be set to an empty string to avoid using a provisioning recipe.
 * `SOTA_CLIENT_FEATURES` - extensions to aktualizr. The only valid options are `hsm` (to build with HSM support) and `secondary-network` (to set up a simulated 'in-vehicle' network with support for a primary node with a DHCP server and a secondary node with a DHCP client).
 * `SOTA_SECONDARY_CONFIG_DIR` - a directory containing JSON configuration files for virtual secondaries on the host. These will be installed into `/etc/sota/ecus` on the device and automatically provided to aktualizr.
+* `SOTA_HARDWARE_ID` - a custom hardware id variable. If not set, - MACHINE variable is used.
 
 == Usage
 
