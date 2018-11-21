@@ -11,6 +11,7 @@ HOSTTOOLS_NONFATAL += "java"
 SOTA_CLIENT ??= "aktualizr"
 SOTA_CLIENT_PROV ??= "aktualizr-auto-prov"
 SOTA_DEPLOY_CREDENTIALS ?= "1"
+SOTA_HARDWARE_ID ??= "${MACHINE}"
 
 IMAGE_INSTALL_append_sota = " ostree os-release ${SOTA_CLIENT} ${SOTA_CLIENT_PROV}"
 IMAGE_CLASSES += " image_types_ostree image_types_ota"
@@ -29,7 +30,7 @@ INITRAMFS_FSTYPES ??= "${@oe.utils.ifelse(d.getVar('OSTREE_BOOTLOADER', True) ==
 
 # Please redefine OSTREE_REPO in order to have a persistent OSTree repo
 OSTREE_REPO ?= "${DEPLOY_DIR_IMAGE}/ostree_repo"
-OSTREE_BRANCHNAME ?= "${MACHINE}"
+OSTREE_BRANCHNAME ?= "${SOTA_HARDWARE_ID}"
 OSTREE_OSNAME ?= "poky"
 INITRAMFS_IMAGE ?= "initramfs-ostree-image"
 OSTREE_BOOTLOADER ??= 'u-boot'
