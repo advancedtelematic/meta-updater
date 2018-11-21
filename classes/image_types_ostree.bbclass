@@ -235,7 +235,7 @@ IMAGE_CMD_garagesign () {
                                     --length 0 \
                                     --url "${GARAGE_TARGET_URL}" \
                                     --sha256 ${ostree_target_hash} \
-                                    --hardwareids ${MACHINE}
+                                    --hardwareids ${SOTA_HARDWARE_ID}
             garage-sign targets sign --repo tufrepo \
                                      --home-dir ${GARAGE_SIGN_REPO} \
                                      --key-name=targets
