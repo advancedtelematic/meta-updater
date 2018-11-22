@@ -71,7 +71,7 @@ do_install_append () {
     install -m 0700 -d ${D}${sysconfdir}/sota/conf.d
 
     if [ -n "${SOTA_HARDWARE_ID}" ]; then
-        echo "[uptane]\nprimary_ecu_hardware_id = ${SOTA_HARDWARE_ID}\n" > ${D}${libdir}/sota/conf.d/40-hardware-id.toml
+        echo "[provision]\nprimary_ecu_hardware_id = ${SOTA_HARDWARE_ID}\n" > ${D}${libdir}/sota/conf.d/40-hardware-id.toml
     fi
 
     if [ -n "${SOTA_SECONDARY_CONFIG_DIR}" ]; then
