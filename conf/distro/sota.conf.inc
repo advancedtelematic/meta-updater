@@ -4,7 +4,7 @@
 #
 # require conf/distro/sota.conf.inc
 
-DISTRO_FEATURES_append = " sota"
+DISTRO_FEATURES_append = " sota usrmerge"
 DISTRO_FEATURES_NATIVE_append = " sota"
 INHERIT += " sota"
 # Prelinking increases the size of downloads and causes build errors
