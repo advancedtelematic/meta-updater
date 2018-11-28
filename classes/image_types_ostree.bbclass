@@ -129,7 +129,7 @@ IMAGE_CMD_ostree () {
 
 IMAGE_TYPEDEP_ostreecommit = "ostree"
 do_image_ostreecommit[depends] += "ostree-native:do_populate_sysroot"
-do_image_ostreecommit[lockfiles] += "${WORKDIR}/${OSTREE_REPO}-commit.lock"
+do_image_ostreecommit[lockfiles] += "${OSTREE_REPO}/ostree.lock"
 IMAGE_CMD_ostreecommit () {
     if ! ostree --repo=${OSTREE_REPO} refs 2>&1 > /dev/null; then
         ostree --repo=${OSTREE_REPO} init --mode=archive-z2
