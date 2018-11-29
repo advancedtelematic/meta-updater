@@ -36,6 +36,10 @@ class GeneralTests(OESelftestTestCase):
         result = get_bb_var('DISTRO_FEATURES').find('sota')
         self.assertNotEqual(result, -1, 'Feature "sota" not set at DISTRO_FEATURES')
 
+    def test_feature_usrmerge(self):
+        result = get_bb_var('DISTRO_FEATURES').find('usrmerge')
+        self.assertNotEqual(result, -1, 'Feature "sota" not set at DISTRO_FEATURES')
+
     def test_feature_systemd(self):
         result = get_bb_var('DISTRO_FEATURES').find('systemd')
         self.assertNotEqual(result, -1, 'Feature "systemd" not set at DISTRO_FEATURES')
