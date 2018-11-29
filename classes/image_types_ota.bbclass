@@ -96,17 +96,17 @@ IMAGE_CMD_ota-ext4 () {
 	# Calculate image type
 	OTA_ROOTFS_SIZE=$(calculate_size `du -ks ${OTA_SYSROOT} | cut -f 1`  "${IMAGE_OVERHEAD_FACTOR}" "${IMAGE_ROOTFS_SIZE}" "${IMAGE_ROOTFS_MAXSIZE}" `expr ${IMAGE_ROOTFS_EXTRA_SPACE}` "${IMAGE_ROOTFS_ALIGNMENT}")
 
-	if [ $OTA_ROOTFS_SIZE -lt 0 ]; then
+	if [ ${OTA_ROOTFS_SIZE} -lt 0 ]; then
 		bbfatal "create_ota failed to calculate OTA rootfs size!"
 	fi
 
 	eval local COUNT=\"0\"
 	eval local MIN_COUNT=\"60\"
-	if [ $OTA_ROOTFS_SIZE -lt $MIN_COUNT ]; then
-		eval COUNT=\"$MIN_COUNT\"
+	if [ ${OTA_ROOTFS_SIZE} -lt ${MIN_COUNT} ]; then
+		eval COUNT=\"${MIN_COUNT}\"
 	fi
 
-	dd if=/dev/zero of=${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.ota-ext4 seek=${OTA_ROOTFS_SIZE} count=$COUNT bs=1024
+	dd if=/dev/zero of=${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.ota-ext4 seek=${OTA_ROOTFS_SIZE} count=${COUNT} bs=1024
 	mkfs.ext4 -O ^64bit ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.ota-ext4 -L otaroot -d ${OTA_SYSROOT}
 }
 
