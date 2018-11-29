@@ -11,11 +11,12 @@ parentdir="$(dirname "$0")"
 # those are common dependencies not enabled by default.
 ${parentdir}/find_dependencies.py aktualizr
 ${parentdir}/find_dependencies.py aktualizr-auto-prov
-${parentdir}/find_dependencies.py aktualizr-implicit-prov
+${parentdir}/find_dependencies.py aktualizr-auto-prov-creds
 ${parentdir}/find_dependencies.py aktualizr-ca-implicit-prov
+${parentdir}/find_dependencies.py aktualizr-ca-implicit-prov-creds
 ${parentdir}/find_dependencies.py aktualizr-hsm-prov
+${parentdir}/find_dependencies.py aktualizr-hsm-prov-creds
 ${parentdir}/find_dependencies.py aktualizr-disable-send-ip
-${parentdir}/find_dependencies.py aktualizr-example-interface
 ${parentdir}/find_dependencies.py aktualizr-log-debug
 ${parentdir}/find_dependencies.py libp11
 ${parentdir}/find_dependencies.py dpkg
