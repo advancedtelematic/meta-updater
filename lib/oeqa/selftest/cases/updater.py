@@ -103,7 +103,7 @@ class AktualizrToolsTests(OESelftestTestCase):
         bitbake('aktualizr-native')
 
     def test_cert_provider_help(self):
-        akt_native_run(self, 'aktualizr_cert_provider --help')
+        akt_native_run(self, 'aktualizr-cert-provider --help')
 
     def test_cert_provider_local_output(self):
         logger = logging.getLogger("selftest")
@@ -115,7 +115,7 @@ class AktualizrToolsTests(OESelftestTestCase):
         bb_vars_prov = get_bb_vars(['STAGING_DIR_HOST', 'libdir'], 'aktualizr-ca-implicit-prov')
         config = bb_vars_prov['STAGING_DIR_HOST'] + bb_vars_prov['libdir'] + '/sota/sota_implicit_prov_ca.toml'
 
-        akt_native_run(self, 'aktualizr_cert_provider -c {creds} -r -l {temp} -g {config}'
+        akt_native_run(self, 'aktualizr-cert-provider -c {creds} -r -l {temp} -g {config}'
                        .format(creds=creds, temp=temp_dir, config=config))
 
         # Might be nice if these names weren't hardcoded.
@@ -424,14 +424,14 @@ class ImplProvTests(OESelftestTestCase):
         self.assertIn(b'Fetched metadata: no', stdout,
                       'Device already provisioned!? ' + stderr.decode() + stdout.decode())
 
-        # Run cert_provider.
+        # Run aktualizr-cert-provider.
         bb_vars = get_bb_vars(['SOTA_PACKED_CREDENTIALS'], 'aktualizr-native')
         creds = bb_vars['SOTA_PACKED_CREDENTIALS']
         bb_vars_prov = get_bb_vars(['STAGING_DIR_HOST', 'libdir'], 'aktualizr-ca-implicit-prov')
         config = bb_vars_prov['STAGING_DIR_HOST'] + bb_vars_prov['libdir'] + '/sota/sota_implicit_prov_ca.toml'
 
         print('Provisining at root@localhost:%d' % self.qemu.ssh_port)
-        akt_native_run(self, 'aktualizr_cert_provider -c {creds} -t root@localhost -p {port} -s -u -r -g {config}'
+        akt_native_run(self, 'aktualizr-cert-provider -c {creds} -t root@localhost -p {port} -s -u -r -g {config}'
                        .format(creds=creds, port=self.qemu.ssh_port, config=config))
 
         verifyProvisioned(self, machine)
@@ -509,13 +509,13 @@ class HsmTests(OESelftestTestCase):
         self.assertNotEqual(retcode, 0, 'softhsm2-tool succeeded before initialization: ' +
                         stdout.decode() + stderr.decode())
 
-        # Run cert_provider.
+        # Run aktualizr-cert-provider.
         bb_vars = get_bb_vars(['SOTA_PACKED_CREDENTIALS'], 'aktualizr-native')
         creds = bb_vars['SOTA_PACKED_CREDENTIALS']
         bb_vars_prov = get_bb_vars(['STAGING_DIR_NATIVE', 'libdir'], 'aktualizr-hsm-prov')
         config = bb_vars_prov['STAGING_DIR_NATIVE'] + bb_vars_prov['libdir'] + '/sota/sota_hsm_prov.toml'
 
-        akt_native_run(self, 'aktualizr_cert_provider -c {creds} -t root@localhost -p {port} -r -s -u -g {config}'
+        akt_native_run(self, 'aktualizr-cert-provider -c {creds} -t root@localhost -p {port} -r -s -u -g {config}'
                        .format(creds=creds, port=self.qemu.ssh_port, config=config))
 
         # Verify that HSM is able to initialize.

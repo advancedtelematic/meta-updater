@@ -27,7 +27,7 @@ SRC_URI = " \
   file://aktualizr-serialcan.service \
   "
 
-SRCREV = "4621a15779db38531fb386478232a9e8593e53f4"
+SRCREV = "d00d1a04cc2366d1a5f143b84b9f507f8bd32c44"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -71,6 +71,10 @@ do_install_append () {
     install -m 0700 -d ${D}${libdir}/sota/conf.d
     install -m 0700 -d ${D}${sysconfdir}/sota/conf.d
 
+    if [ -n "${SOTA_HARDWARE_ID}" ]; then
+        echo "[provision]\nprimary_ecu_hardware_id = ${SOTA_HARDWARE_ID}\n" > ${D}${libdir}/sota/conf.d/40-hardware-id.toml
+    fi
+
     if [ -n "${SOTA_SECONDARY_CONFIG_DIR}" ]; then
         if [ -d "${SOTA_SECONDARY_CONFIG_DIR}" ]; then
             install -m 0700 -d ${D}${sysconfdir}/sota/ecus
@@ -107,12 +111,12 @@ FILES_${PN} = " \
                 "
 
 FILES_${PN}-examples = " \
-                ${bindir}/hmi_stub \
+                ${bindir}/hmi-stub \
                 "
 
 FILES_${PN}-host-tools = " \
                 ${bindir}/aktualizr-repo \
-                ${bindir}/aktualizr_cert_provider \
+                ${bindir}/aktualizr-cert-provider \
                 ${bindir}/garage-deploy \
                 ${bindir}/garage-push \
                 ${libdir}/sota/sota_autoprov.toml \
