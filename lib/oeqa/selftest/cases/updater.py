@@ -36,6 +36,10 @@ class GeneralTests(OESelftestTestCase):
         result = get_bb_var('DISTRO_FEATURES').find('sota')
         self.assertNotEqual(result, -1, 'Feature "sota" not set at DISTRO_FEATURES')
 
+    def test_feature_usrmerge(self):
+        result = get_bb_var('DISTRO_FEATURES').find('usrmerge')
+        self.assertNotEqual(result, -1, 'Feature "sota" not set at DISTRO_FEATURES')
+
     def test_feature_systemd(self):
         result = get_bb_var('DISTRO_FEATURES').find('systemd')
         self.assertNotEqual(result, -1, 'Feature "systemd" not set at DISTRO_FEATURES')
@@ -103,7 +107,7 @@ class AktualizrToolsTests(OESelftestTestCase):
         bitbake('aktualizr-native')
 
     def test_cert_provider_help(self):
-        akt_native_run(self, 'aktualizr_cert_provider --help')
+        akt_native_run(self, 'aktualizr-cert-provider --help')
 
     def test_cert_provider_local_output(self):
         logger = logging.getLogger("selftest")
@@ -115,7 +119,7 @@ class AktualizrToolsTests(OESelftestTestCase):
         bb_vars_prov = get_bb_vars(['STAGING_DIR_HOST', 'libdir'], 'aktualizr-ca-implicit-prov')
         config = bb_vars_prov['STAGING_DIR_HOST'] + bb_vars_prov['libdir'] + '/sota/sota_implicit_prov_ca.toml'
 
-        akt_native_run(self, 'aktualizr_cert_provider -c {creds} -r -l {temp} -g {config}'
+        akt_native_run(self, 'aktualizr-cert-provider -c {creds} -r -l {temp} -g {config}'
                        .format(creds=creds, temp=temp_dir, config=config))
 
         # Might be nice if these names weren't hardcoded.
@@ -285,9 +289,9 @@ class RpiTests(OESelftestTestCase):
 
     def test_rpi(self):
         logger = logging.getLogger("selftest")
-        logger.info('Running bitbake to build rpi-basic-image')
+        logger.info('Running bitbake to build core-image-minimal')
         self.append_config('SOTA_CLIENT_PROV = "aktualizr-auto-prov"')
-        bitbake('rpi-basic-image')
+        bitbake('core-image-minimal')
         credentials = get_bb_var('SOTA_PACKED_CREDENTIALS')
         # Skip the test if the variable SOTA_PACKED_CREDENTIALS is not set.
         if credentials is None:
@@ -295,7 +299,7 @@ class RpiTests(OESelftestTestCase):
         # Check if the file exists.
         self.assertTrue(os.path.isfile(credentials), "File %s does not exist" % credentials)
         deploydir = get_bb_var('DEPLOY_DIR_IMAGE')
-        imagename = get_bb_var('IMAGE_LINK_NAME', 'rpi-basic-image')
+        imagename = get_bb_var('IMAGE_LINK_NAME', 'core-image-minimal')
         # Check if the credentials are included in the output image.
         result = runCmd('tar -jtvf %s/%s.tar.bz2 | grep sota_provisioning_credentials.zip' %
                         (deploydir, imagename), ignore_status=True)
@@ -424,14 +428,14 @@ class ImplProvTests(OESelftestTestCase):
         self.assertIn(b'Fetched metadata: no', stdout,
                       'Device already provisioned!? ' + stderr.decode() + stdout.decode())
 
-        # Run cert_provider.
+        # Run aktualizr-cert-provider.
         bb_vars = get_bb_vars(['SOTA_PACKED_CREDENTIALS'], 'aktualizr-native')
         creds = bb_vars['SOTA_PACKED_CREDENTIALS']
         bb_vars_prov = get_bb_vars(['STAGING_DIR_HOST', 'libdir'], 'aktualizr-ca-implicit-prov')
         config = bb_vars_prov['STAGING_DIR_HOST'] + bb_vars_prov['libdir'] + '/sota/sota_implicit_prov_ca.toml'
 
         print('Provisining at root@localhost:%d' % self.qemu.ssh_port)
-        akt_native_run(self, 'aktualizr_cert_provider -c {creds} -t root@localhost -p {port} -s -u -r -g {config}'
+        akt_native_run(self, 'aktualizr-cert-provider -c {creds} -t root@localhost -p {port} -s -u -r -g {config}'
                        .format(creds=creds, port=self.qemu.ssh_port, config=config))
 
         verifyProvisioned(self, machine)
@@ -509,13 +513,13 @@ class HsmTests(OESelftestTestCase):
         self.assertNotEqual(retcode, 0, 'softhsm2-tool succeeded before initialization: ' +
                         stdout.decode() + stderr.decode())
 
-        # Run cert_provider.
+        # Run aktualizr-cert-provider.
         bb_vars = get_bb_vars(['SOTA_PACKED_CREDENTIALS'], 'aktualizr-native')
         creds = bb_vars['SOTA_PACKED_CREDENTIALS']
         bb_vars_prov = get_bb_vars(['STAGING_DIR_HOST', 'libdir'], 'aktualizr-hsm-prov')
         config = bb_vars_prov['STAGING_DIR_HOST'] + bb_vars_prov['libdir'] + '/sota/sota_hsm_prov.toml'
 
-        akt_native_run(self, 'aktualizr_cert_provider -c {creds} -t root@localhost -p {port} -r -s -u -g {config}'
+        akt_native_run(self, 'aktualizr-cert-provider -c {creds} -t root@localhost -p {port} -r -s -u -g {config}'
                        .format(creds=creds, port=self.qemu.ssh_port, config=config))
 
         # Verify that HSM is able to initialize.
@@ -655,7 +659,13 @@ def qemu_launch(efi=False, machine=None, imagename=None):
     args.dir = 'tmp/deploy/images'
     args.efi = efi
     args.machine = machine
-    args.kvm = None  # Autodetect
+    qemu_use_kvm = get_bb_var("QEMU_USE_KVM")
+    if qemu_use_kvm and \
+       (qemu_use_kvm == 'True' and 'x86' in machine or \
+        get_bb_var('MACHINE') in qemu_use_kvm.split()):
+        args.kvm = True
+    else:
+        args.kvm = None  # Autodetect
     args.no_gui = True
     args.gdb = False
     args.pcap = None
