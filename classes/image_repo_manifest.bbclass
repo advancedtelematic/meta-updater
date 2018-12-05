@@ -12,7 +12,7 @@
 HOSTTOOLS_NONFATAL += " repo "
 
 # Write build information to target filesystem
-buildinfo () {
+buildinfo_manifest () {
   if [ $(which repo) ]; then
     repo manifest --revision-as-HEAD -o ${IMAGE_ROOTFS}${sysconfdir}/manifest.xml || bbwarn "Android repo tool failed to run; manifest not copied"
   else
@@ -20,4 +20,4 @@ buildinfo () {
   fi
 }
 
-IMAGE_PREPROCESS_COMMAND += "buildinfo;"
+IMAGE_PREPROCESS_COMMAND += "buildinfo_manifest;"
