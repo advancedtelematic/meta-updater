@@ -88,6 +88,7 @@ Although we have used U-Boot so far, other boot loaders can be configured work w
 * `SOTA_CLIENT_FEATURES` - extensions to aktualizr. The only valid options are `hsm` (to build with HSM support) and `secondary-network` (to set up a simulated 'in-vehicle' network with support for a primary node with a DHCP server and a secondary node with a DHCP client).
 * `SOTA_SECONDARY_CONFIG_DIR` - a directory containing JSON configuration files for virtual secondaries on the host. These will be installed into `/etc/sota/ecus` on the device and automatically provided to aktualizr.
 * `SOTA_HARDWARE_ID` - a custom hardware ID that will be written to the aktualizr config. Defaults to MACHINE if not set.
+* `OSTREE_DEPLOY_DEVICETREE` - Set this to '1' to include devicetree(s) to boot
 
 == Usage
 
