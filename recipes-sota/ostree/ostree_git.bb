@@ -7,9 +7,9 @@ inherit autotools pkgconfig systemd bash-completion gobject-introspection
 
 SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master"
 
-SRCREV="3e96ec9811b5cfc5481f8b6b06c8d34d9a35408e"
+SRCREV = "f3eba6bcec39c163eb831c02c148ffa483292906"
 
-PV = "v2018.7"
+PV = "v2018.9"
 
 S = "${WORKDIR}/git"
 
@@ -61,6 +61,7 @@ FILES_${PN} = "${bindir} \
     ${libdir}/ostree/ostree-remount \
     ${libdir}/girepository-1.0/* \
     ${@bb.utils.contains('DISTRO_FEATURES','systemd','${libdir}/tmpfiles.d', '', d)} \
+    ${@bb.utils.contains('DISTRO_FEATURES','systemd','${systemd_unitdir}/system/*.path', '', d)} \
     ${@bb.utils.contains('DISTRO_FEATURES','systemd','${systemd_unitdir}/system-generators', '', d)} \
 "
 FILES_${PN}-dev += " ${datadir}/gir-1.0"
