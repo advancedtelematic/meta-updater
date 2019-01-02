@@ -2,127 +2,17 @@
 
 from argparse import ArgumentParser
 from subprocess import Popen
-from os.path import exists, join, realpath
-from os import listdir
-import random
+from os.path import exists
 import sys
-import socket
+from qemucommand import QemuCommand
 
 DEFAULT_DIR = 'tmp/deploy/images'
-
-EXTENSIONS = {
-    'intel-corei7-64': 'wic',
-    'qemux86-64': 'otaimg'
-}
-
-
-def find_local_port(start_port):
-    """"
-    Find the next free TCP port after 'start_port'.
-    """
-
-    for port in range(start_port, start_port + 10):
-        try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.bind(('', port))
-            return port
-        except socket.error:
-            print("Skipping port %d" % port)
-        finally:
-            s.close()
-    raise Exception("Could not find a free TCP port")
-
-
-def random_mac():
-    """Return a random Ethernet MAC address
-    @link https://www.iana.org/assignments/ethernet-numbers/ethernet-numbers.xhtml#ethernet-numbers-2
-    """
-    head = "ca:fe:"
-    hex_digits = '0123456789abcdef'
-    tail = ':'.join([random.choice(hex_digits) + random.choice(hex_digits) for _ in range(4)])
-    return head + tail
-
-
-class QemuCommand(object):
-    def __init__(self, args):
-        if args.machine:
-            self.machine = args.machine
-        else:
-            machines = listdir(args.dir)
-            if len(machines) == 1:
-                self.machine = machines[0]
-            else:
-                raise ValueError("Could not autodetect machine type from %s" % args.dir)
-        if args.efi:
-            self.bios = 'OVMF.fd'
-        else:
-            uboot = join(args.dir, self.machine, 'u-boot-qemux86-64.rom')
-            if not exists(uboot):
-                raise ValueError("U-Boot image %s does not exist" % uboot)
-            self.bios = uboot
-        ext = EXTENSIONS.get(self.machine, 'wic')
-        image = join(args.dir, self.machine, '%s-%s.%s' % (args.imagename, self.machine, ext))
-        self.image = realpath(image)
-        if not exists(self.image):
-            raise ValueError("OS image %s does not exist" % self.image)
-        if args.mac:
-            self.mac_address = args.mac
-        else:
-            self.mac_address = random_mac()
-        self.serial_port = find_local_port(8990)
-        self.ssh_port = find_local_port(2222)
-        self.kvm = not args.no_kvm
-        self.gui = not args.no_gui
-        self.gdb = args.gdb
-        self.pcap = args.pcap
-        self.overlay = args.overlay
-
-    def command_line(self):
-        netuser = 'user,hostfwd=tcp:0.0.0.0:%d-:22,restrict=off' % self.ssh_port
-        if self.gdb:
-            netuser += ',hostfwd=tcp:0.0.0.0:2159-:2159'
-        cmdline = [
-            "qemu-system-x86_64",
-            "-bios", self.bios
-        ]
-        if not self.overlay:
-            cmdline += ["-drive", "file=%s,if=ide,format=raw,snapshot=on" % self.image]
-        cmdline += [
-            "-serial", "tcp:127.0.0.1:%d,server,nowait" % self.serial_port,
-            "-m", "1G",
-            "-usb",
-            "-usbdevice", "tablet",
-            "-show-cursor",
-            "-vga", "std",
-            "-net", netuser,
-            "-net", "nic,macaddr=%s" % self.mac_address
-        ]
-        if self.pcap:
-            cmdline += ['-net', 'dump,file=' + self.pcap]
-        if self.gui:
-            cmdline += ["-serial", "stdio"]
-        else:
-            cmdline.append('-nographic')
-        if self.kvm:
-            cmdline.append('-enable-kvm')
-        else:
-            cmdline += ['-cpu', 'Haswell']
-        if self.overlay:
-            cmdline.append(self.overlay)
-        return cmdline
-
-    def img_command_line(self):
-        cmdline = [
-        "qemu-img", "create",
-        "-o", "backing_file=%s" % self.image,
-        "-f", "qcow2",
-        self.overlay]
-        return cmdline
 
 
 def main():
     parser = ArgumentParser(description='Run meta-updater image in qemu')
-    parser.add_argument('imagename', default='core-image-minimal', nargs='?')
+    parser.add_argument('imagename', default='core-image-minimal', nargs='?',
+                        help="Either the name of the bitbake image target, or a path to the image to run")
     parser.add_argument('mac', default=None, nargs='?')
     parser.add_argument('--dir', default=DEFAULT_DIR,
                         help='Path to build directory containing the image and u-boot-qemux86-64.rom')
@@ -131,11 +21,21 @@ def main():
                              'OSTREE_BOOTLOADER = "grub" and OVMF.fd firmware to be installed (try "apt install ovmf")',
                         action='store_true')
     parser.add_argument('--machine', default=None, help="Target MACHINE")
-    parser.add_argument('--no-kvm', help='Disable KVM in QEMU', action='store_true')
+    kvm_group = parser.add_argument_group()
+    kvm_group.add_argument('--force-kvm', help='Force use of KVM (default is to autodetect)',
+                           dest='kvm', action='store_true', default=None)
+    kvm_group.add_argument('--no-kvm', help='Disable KVM in QEMU',
+                           dest='kvm', action='store_false')
     parser.add_argument('--no-gui', help='Disable GUI', action='store_true')
     parser.add_argument('--gdb', help='Export gdbserver port 2159 from the image', action='store_true')
     parser.add_argument('--pcap', default=None, help='Dump all network traffic')
-    parser.add_argument('-o', '--overlay', type=str, metavar='file.cow', help='Use an overlay storage image file. Will be created if it does not exist. This option lets you have a persistent image without modifying the underlying image file, permitting multiple different persistent machines.')
+    parser.add_argument('-o', '--overlay', type=str, metavar='file.cow',
+                        help='Use an overlay storage image file. Will be created if it does not exist. ' +
+                             'This option lets you have a persistent image without modifying the underlying image ' +
+                             'file, permitting multiple different persistent machines.')
+    parser.add_argument('--secondary-network', action='store_true', dest='secondary_network',
+                        help='Give the image a second network card connected to a virtual network. ' +
+                             'This can be used to test Uptane Primary/Secondary communication.')
     parser.add_argument('-n', '--dry-run', help='Print qemu command line rather then run it', action='store_true')
     args = parser.parse_args()
     try:
