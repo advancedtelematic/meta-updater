@@ -2,15 +2,15 @@ SUMMARY = "Tool for managing bootable, immutable, versioned filesystem trees"
 LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://COPYING;md5=5f30f0716dfdd0d91eb439ebec522ec2"
 
-inherit autotools-brokensep pkgconfig systemd gobject-introspection
+inherit autotools-brokensep pkgconfig systemd bash-completion gobject-introspection
 
 INHERIT_remove_class-native = "systemd"
 
 SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master"
 
-SRCREV="3b09620c2738bce4ed45e099cf2e4c5df7671d39"
+SRCREV="3e96ec9811b5cfc5481f8b6b06c8d34d9a35408e"
 
-PV = "2017.3-31-g3b09620c"
+PV = "v2018.7"
 
 S = "${WORKDIR}/git"
 
@@ -22,6 +22,7 @@ DEPENDS_remove_class-native = "systemd-native"
 
 RDEPENDS_${PN} = "python util-linux-libuuid util-linux-libblkid util-linux-libmount libcap bash"
 RDEPENDS_${PN}_remove_class-native = "python-native"
+RDEPENDS_${PN}-dracut = "bash"
 
 EXTRA_OECONF = "--with-libarchive --disable-gtk-doc --disable-gtk-doc-html --disable-gtk-doc-pdf --disable-man --with-smack --with-builtin-grub2-mkconfig --with-curl"
 EXTRA_OECONF_append_class-native = " --enable-wrpseudo-compat"
@@ -58,6 +59,8 @@ do_compile_prepend() {
  export HOST_SYS="${HOST_SYS}"
 }
 
+SYSTEMD_SERVICE_${PN} = "ostree-prepare-root.service ostree-remount.service ostree-finalize-staged.service"
+
 export SYSTEMD_REQUIRED
 
 do_install_append() {
@@ -73,17 +76,24 @@ do_install_append_class-native() {
 
 
 FILES_${PN} += " \
-    ${@'${systemd_unitdir}/system/' if d.getVar('SYSTEMD_REQUIRED', True) else ''} \
-    ${@'${libdir}/dracut/modules.d/98ostree/module-setup.sh' if d.getVar('SYSTEMD_REQUIRED', True) else ''} \
-    ${datadir}/gir-1.0 \
-    ${datadir}/gir-1.0/OSTree-1.0.gir \
-    ${libdir}/girepository-1.0 \
-    ${libdir}/girepository-1.0/OSTree-1.0.typelib \
+    {bindir} \
+    ${sysconfdir}/ostree \
+    ${datadir}/ostree \
+    ${libdir}/*.so.* \
+    ${libdir}/ostree/ostree-grub-generator \
+    ${libdir}/ostree/ostree-remount \
+    ${libdir}/girepository-1.0/* \
+    ${@bb.utils.contains('DISTRO_FEATURES','systemd','${libdir}/tmpfiles.d', '', d)} \
+    ${@bb.utils.contains('DISTRO_FEATURES','systemd','${systemd_unitdir}/system-generators', '', d)} \
 "
 
-PACKAGES =+ "${PN}-switchroot"
+PACKAGES =+ " \
+    ${PN}-switchroot \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'ostree-dracut', '', d)} \
+"
 
 FILES_${PN}-switchroot = "${libdir}/ostree/ostree-prepare-root"
 RDEPENDS_${PN}-switchroot = ""
 DEPENDS_remove_class-native = "systemd-native"
-
+FILES_${PN}-dev += " ${datadir}/gir-1.0"
+FILES_${PN}-dracut = "${sysconfdir}/dracut.conf.d ${libdir}/dracut"
