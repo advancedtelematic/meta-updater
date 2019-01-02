@@ -1,0 +1,11 @@
+[Unit]
+Description=Aktualizr SOTA Client
+After=network.target
+
+[Service]
+RestartSec=10
+Restart=always
+ExecStart=/usr/bin/aktualizr $AKTUALIZR_CMDLINE_PARAMETERS
+
+[Install]
+WantedBy=multi-user.target
