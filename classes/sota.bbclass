@@ -23,7 +23,7 @@ WKS_FILE_sota ?= "sdimage-sota.wks"
 
 EXTRA_IMAGEDEPENDS_append_sota = " parted-native mtools-native dosfstools-native"
 
-OSTREE_INITRAMFS_FSTYPES ??= 'ext4.gz'
+OSTREE_INITRAMFS_FSTYPES ??= "${@oe.utils.ifelse(d.getVar('OSTREE_BOOTLOADER', True) == 'u-boot' and d.getVar('MACHINE', True) != 'qemux86-64', 'ext4.gz.u-boot', 'ext4.gz')}"
 
 # Please redefine OSTREE_REPO in order to have a persistent OSTree repo
 OSTREE_REPO ?= "${DEPLOY_DIR_IMAGE}/ostree_repo"
