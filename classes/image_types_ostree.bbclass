@@ -182,6 +182,9 @@ IMAGE_CMD_ostreepush () {
 
 IMAGE_TYPEDEP_garagesign = "ostreepush"
 do_image_garagesign[depends] += "unzip-native:do_populate_sysroot"
+# This lock solves OTA-1866, which is that removing GARAGE_SIGN_REPO while using
+# garage-sign simultaneously for two images often causes problems.
+do_image_garagesign[lockfiles] += "${DEPLOY_DIR_IMAGE}/garagesign.lock"
 IMAGE_CMD_garagesign () {
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         # if credentials are issued by a server that doesn't support offline signing, exit silently
