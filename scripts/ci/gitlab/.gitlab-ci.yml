@@ -1,0 +1,48 @@
+stages:
+  - setup_docker
+  - setup_data
+  - execute
+
+variables:
+  DEBIAN_BITBAKE_MASTER_IMAGE: ${CI_REGISTRY_IMAGE}:ci-master-DEBIAN_BITBAKE
+  # The docker images will be specific to the branch we are pushing to
+  DEBIAN_BITBAKE_CI_IMAGE: ${CI_REGISTRY_IMAGE}:ci-${CI_COMMIT_REF_SLUG}-DEBIAN_BITBAKE
+  BITBAKE_CACHE: "/data/bitbake-cache"
+  
+# Build the Docker image that will be used in subsequent CI/CD stages
+setup docker image:
+  image: docker:latest
+  stage: setup_docker
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+  script:
+    - docker pull "$DEBIAN_BITBAKE_CI_IMAGE" || docker pull "$DEBIAN_BITBAKE_MASTER_IMAGE" || true
+    - docker build --pull --cache-from "$DEBIAN_BITBAKE_MASTER_IMAGE" --cache-from "$DEBIAN_BITBAKE_CI_IMAGE" -f "${CI_PROJECT_DIR}/scripts/ci/Dockerfile.bitbake" -t "$DEBIAN_BITBAKE_CI_IMAGE" .
+    - docker push "$DEBIAN_BITBAKE_CI_IMAGE"
+
+setup data:
+  stage: setup_data
+  image: "$DEBIAN_BITBAKE_CI_IMAGE"
+  artifacts:
+    paths:
+      - data/
+    
+  script:
+    - mkdir data
+    - aws s3 ls s3://ota-gitlab-ci/
+    - aws s3 cp s3://ota-gitlab-ci/hereotaconnect_prod.zip data/credentials.zip
+    - chmod +x data/credentials.zip
+
+#Build step to perform bitbake or run oe-selftest based on input params
+oe-selftest:
+  image: "$DEBIAN_BITBAKE_CI_IMAGE"
+  stage: execute
+  dependencies:
+    - setup data
+
+  script:
+    - export DEVICE=${DEVICE:-'qemux86-64'}
+    - export REPO_BRANCH=${REPO_BRANCH:-'master'}
+    - scripts/ci/gitlab/bitbaker.sh
