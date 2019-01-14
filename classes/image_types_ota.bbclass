@@ -111,7 +111,7 @@ IMAGE_CMD_otaimg () {
 
 		rm -rf ${HOME_TMP}
 
-		# Calculate image type
+		# Calculate image size
 		OTA_ROOTFS_SIZE=$(calculate_size `du -ks $PHYS_SYSROOT | cut -f 1`  "${IMAGE_OVERHEAD_FACTOR}" "${IMAGE_ROOTFS_SIZE}" "${IMAGE_ROOTFS_MAXSIZE}" `expr ${IMAGE_ROOTFS_EXTRA_SPACE}` "${IMAGE_ROOTFS_ALIGNMENT}")
 
 		if [ ${OTA_ROOTFS_SIZE} -lt 0 ]; then
