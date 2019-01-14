@@ -93,7 +93,7 @@ IMAGE_CMD_ota () {
 IMAGE_TYPEDEP_ota-ext4 = "ota"
 do_image_ota_ext4[depends] = "e2fsprogs-native:do_populate_sysroot"
 IMAGE_CMD_ota-ext4 () {
-	# Calculate image type
+	# Calculate image size
 	OTA_ROOTFS_SIZE=$(calculate_size `du -ks ${OTA_SYSROOT} | cut -f 1`  "${IMAGE_OVERHEAD_FACTOR}" "${IMAGE_ROOTFS_SIZE}" "${IMAGE_ROOTFS_MAXSIZE}" `expr ${IMAGE_ROOTFS_EXTRA_SPACE}` "${IMAGE_ROOTFS_ALIGNMENT}")
 
 	if [ ${OTA_ROOTFS_SIZE} -lt 0 ]; then
