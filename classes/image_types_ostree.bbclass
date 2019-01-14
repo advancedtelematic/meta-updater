@@ -104,25 +104,26 @@ IMAGE_CMD_ostree () {
         ln -sf var/roothome root
     fi
 
-    checksum=`sha256sum ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} | cut -f 1 -d " "`
-
-    cp ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} boot/vmlinuz-${checksum}
-
     if [ "${KERNEL_IMAGETYPE}" = "fitImage" ]; then
         # this is a hack for ostree not to override init= in kernel cmdline -
         # make it think that the initramfs is present (while it is in FIT image)
+        # since initramfs is fake file, it does not need to be included in checksum
+        checksum=$(sha256sum ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} | cut -f 1 -d " ")
         touch boot/initramfs-${checksum}
     else
-        cp ${DEPLOY_DIR_IMAGE}/${INITRAMFS_IMAGE}-${MACHINE}.${INITRAMFS_FSTYPES} boot/initramfs-${checksum}
-        if [ "${OSTREE_DEPLOY_DEVICETREE}" = "1"  ]; then
-            if test -n "${KERNEL_DEVICETREE}"; then
-                for DTS_FILE in ${KERNEL_DEVICETREE}; do
-                    DTS_FILE_BASENAME=$(basename ${DTS_FILE})
-                    cp ${DEPLOY_DIR_IMAGE}/${DTS_FILE_BASENAME} boot/devicetree-${DTS_FILE_BASENAME}-${checksum}
-                done
-            fi
+        if [ "${OSTREE_DEPLOY_DEVICETREE}" = "1"  ] && [ -n "${KERNEL_DEVICETREE}" ]; then
+            checksum=$(cat ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} ${DEPLOY_DIR_IMAGE}/${INITRAMFS_IMAGE}-${MACHINE}.${INITRAMFS_FSTYPES} ${KERNEL_DEVICETREE} | sha256sum | cut -f 1 -d " ")
+            for DTS_FILE in ${KERNEL_DEVICETREE}; do
+                DTS_FILE_BASENAME=$(basename ${DTS_FILE})
+                cp ${DEPLOY_DIR_IMAGE}/${DTS_FILE_BASENAME} boot/devicetree-${DTS_FILE_BASENAME}-${checksum}
+            done
+        else
+            checksum=$(cat ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} ${DEPLOY_DIR_IMAGE}/${INITRAMFS_IMAGE}-${MACHINE}.${INITRAMFS_FSTYPES} | sha256sum | cut -f 1 -d " ")
         fi
+        cp ${DEPLOY_DIR_IMAGE}/${INITRAMFS_IMAGE}-${MACHINE}.${INITRAMFS_FSTYPES} boot/initramfs-${checksum}
     fi
+
+    cp ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} boot/vmlinuz-${checksum}
 
     # Copy image manifest
     cat ${IMAGE_MANIFEST} | cut -d " " -f1,3 > usr/package.manifest
