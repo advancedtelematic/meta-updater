@@ -140,6 +140,9 @@ IMAGE_CMD_otaimg () {
 
 		rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg
 		ln -s ${IMAGE_NAME}.otaimg ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg
+		# for forward compatibility
+		rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.ota-ext4
+		ln -s ${IMAGE_NAME}.otaimg ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.ota-ext4
 	fi
 }
 
