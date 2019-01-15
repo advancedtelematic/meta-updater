@@ -42,8 +42,8 @@ OTA_IMAGE_ROOTFS_task-image-ota = "${OTA_SYSROOT}"
 IMAGE_TYPEDEP_ota = "ostreecommit"
 do_image_ota[dirs] = "${OTA_SYSROOT}"
 do_image_ota[cleandirs] = "${OTA_SYSROOT}"
-do_image_ota[depends] = "${@'grub:do_populate_sysroot' if d.getVar('OSTREE_BOOTLOADER', True) == 'grub' else ''} \
-                         ${@'virtual/bootloader:do_deploy' if d.getVar('OSTREE_BOOTLOADER', True) == 'u-boot' else ''}"
+do_image_ota[depends] = "${@'grub:do_populate_sysroot' if d.getVar('OSTREE_BOOTLOADER') == 'grub' else ''} \
+                         ${@'virtual/bootloader:do_deploy' if d.getVar('OSTREE_BOOTLOADER') == 'u-boot' else ''}"
 IMAGE_CMD_ota () {
 	ostree admin --sysroot=${OTA_SYSROOT} init-fs ${OTA_SYSROOT}
 	ostree admin --sysroot=${OTA_SYSROOT} os-init ${OSTREE_OSNAME}
@@ -93,7 +93,7 @@ IMAGE_CMD_ota () {
 IMAGE_TYPEDEP_ota-ext4 = "ota"
 do_image_ota_ext4[depends] = "e2fsprogs-native:do_populate_sysroot"
 IMAGE_CMD_ota-ext4 () {
-	# Calculate image type
+	# Calculate image size
 	OTA_ROOTFS_SIZE=$(calculate_size `du -ks ${OTA_SYSROOT} | cut -f 1`  "${IMAGE_OVERHEAD_FACTOR}" "${IMAGE_ROOTFS_SIZE}" "${IMAGE_ROOTFS_MAXSIZE}" `expr ${IMAGE_ROOTFS_EXTRA_SPACE}` "${IMAGE_ROOTFS_ALIGNMENT}")
 
 	if [ ${OTA_ROOTFS_SIZE} -lt 0 ]; then
@@ -110,4 +110,4 @@ IMAGE_CMD_ota-ext4 () {
 	mkfs.ext4 -O ^64bit ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.ota-ext4 -L otaroot -d ${OTA_SYSROOT}
 }
 
-do_image_wic[depends] += "${@bb.utils.contains('DISTRO_FEATURES', 'sota', '%s:do_image_ota_ext4' % d.getVar('IMAGE_BASENAME', True), '', d)}"
+do_image_wic[depends] += "${@bb.utils.contains('DISTRO_FEATURES', 'sota', '%s:do_image_ota_ext4' % d.getVar('IMAGE_BASENAME'), '', d)}"
