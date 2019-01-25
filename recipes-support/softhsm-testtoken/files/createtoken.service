@@ -1,0 +1,12 @@
+[Unit]
+Description=Create a mock smartcard for testing
+Before=aktualizr.service
+RequiredBy=aktualizr.service
+
+[Service]
+RestartSec=10
+Restart=on-failure
+ExecStart=/usr/bin/createtoken.sh
+
+[Install]
+WantedBy=aktualizr.service

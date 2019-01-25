@@ -1,0 +1,12 @@
+[Match]
+Name=enp0s4
+
+[Network]
+Description=Private internal network between aktualizr Primary and Secondary nodes
+DHCPServer=yes
+Address=10.0.3.1/24
+IPForward=yes
+IPMasquerade=yes
+
+[DHCPServer]
+PoolOffset=10
