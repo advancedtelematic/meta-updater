@@ -692,21 +692,15 @@ def akt_native_run(testInst, cmd, **kwargs):
     # - the command runs without error
     # NOTE: the base test class must have built aktualizr-native (in
     # setUpClass, for example)
-    bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'base_prefix', 'libdir', 'bindir'],
-                          'aktualizr-native')
-    sysroot = bb_vars['SYSROOT_DESTDIR'] + bb_vars['base_prefix']
+    bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'libdir', 'bindir'], 'aktualizr-native')
     sysrootbin = bb_vars['SYSROOT_DESTDIR'] + bb_vars['bindir']
     libdir = bb_vars['libdir']
 
-    program, *_ = cmd.split(' ')
+    program, args = cmd.split(' ', maxsplit=1)
     p = '{}/{}'.format(sysrootbin, program)
     testInst.assertTrue(os.path.isfile(p), msg="No {} found ({})".format(program, p))
-    env = dict(os.environ)
-    env['LD_LIBRARY_PATH'] = libdir
-    #result = runCmd(cmd, env=env, native_sysroot=sysroot, ignore_status=True, **kwargs)
-    result = runCmd(cmd, env=env, ignore_status=True, **kwargs)
+    result = runCmd('LD_LIBRARY_PATH=%s %s %s' % (libdir, p, args), ignore_status=True)
     testInst.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
-
 
 def verifyProvisioned(testInst, machine):
     # Verify that device HAS provisioned.
