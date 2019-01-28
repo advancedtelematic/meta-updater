@@ -210,7 +210,7 @@ class ManualControlTests(OESelftestTestCase):
     def qemu_command(self, command):
         return qemu_send_command(self.qemu.ssh_port, command)
 
-    def test_manual_running_mode_once(self):
+    def test_manual_run_mode_once(self):
         """
         Disable the systemd service then run aktualizr manually
         """
@@ -219,7 +219,7 @@ class ManualControlTests(OESelftestTestCase):
         self.assertIn(b'Can\'t open database', stdout,
                       'Aktualizr should not have run yet' + stderr.decode() + stdout.decode())
 
-        stdout, stderr, retcode = self.qemu_command('aktualizr --running-mode=once')
+        stdout, stderr, retcode = self.qemu_command('aktualizr once')
 
         stdout, stderr, retcode = self.qemu_command('aktualizr-info')
         self.assertIn(b'Fetched metadata: yes', stdout,
