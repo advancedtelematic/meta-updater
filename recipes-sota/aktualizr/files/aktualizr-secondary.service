@@ -1,0 +1,8 @@
+[Unit]
+Description=Aktualizr SOTA Client (UPTANE Secondary)
+
+[Service]
+RestartSec=10
+Restart=always
+ExecStart=/usr/bin/aktualizr-secondary --config /usr/lib/sota/sota_secondary.toml
+
