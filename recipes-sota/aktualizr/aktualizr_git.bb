@@ -103,7 +103,6 @@ PACKAGES =+ " ${PN}-examples ${PN}-host-tools ${PN}-tools ${PN}-secondary "
 FILES_${PN} = " \
                 ${bindir}/aktualizr \
                 ${bindir}/aktualizr-info \
-                ${bindir}/aktualizr-check-discovery \
                 ${systemd_unitdir}/system/aktualizr.service \
                 ${libdir}/sota/conf.d \
                 ${sysconfdir}/sota/conf.d \
