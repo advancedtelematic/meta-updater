@@ -5,16 +5,9 @@ SECTION = "base"
 LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=9741c346eef56131163e13b9db1241b3"
 
-DEPENDS = "boost curl openssl libarchive libsodium asn1c-native sqlite3 "
-DEPENDS_append_class-target = "ostree ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', ' libp11', '', d)} "
-DEPENDS_append_class-native = "glib-2.0-native "
-
-RDEPENDS_${PN}_class-target = "lshw "
-RDEPENDS_${PN}_append_class-target = "${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'serialcan', ' slcand-start', '', d)} "
-RDEPENDS_${PN}_append_class-target = " ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'ubootenv', ' u-boot-fw-utils aktualizr-uboot-env-rollback', '', d)} "
-
-RDEPENDS_${PN}_append_class-target = " ${PN}-tools "
-RDEPENDS_${PN}-secondary_append_class-target = " ${PN}-tools "
+DEPENDS = "boost curl openssl libarchive libsodium sqlite3 asn1c-native"
+RDEPENDS_${PN}_class-target = "${PN}-tools lshw"
+RDEPENDS_${PN}-secondary_class-target = "${PN}-tools"
 
 PV = "1.0+git${SRCPV}"
 PR = "7"
@@ -32,9 +25,7 @@ BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
 
-inherit cmake
-
-inherit systemd
+inherit pkgconfig cmake systemd
 
 SYSTEMD_PACKAGES = "${PN} ${PN}-secondary"
 SYSTEMD_SERVICE_${PN} = "aktualizr.service"
@@ -44,18 +35,22 @@ BBCLASSEXTEND =+ "native"
 
 require garage-sign-version.inc
 
-EXTRA_OECMAKE = "-DWARNING_AS_ERROR=OFF \
-                 -DCMAKE_BUILD_TYPE=Release \
-                 -DAKTUALIZR_VERSION=${PV} \
-                 -DBUILD_LOAD_TESTS=OFF \
-                 -Dgtest_disable_pthreads=ON"
-EXTRA_OECMAKE_append_class-target = " -DBUILD_OSTREE=ON \
-                                      ${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'hsm', '-DBUILD_P11=ON', '', d)} "
-EXTRA_OECMAKE_append_class-native = " -DBUILD_SOTA_TOOLS=ON \
-                                      -DBUILD_OSTREE=OFF \
-                                      -DBUILD_SYSTEMD=OFF \
-                                      -DGARAGE_SIGN_VERSION=${GARAGE_SIGN_VERSION} \
-                                      -DGARAGE_SIGN_SHA256=${GARAGE_SIGN_SHA256}"
+EXTRA_OECMAKE = "-DCMAKE_BUILD_TYPE=Release -DAKTUALIZR_VERSION=${PV} -Dgtest_disable_pthreads=ON"
+
+GARAGE_SIGN_OPS = "${@ '-DGARAGE_SIGN_VERSION=%s' % d.getVar('GARAGE_SIGN_VERSION') if d.getVar('GARAGE_SIGN_VERSION') is not None else ''} \
+                   ${@ '-DGARAGE_SIGN_SHA256=%s' % d.getVar('GARAGE_SIGN_SHA256') if d.getVar('GARAGE_SIGN_SHA256') is not None else ''} \
+                  "
+
+PACKAGECONFIG ?= "ostree ${@bb.utils.filter('DISTRO_FEATURES', 'systemd', d)} ${@bb.utils.filter('SOTA_CLIENT_FEATURES', 'hsm serialcan ubootenv', d)}"
+PACKAGECONFIG_class-native = "sota-tools"
+PACKAGECONFIG[warning-as-error] = "-DWARNING_AS_ERROR=ON,-DWARNING_AS_ERROR=OFF,"
+PACKAGECONFIG[ostree] = "-DBUILD_OSTREE=ON,-DBUILD_OSTREE=OFF,ostree,"
+PACKAGECONFIG[hsm] = "-DBUILD_P11=ON,-DBUILD_P11=OFF,libp11,"
+PACKAGECONFIG[sota-tools] = "-DBUILD_SOTA_TOOLS=ON ${GARAGE_SIGN_OPS},-DBUILD_SOTA_TOOLS=OFF,glib-2.0,"
+PACKAGECONFIG[systemd] = "-DBUILD_SYSTEMD=ON,-DBUILD_SYSTEMD=OFF,systemd,"
+PACKAGECONFIG[load-tests] = "-DBUILD_LOAD_TESTS=ON,-DBUILD_LOAD_TESTS=OFF,"
+PACKAGECONFIG[serialcan] = ",,,slcand-start"
+PACKAGECONFIG[ubootenv] = ",,,u-boot-fw-utils aktualizr-uboot-env-rollback"
 
 do_install_append () {
     install -d ${D}${libdir}/sota
