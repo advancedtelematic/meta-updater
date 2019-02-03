@@ -5,9 +5,12 @@ SECTION = "base"
 LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=9741c346eef56131163e13b9db1241b3"
 
+require garage-sign-version.inc
+
 DEPENDS = "boost curl openssl libarchive libsodium sqlite3 asn1c-native"
-RDEPENDS_${PN}_class-target = "${PN}-tools lshw"
-RDEPENDS_${PN}-secondary_class-target = "${PN}-tools"
+RDEPENDS_${PN}_class-target = "aktualizr-check-discovery aktualizr-configs lshw"
+RDEPENDS_${PN}-secondary = "aktualizr-check-discovery"
+RDEPENDS_${PN}-host-tools = "aktualizr aktualizr-repo aktualizr-cert-provider ${@bb.utils.contains('PACKAGECONFIG', 'sota-tools', 'garage-deploy garage-push', '', d)}"
 
 PV = "1.0+git${SRCPV}"
 PR = "7"
@@ -30,10 +33,6 @@ inherit pkgconfig cmake systemd
 SYSTEMD_PACKAGES = "${PN} ${PN}-secondary"
 SYSTEMD_SERVICE_${PN} = "aktualizr.service"
 SYSTEMD_SERVICE_${PN}-secondary = "aktualizr-secondary.socket"
-
-BBCLASSEXTEND =+ "native"
-
-require garage-sign-version.inc
 
 EXTRA_OECMAKE = "-DCMAKE_BUILD_TYPE=Release -DAKTUALIZR_VERSION=${PV}"
 
@@ -80,48 +79,45 @@ do_install_append () {
         fi
     fi
 
-}
-
-do_install_append_class-target () {
     install -m 0755 -d ${D}${systemd_unitdir}/system
     aktualizr_service=${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'serialcan', '${WORKDIR}/aktualizr-serialcan.service', '${WORKDIR}/aktualizr.service', d)}
     install -m 0644 ${aktualizr_service} ${D}${systemd_unitdir}/system/aktualizr.service
+
+    if ${@bb.utils.contains('PACKAGECONFIG', 'sota-tools', 'true', 'false', d)}; then
+        install -m 0755 ${B}/src/sota_tools/garage-sign/bin/* ${D}${bindir}
+        install -m 0644 ${B}/src/sota_tools/garage-sign/lib/* ${D}${libdir}
+    fi
 }
 
-do_install_append_class-native () {
-    install -m 0755 ${B}/src/sota_tools/garage-sign/bin/* ${D}${bindir}
-    install -m 0644 ${B}/src/sota_tools/garage-sign/lib/* ${D}${libdir}
+PACKAGESPLITFUNCS_prepend = "split_hosttools_packages "
+
+python split_hosttools_packages () {
+    bindir = d.getVar('bindir')
+
+    # Split all binaries to their own packages except aktualizr-info,
+    # aktualizr-info should stay in main package aktualizr.
+    do_split_packages(d, bindir, r'^((?!(aktualizr-info)).*)$', '%s', 'Aktualizr tool - %s', extra_depends='aktualizr-configs', prepend=False)
 }
 
-PACKAGES =+ " ${PN}-examples ${PN}-host-tools ${PN}-tools ${PN}-secondary "
+PACKAGES_DYNAMIC = "^aktualizr-.* ^garage-.*"
+
+PACKAGES =+ "${PN}-examples ${PN}-secondary ${PN}-configs ${PN}-host-tools"
+
+ALLOW_EMPTY_${PN}-host-tools = "1"
 
 FILES_${PN} = " \
                 ${bindir}/aktualizr \
                 ${bindir}/aktualizr-info \
                 ${systemd_unitdir}/system/aktualizr.service \
-                ${libdir}/sota/conf.d \
-                ${sysconfdir}/sota/conf.d \
-                ${sysconfdir}/sota/ecus/* \
+                "
+
+FILES_${PN}-configs = " \
+                ${sysconfdir}/sota/* \
+                ${libdir}/sota/* \
                 "
 
 FILES_${PN}-examples = " \
                 ${bindir}/hmi-stub \
-                "
-
-FILES_${PN}-host-tools = " \
-                ${bindir}/aktualizr-repo \
-                ${bindir}/aktualizr-cert-provider \
-                ${bindir}/garage-deploy \
-                ${bindir}/garage-push \
-                ${libdir}/sota/sota_autoprov.toml \
-                ${libdir}/sota/sota_autoprov_primary.toml \
-                ${libdir}/sota/sota_hsm_prov.toml \
-                ${libdir}/sota/sota_implicit_prov_ca.toml \
-                ${libdir}/sota/sota_uboot_env.toml \
-                "
-
-FILES_${PN}-tools = " \
-                ${bindir}/aktualizr-check-discovery \
                 "
 
 FILES_${PN}-secondary = " \
@@ -130,5 +126,6 @@ FILES_${PN}-secondary = " \
                 ${systemd_unitdir}/system/aktualizr-secondary.socket \
                 ${systemd_unitdir}/system/aktualizr-secondary.service \
                 "
+BBCLASSEXTEND = "native"
 
 # vim:set ts=4 sw=4 sts=4 expandtab:
