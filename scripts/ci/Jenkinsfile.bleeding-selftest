@@ -10,7 +10,9 @@ node {
 }
 
 pipeline {
-  agent any
+  agent { 
+    node { label 'bitbake' } 
+        }
   environment {
     TEST_AKTUALIZR_REMOTE = 'aktualizr'
     TEST_AKTUALIZR_DIR = 'aktualizr'

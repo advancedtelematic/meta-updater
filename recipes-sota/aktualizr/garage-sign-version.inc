@@ -1,11 +1,11 @@
 
 python () {
-    if d.getVar("GARAGE_SIGN_VERSION", True) or not d.getVar("SOTA_PACKED_CREDENTIALS", True):
+    if d.getVar("GARAGE_SIGN_VERSION") or not d.getVar("SOTA_PACKED_CREDENTIALS"):
         return
     import json
     import urllib.request
     import zipfile
-    with zipfile.ZipFile(d.getVar("SOTA_PACKED_CREDENTIALS", True), 'r') as zip_ref:
+    with zipfile.ZipFile(d.getVar("SOTA_PACKED_CREDENTIALS"), 'r') as zip_ref:
         try:
             with zip_ref.open('tufrepo.url', mode='r') as url_file:
                 url = url_file.read().decode().strip(' \t\n') + '/health/version'

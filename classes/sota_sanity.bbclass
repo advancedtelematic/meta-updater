@@ -1,17 +1,17 @@
 # Sanity check the sota setup for common misconfigurations
 
 def sota_check_overrides(status, d):
-    for var in (d.getVar('SOTA_OVERRIDES_BLACKLIST', True) or "").split():
-        if var in d.getVar('OVERRIDES', True).split(':'):
+    for var in (d.getVar('SOTA_OVERRIDES_BLACKLIST') or "").split():
+        if var in d.getVar('OVERRIDES').split(':'):
             status.addresult("%s should not be a overrides, because it is a image fstype in updater layer, please check your OVERRIDES setting.\n" % var)
 
 def sota_check_required_variables(status, d):
-    for var in (d.getVar('SOTA_REQUIRED_VARIABLES', True) or "").split():
-        if not d.getVar(var, True):
+    for var in (d.getVar('SOTA_REQUIRED_VARIABLES') or "").split():
+        if not d.getVar(var):
             status.addresult("%s should be set in your local.conf.\n" % var)
 
 def sota_raise_sanity_error(msg, d):
-    if d.getVar("SANITY_USE_EVENTS", True) == "1":
+    if d.getVar("SANITY_USE_EVENTS") == "1":
         bb.event.fire(bb.event.SanityCheckFailed(msg), d)
         return
 
