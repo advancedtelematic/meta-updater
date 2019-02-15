@@ -10,7 +10,7 @@ LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7f619bab123dad"
 
 DEPENDS = "aktualizr aktualizr-native openssl-native"
-RDEPENDS_${PN}_append = "${@' aktualizr-ca-implicit-prov-creds' if d.getVar('SOTA_DEPLOY_CREDENTIALS', True) == '1' else ''}"
+RDEPENDS_${PN}_append = "${@' aktualizr-ca-implicit-prov-creds' if d.getVar('SOTA_DEPLOY_CREDENTIALS') == '1' else ''}"
 
 PV = "1.0"
 PR = "1"

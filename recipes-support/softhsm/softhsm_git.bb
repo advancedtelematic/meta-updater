@@ -1,27 +1,26 @@
 SUMMARY = "HSM emulator"
-LICENSE = "BSD"
+HOMEPAGE = "https://www.opendnssec.org/softhsm/"
+LICENSE = "BSD-2-Clause & ISC"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=ef3f77a3507c3d91e75b9f2bdaee4210"
 
-inherit autotools-brokensep
+DEPENDS = "openssl"
 
+SRC_URI = "git://github.com/opendnssec/SoftHSMv2.git;branch=master"
+SRCREV = "369df0383d101bc8952692c2a368ac8bc887d1b4"
 
-SRC_URI = "git://github.com/opendnssec/SoftHSMv2.git;branch=master \
-	   file://0001-Cross-compilation-tweaks.patch"
-SRCREV="1f7498c0c65b1b1ad5e1bdbd87e9d4b100705745"
+PV = "2.5.0"
 
 S = "${WORKDIR}/git"
 
-DEPENDS += " openssl"
+inherit autotools pkgconfig
 
-EXTRA_OECONF = "--disable-gost --with-openssl=${STAGING_LIBDIR}/.."
+# EdDSA requires OpenSSL >= 1.1.1
+EXTRA_OECONF = "--enable-eddsa --disable-gost"
 
-do_configure() {
- unset docdir
- sh ./autogen.sh
- oe_runconf
+do_configure_prepend() {
+    (
+        cd ${S}
+        unset docdir
+        sh ./autogen.sh
+    )
 }
-
-FILES_${PN} = "${bindir} \
-	       ${libdir}/softhsm \
-	       ${sysconfdir} \
-	       ${localstatedir}/lib/softhsm "

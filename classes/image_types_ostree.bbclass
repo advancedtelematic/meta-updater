@@ -6,10 +6,11 @@ OSTREE_ROOTFS ??= "${WORKDIR}/ostree-rootfs"
 OSTREE_COMMIT_SUBJECT ??= "Commit-id: ${IMAGE_NAME}"
 OSTREE_COMMIT_BODY ??= ""
 OSTREE_UPDATE_SUMMARY ??= "0"
+OSTREE_DEPLOY_DEVICETREE ??= "0"
 
 BUILD_OSTREE_TARBALL ??= "1"
 
-SYSTEMD_USED = "${@oe.utils.ifelse(d.getVar('VIRTUAL-RUNTIME_init_manager', True) == 'systemd', 'true', '')}"
+SYSTEMD_USED = "${@oe.utils.ifelse(d.getVar('VIRTUAL-RUNTIME_init_manager') == 'systemd', 'true', '')}"
 
 IMAGE_CMD_TAR = "tar --xattrs --xattrs-include=*"
 CONVERSION_CMD_tar = "touch ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type}; ${IMAGE_CMD_TAR} --numeric-owner -cf ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type}.tar -C ${OTA_IMAGE_ROOTFS} . || [ $? -eq 1 ]"
@@ -103,17 +104,26 @@ IMAGE_CMD_ostree () {
         ln -sf var/roothome root
     fi
 
-    checksum=`sha256sum ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} | cut -f 1 -d " "`
-
-    cp ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} boot/vmlinuz-${checksum}
-
     if [ "${KERNEL_IMAGETYPE}" = "fitImage" ]; then
         # this is a hack for ostree not to override init= in kernel cmdline -
         # make it think that the initramfs is present (while it is in FIT image)
+        # since initramfs is fake file, it does not need to be included in checksum
+        checksum=$(sha256sum ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} | cut -f 1 -d " ")
         touch boot/initramfs-${checksum}
     else
+        if [ "${OSTREE_DEPLOY_DEVICETREE}" = "1"  ] && [ -n "${KERNEL_DEVICETREE}" ]; then
+            checksum=$(cat ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} ${DEPLOY_DIR_IMAGE}/${INITRAMFS_IMAGE}-${MACHINE}.${INITRAMFS_FSTYPES} ${KERNEL_DEVICETREE} | sha256sum | cut -f 1 -d " ")
+            for DTS_FILE in ${KERNEL_DEVICETREE}; do
+                DTS_FILE_BASENAME=$(basename ${DTS_FILE})
+                cp ${DEPLOY_DIR_IMAGE}/${DTS_FILE_BASENAME} boot/devicetree-${DTS_FILE_BASENAME}-${checksum}
+            done
+        else
+            checksum=$(cat ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} ${DEPLOY_DIR_IMAGE}/${INITRAMFS_IMAGE}-${MACHINE}.${INITRAMFS_FSTYPES} | sha256sum | cut -f 1 -d " ")
+        fi
         cp ${DEPLOY_DIR_IMAGE}/${INITRAMFS_IMAGE}-${MACHINE}.${INITRAMFS_FSTYPES} boot/initramfs-${checksum}
     fi
+
+    cp ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} boot/vmlinuz-${checksum}
 
     # Copy image manifest
     cat ${IMAGE_MANIFEST} | cut -d " " -f1,3 > usr/package.manifest
@@ -160,6 +170,9 @@ IMAGE_CMD_ostreepush () {
 
 IMAGE_TYPEDEP_garagesign = "ostreepush"
 do_image_garagesign[depends] += "unzip-native:do_populate_sysroot"
+# This lock solves OTA-1866, which is that removing GARAGE_SIGN_REPO while using
+# garage-sign simultaneously for two images often causes problems.
+do_image_garagesign[lockfiles] += "${DEPLOY_DIR_IMAGE}/garagesign.lock"
 IMAGE_CMD_garagesign () {
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         # if credentials are issued by a server that doesn't support offline signing, exit silently
