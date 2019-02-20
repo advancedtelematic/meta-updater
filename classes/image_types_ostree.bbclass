@@ -1,26 +1,19 @@
 # OSTree deployment
 
 do_image_ostree[depends] += "ostree-native:do_populate_sysroot \
-                        openssl-native:do_populate_sysroot \
                         coreutils-native:do_populate_sysroot \
-                        unzip-native:do_populate_sysroot \
                         virtual/kernel:do_deploy \
                         ${OSTREE_INITRAMFS_IMAGE}:do_image_complete"
 do_image_ostree[lockfiles] += "${OSTREE_REPO}/ostree.lock"
 
-export OSTREE_REPO
-export OSTREE_BRANCHNAME
-export GARAGE_TARGET_NAME
-
 RAMDISK_EXT ?= ".${OSTREE_INITRAMFS_FSTYPES}"
 
 OSTREE_KERNEL ??= "${KERNEL_IMAGETYPE}"
-
 OSTREE_COMMIT_SUBJECT ??= "Commit-id: ${IMAGE_NAME}"
 OSTREE_COMMIT_BODY ??= ""
 OSTREE_UPDATE_SUMMARY ??= "0"
 
-export SYSTEMD_USED = "${@oe.utils.ifelse(d.getVar('VIRTUAL-RUNTIME_init_manager', True) == 'systemd', 'true', '')}"
+SYSTEMD_USED = "${@oe.utils.ifelse(d.getVar('VIRTUAL-RUNTIME_init_manager', True) == 'systemd', 'true', '')}"
 
 IMAGE_CMD_ostree () {
     if [ -z "$OSTREE_REPO" ]; then
@@ -65,7 +58,7 @@ IMAGE_CMD_ostree () {
         fi
     done
 
-    if [ -n "$SYSTEMD_USED" ]; then
+    if [ -n "${SYSTEMD_USED}" ]; then
         mkdir -p usr/etc/tmpfiles.d
         tmpfiles_conf=usr/etc/tmpfiles.d/00ostree-tmpfiles.conf
         echo "d /var/rootdirs 0755 root root -" >>${tmpfiles_conf}
@@ -101,7 +94,7 @@ IMAGE_CMD_ostree () {
                 bbwarn "Data in /$dir directory is not preserved by OSTree. Consider moving it under /usr"
             fi
 
-            if [ -n "$SYSTEMD_USED" ]; then
+            if [ -n "${SYSTEMD_USED}" ]; then
                 echo "d /var/rootdirs/${dir} 0755 root root -" >>${tmpfiles_conf}
             else
                 echo "mkdir -p /var/rootdirs/${dir}; chown 755 /var/rootdirs/${dir}" >>${tmpfiles_conf}
@@ -113,11 +106,10 @@ IMAGE_CMD_ostree () {
 
     if [ -d root ] && [ ! -L root ]; then
         if [ "$(ls -A root)" ]; then
-            bberror "Data in /root directory is not preserved by OSTree."
-            exit 1
+            bbfatal "Data in /root directory is not preserved by OSTree."
         fi
 
-        if [ -n "$SYSTEMD_USED" ]; then
+        if [ -n "${SYSTEMD_USED}" ]; then
             echo "d /var/roothome 0755 root root -" >>${tmpfiles_conf}
         else
             echo "mkdir -p /var/roothome; chown 755 /var/roothome" >>${tmpfiles_conf}
@@ -189,7 +181,10 @@ IMAGE_CMD_ostreepush () {
 }
 
 IMAGE_TYPEDEP_garagesign = "ostreepush"
-do_image_garagesign[depends] += "aktualizr-native:do_populate_sysroot"
+do_image_garagesign[depends] += "unzip-native:do_populate_sysroot"
+# This lock solves OTA-1866, which is that removing GARAGE_SIGN_REPO while using
+# garage-sign simultaneously for two images often causes problems.
+do_image_garagesign[lockfiles] += "${DEPLOY_DIR_IMAGE}/garagesign.lock"
 IMAGE_CMD_garagesign () {
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         # if credentials are issued by a server that doesn't support offline signing, exit silently
@@ -197,11 +192,9 @@ IMAGE_CMD_garagesign () {
 
         java_version=$( java -version 2>&1 | awk -F '"' '/version/ {print $2}' )
         if [ "${java_version}" = "" ]; then
-            bberror "Java is required for synchronization with update backend, but is not installed on the host machine"
-            exit 1
+            bbfatal "Java is required for synchronization with update backend, but is not installed on the host machine"
         elif [ "${java_version}" \< "1.8" ]; then
-            bberror "Java version >= 8 is required for synchronization with update backend"
-            exit 1
+            bbfatal "Java version >= 8 is required for synchronization with update backend"
         fi
 
         rm -rf ${GARAGE_SIGN_REPO}
@@ -252,14 +245,12 @@ IMAGE_CMD_garagesign () {
         rm -rf ${GARAGE_SIGN_REPO}
 
         if [ "$push_success" -ne "1" ]; then
-            bberror "Couldn't push to garage repository"
-            exit 1
+            bbfatal "Couldn't push to garage repository"
         fi
     fi
 }
 
-IMAGE_TYPEDEP_garagecheck = "ostreepush garagesign"
-do_image_garagecheck[depends] += "aktualizr-native:do_populate_sysroot"
+IMAGE_TYPEDEP_garagecheck = "garagesign"
 IMAGE_CMD_garagecheck () {
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         # if credentials are issued by a server that doesn't support offline signing, exit silently
