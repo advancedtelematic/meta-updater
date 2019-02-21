@@ -23,6 +23,7 @@ SRC_URI = " \
   file://aktualizr-serialcan.service \
   "
 
+
 SRCREV = "c2da7b5dfe34ebe3482042dd461543da291c43bd"
 BRANCH ?= "master"
 
