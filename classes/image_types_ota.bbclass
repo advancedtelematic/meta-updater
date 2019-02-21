@@ -59,7 +59,7 @@ IMAGE_CMD_ota () {
 		bbfatal "Invalid bootloader: ${OSTREE_BOOTLOADER}"
 	fi
 
-	ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME})
+	ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME}-${IMAGE_BASENAME})
 
 	ostree --repo=${OTA_SYSROOT}/ostree/repo pull-local --remote=${OSTREE_OSNAME} ${OSTREE_REPO} ${ostree_target_hash}
 	kargs_list=""
