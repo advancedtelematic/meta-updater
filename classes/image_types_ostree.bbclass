@@ -159,6 +159,13 @@ IMAGE_CMD_ostree () {
         ostree --repo=${OSTREE_REPO} summary -u
     fi
 
+    # To enable simultaneous bitbaking of two images with the same branch name,
+    # create a new ref in the repo using the basename of the image. (This first
+    # requires deleting it if it already exists.) Fixes OTA-2211.
+    ostree --repo=${OSTREE_REPO} refs --delete ${OSTREE_BRANCHNAME}-${IMAGE_BASENAME}
+    ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME})
+    ostree --repo=${OSTREE_REPO} refs --create=${OSTREE_BRANCHNAME}-${IMAGE_BASENAME} ${ostree_target_hash}
+
     rm -rf ${OSTREE_ROOTFS}
 }
 
@@ -202,7 +209,7 @@ IMAGE_CMD_garagesign () {
                          --home-dir ${GARAGE_SIGN_REPO} \
                          --credentials ${SOTA_PACKED_CREDENTIALS}
 
-        ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME})
+        ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME}-${IMAGE_BASENAME})
 
         # Use OSTree target hash as version if none was provided by the user
         target_version=${ostree_target_hash}
@@ -255,7 +262,8 @@ IMAGE_CMD_garagecheck () {
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         # if credentials are issued by a server that doesn't support offline signing, exit silently
         unzip -p ${SOTA_PACKED_CREDENTIALS} root.json targets.pub targets.sec tufrepo.url 2>&1 >/dev/null || exit 0
-        ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME})
+
+        ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME}-${IMAGE_BASENAME})
 
         garage-check --ref=${ostree_target_hash} \
                      --credentials=${SOTA_PACKED_CREDENTIALS} \
