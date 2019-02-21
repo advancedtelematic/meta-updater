@@ -1,0 +1,1 @@
+bootcmd_create_envfile=if test ! -e $sota_boot_part uboot.env; then saveenv; fi;

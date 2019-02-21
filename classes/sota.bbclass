@@ -21,7 +21,11 @@ WKS_FILE_sota ?= "sdimage-sota.wks"
 
 EXTRA_IMAGEDEPENDS_append_sota = " parted-native mtools-native dosfstools-native"
 
-INITRAMFS_FSTYPES ?= "${@oe.utils.ifelse(d.getVar('OSTREE_BOOTLOADER') == 'u-boot', 'cpio.gz.u-boot', 'cpio.gz')}"
+# Has to be an override, because 'INITRAMFS_FSTYPES ?=' is not strong enough to override the default value
+INITRAMFS_FSTYPES_sota ?= "${@oe.utils.ifelse(d.getVar('OSTREE_BOOTLOADER') == 'u-boot' and d.getVar('KERNEL_IMAGETYPE') != 'fitImage', 'cpio.gz.u-boot', 'cpio.gz')}"
+
+# Deploy config fragment list to OSTree root fs
+IMAGE_INSTALL_append = "${@oe.utils.ifelse(d.getVar('KERNEL_IMAGETYPE') == 'fitImage', ' fit-conf', ' ')}"
 
 # Please redefine OSTREE_REPO in order to have a persistent OSTree repo
 export OSTREE_REPO ?= "${DEPLOY_DIR_IMAGE}/ostree_repo"
@@ -38,6 +42,15 @@ GARAGE_TARGET_NAME ?= "${OSTREE_BRANCHNAME}"
 GARAGE_TARGET_VERSION ?= ""
 GARAGE_TARGET_URL ?= "https://example.com/"
 
+SOTA_BOOTLOADER_EXTRA_PARAMS ??= ""
+SOTA_BOOTLOADER_BOOTCOMMAND ??= "bootm"
+SOTA_BOOTLOADER_KERNEL_ADDR ??= "0x02700000"
+SOTA_BOOTLOADER_RAMDISK_ADDR ??= ""
+SOTA_BOOTLOADER_FDT_ADDR ??= ""
+SOTA_BOOTLOADER_BOOT_PART ??= "mmc 0:1"
+SOTA_BOOTLOADER_MAIN_PART ??= "mmc 0:2"
+SOTA_BOOTLOADER_ROOT_DEVICE ??= "/dev/mmcblk0p2"
+
 SOTA_MACHINE ??="none"
 SOTA_MACHINE_rpi ?= "raspberrypi"
 SOTA_MACHINE_porter ?= "porter"
@@ -48,5 +61,7 @@ SOTA_MACHINE_am335x-evm ?= "am335x-evm-wifi"
 
 SOTA_OVERRIDES_BLACKLIST = "ostree ota"
 SOTA_REQUIRED_VARIABLES = "OSTREE_REPO OSTREE_BRANCHNAME OSTREE_OSNAME OSTREE_BOOTLOADER OSTREE_BOOT_PARTITION GARAGE_SIGN_REPO GARAGE_TARGET_NAME"
+
+do_image_wic[depends] += " ota-u-boot-script:do_deploy "
 
 inherit sota_sanity sota_${SOTA_MACHINE} image_repo_manifest

@@ -70,9 +70,20 @@ If your board isn't supported yet, you can add board integration code yourself. 
 1.  Make the board boot into http://www.denx.de/wiki/U-Boot[U-Boot]
 2.  Make U-boot import variables from /boot/loader/uEnv.txt and load the kernel with initramfs and kernel command line arguments according to what is set in this file.
 
-You may take a look into https://github.com/advancedtelematic/meta-updater-minnowboard[Minnowboard] or https://github.com/advancedtelematic/meta-updater-raspberrypi[Raspberry Pi] integration layers for examples.
+There is a flexible universal U-boot script provided by meta-updater to do OSTree-enabled boot, `ota-u-boot-script`. It is not being deployed by default, so you should enable it in your machine configuration. This script can be configured with following variables:
 
-Although we have used U-Boot so far, other boot loaders can be configured work with OSTree as well.
+* `SOTA_BOOTLOADER_BOOTCOMMAND` - command U-Boot will use to load the kernel. Normally is either `bootm` or `bootz`.
+* `SOTA_BOOTLOADER_BOOT_PART` - boot partition the script will use. Now only used for storing the U-Boot environment. Should be a full partition name, e.g. `mmc 0:1`.
+* `SOTA_BOOTLOADER_MAIN_PART` - the partition where the OSTree sysroot resides. Should be a full partition name, e.g. `mmc 0:1`
+* `SOTA_BOOTLOADER_KERNEL_ADDR` - address to load the kernel to. Can't refer to another variable, should be a (normally hex) number e.g. `0x02700000`.
+* `SOTA_BOOTLOADER_RAMDISK_ADDR` - address to load the ramdisk to. Can't refer to another variable, should be a (normally hex) number e.g. `0x02700000`. Set to empty when using FIT image with ramdisk packed (`KERNEL_IMAGETYPE = "fitImage"`).
+* `SOTA_BOOTLOADER_FDT_ADDR` - address to load the device tree to. Can't refer to another variable, should be a (normally hex) number e.g. `0x02700000`. Set to empty when no device tree is used.
+* `SOTA_BOOTLOADER_ROOT_DEVICE` - the partition where the OSTree sysroot resides as linux device path, e.g. `/dev/mmcblk0p2`.
+* `SOTA_BOOTLOADER_EXTRA_PARAMS` - extra parameters to add to kernel command line. Note that these parameters will be non-updatable, it is recommended in most cases to use `OSTREE_KERNEL_ARGS` instead.
+
+Although meta-updater is best integrated with U-Boot so far, basic support for Grub also exists. In addition to these two bootloaders libostree also supports SysLinux.
+
+Normally there still has to be some platform-dependent integration snippet that would source the script provided by meta-updater and/or OSTree. For an example of such snippets you can look into https://github.com/advancedtelematic/meta-updater-raspberrypi[Raspberry Pi] (U-Boot) and https://github.com/advancedtelematic/meta-updater-minnowboard[Minnowboard] (Grub, directly loads snippet provided by libostree) integration layers.
 
 == SOTA-related variables in local.conf
 
@@ -82,6 +93,7 @@ Although we have used U-Boot so far, other boot loaders can be configured work w
 * `OSTREE_COMMIT_SUBJECT` - Commit subject used by OSTree. Defaults to `Commit-id: ${IMAGE_NAME}`
 * `OSTREE_UPDATE_SUMMARY` - Set this to '1' to update summary of OSTree repository on each commit. '0' by default.
 * `OSTREE_DEPLOY_DEVICETREE` - Set this to '1' to include devicetree(s) to boot
+* `OSTREE_KERNEL_ARGS` - Parameters to kernel command line.
 * `INITRAMFS_IMAGE` - initramfs/initrd image that is used as a proxy while booting into OSTree deployment. Do not change this setting unless you are sure that your initramfs can serve as such a proxy.
 * `SOTA_PACKED_CREDENTIALS` - when set, your ostree commit will be pushed to a remote repo as a bitbake step. This should be the path to a zipped credentials file in https://github.com/advancedtelematic/aktualizr/blob/master/docs/credentials.adoc[the format accepted by garage-push].
 * `SOTA_DEPLOY_CREDENTIALS` - when set to '1' (default value), deploys credentials to the built image. Override it in `local.conf` to built a generic image that can be provisioned manually after the build.

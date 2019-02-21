@@ -1,0 +1,1 @@
+bootcmd_fitconf=run bootcmd_getroot; if test -e ${sota_main_part} "${ostree_root}/usr/lib/fit_conf"; then load ${sota_main_part} $loadaddr "${ostree_root}/usr/lib/fit_conf"; env import -t $loadaddr $filesize; fi;

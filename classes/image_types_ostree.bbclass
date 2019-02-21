@@ -112,7 +112,12 @@ IMAGE_CMD_ostree () {
         touch boot/initramfs-${checksum}
     else
         if [ "${OSTREE_DEPLOY_DEVICETREE}" = "1"  ] && [ -n "${KERNEL_DEVICETREE}" ]; then
-            checksum=$(cat ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} ${DEPLOY_DIR_IMAGE}/${INITRAMFS_IMAGE}-${MACHINE}.${INITRAMFS_FSTYPES} ${KERNEL_DEVICETREE} | sha256sum | cut -f 1 -d " ")
+            kernel_ostree_fullpath=""
+            for blob in ${KERNEL_DEVICETREE}; do
+              kernel_ostree_fullpath="$kernel_ostree_fullpath ${DEPLOY_DIR_IMAGE}/$blob"
+            done
+
+            checksum=$(cat ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} ${DEPLOY_DIR_IMAGE}/${INITRAMFS_IMAGE}-${MACHINE}.${INITRAMFS_FSTYPES} $kernel_ostree_fullpath | sha256sum | cut -f 1 -d " ")
             for DTS_FILE in ${KERNEL_DEVICETREE}; do
                 DTS_FILE_BASENAME=$(basename ${DTS_FILE})
                 cp ${DEPLOY_DIR_IMAGE}/${DTS_FILE_BASENAME} boot/devicetree-${DTS_FILE_BASENAME}-${checksum}

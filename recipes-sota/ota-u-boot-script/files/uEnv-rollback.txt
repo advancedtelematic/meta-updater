@@ -1,0 +1,8 @@
+bootcmd_rollbackenv=setenv kernel_image ${kernel_image2}; setenv ramdisk_image ${ramdisk_image2}; setenv fdt_file ${fdt_file2}; setenv bootargs ${bootargs2}
+
+bootlimit=3
+
+bootcmd_set_rollback=if test ! "${rollback}" = "1"; then setenv rollback 1; setenv upgrade_available 0; saveenv; fi
+altbootcmd=run bootcmd_create_envfile; run bootcmd_otenv; run bootcmd_set_rollback; if test -n "${kernel_image2}"; then run bootcmd_rollbackenv; fi; run bootcmd_args; run bootcmd_fitconf; run bootcmd_load; run bootcmd_run; reset
+
+

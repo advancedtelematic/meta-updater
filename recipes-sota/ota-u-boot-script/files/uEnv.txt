@@ -1,0 +1,34 @@
+bootcmd_fitconf=
+bootcmd_create_envfile=
+fit_conf=
+
+sota_bootcommand=@@SOTA_BOOTLOADER_BOOTCOMMAND@@
+sota_kernel_addr=@@SOTA_BOOTLOADER_KERNEL_ADDR@@
+sota_ramdisk_addr=@@SOTA_BOOTLOADER_RAMDISK_ADDR@@
+sota_fdt_addr=@@SOTA_BOOTLOADER_FDT_ADDR@@
+sota_boot_part=@@SOTA_BOOTLOADER_BOOT_PART@@
+sota_main_part=@@SOTA_BOOTLOADER_MAIN_PART@@
+sota_root_device=@@SOTA_BOOTLOADER_ROOT_DEVICE@@
+
+@@INITFINISHED@@
+
+bootcmd_resetvars=setenv kernel_image; setenv bootargs; setenv kernel_image2; setenv bootargs2
+bootcmd_otenv=run bootcmd_resetvars; load ${sota_main_part} $loadaddr /boot/loader/uEnv.txt; env import -t $loadaddr $filesize
+
+bootcmd_args=setenv bootargs "$bootargs $bootargs_fdt ostree_root=$sota_root_device root=/dev/ram0 rw rootwait rootdelay=2 ramdisk_size=8192 panic=1 @@SOTA_BOOTLOADER_EXTRA_PARAMS@@"
+
+bootcmd_getroot=setexpr ostree_root gsub "^.*ostree=([^ ]*).*$" "\\\\1" "${bootargs}";
+
+bootcmd_load_kernel=load $sota_main_part $sota_kernel_addr "/boot"$kernel_image
+
+bootcmd_load_ramdisk=if test -n "${sota_ramdisk_addr}"; then load $sota_main_part $sota_ramdisk_addr "/boot"$ramdisk_image; fi
+
+bootcmd_load_fdt=if test -n "${sota_fdt_addr}"; then load $sota_main_part $sota_fdt_addr "/boot"$fdt_file; fi
+
+bootcmd_load=run bootcmd_load_kernel; run bootcmd_load_ramdisk; run bootcmd_load_fdt;
+
+bootcmd_run=$sota_bootcommand $sota_kernel_addr$fit_conf $sota_ramdisk_addr $sota_fdt_addr
+
+bootcmd=if test "${rollback}" = "1"; then run altbootcmd; else run bootcmd_create_envfile; run bootcmd_otenv; run bootcmd_args; run bootcmd_fitconf; run bootcmd_load; run bootcmd_run; if test ! "${upgrade_available}" = "1"; then setenv upgrade_available 1; saveenv; fi; reset; fi
+
+
