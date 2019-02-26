@@ -235,7 +235,6 @@ class RpiTests(OESelftestTestCase):
     def setUpLocal(self):
         # Add layers before changing the machine type, otherwise the sanity
         # checker complains loudly.
-        layer_python = "meta-openembedded/meta-python"
         layer_rpi = "meta-raspberrypi"
         layer_upd_rpi = "meta-updater-raspberrypi"
         result = runCmd('bitbake-layers show-layers')
@@ -244,11 +243,6 @@ class RpiTests(OESelftestTestCase):
         # layers we need aren't where we expect them, we are out of luck.
         path = os.path.abspath(os.path.dirname(__file__))
         metadir = path + "/../../../../../"
-        if re.search(layer_python, result.output) is None:
-            self.meta_python = metadir + layer_python
-            runCmd('bitbake-layers add-layer "%s"' % self.meta_python)
-        else:
-            self.meta_python = None
         if re.search(layer_rpi, result.output) is None:
             self.meta_rpi = metadir + layer_rpi
             runCmd('bitbake-layers add-layer "%s"' % self.meta_rpi)
@@ -284,8 +278,6 @@ class RpiTests(OESelftestTestCase):
             runCmd('bitbake-layers remove-layer "%s"' % self.meta_upd_rpi, ignore_status=True)
         if self.meta_rpi:
             runCmd('bitbake-layers remove-layer "%s"' % self.meta_rpi, ignore_status=True)
-        if self.meta_python:
-            runCmd('bitbake-layers remove-layer "%s"' % self.meta_python, ignore_status=True)
 
     def test_rpi(self):
         logger = logging.getLogger("selftest")
