@@ -24,7 +24,7 @@ SRC_URI = " \
   "
 
 
-SRCREV = "c2da7b5dfe34ebe3482042dd461543da291c43bd"
+SRCREV = "c71ec0a320d85a3e75ba37bff7dc40ad02e9d655"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
