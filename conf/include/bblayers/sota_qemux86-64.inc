@@ -1,1 +1,2 @@
-BBLAYERS += " ${METADIR}/meta-updater-qemux86-64 " 
+
+BBLAYERS += "${METADIR}/meta-updater-qemux86-64"
