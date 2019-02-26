@@ -63,35 +63,6 @@ class GeneralTests(OESelftestTestCase):
         self.assertEqual(result.status, 0,
                          "Java not found. Do you have a JDK installed on your host machine?")
 
-    def test_add_package(self):
-        deploydir = get_bb_var('DEPLOY_DIR_IMAGE')
-        imagename = get_bb_var('IMAGE_LINK_NAME', 'core-image-minimal')
-        image_path = deploydir + '/' + imagename + '.otaimg'
-        logger = logging.getLogger("selftest")
-
-        logger.info('Running bitbake with man in the image package list')
-        self.append_config('IMAGE_INSTALL_append = " man "')
-        bitbake('-c cleanall man-db')
-        bitbake('core-image-minimal')
-        result = runCmd('oe-pkgdata-util find-path /usr/bin/man')
-        self.assertEqual(result.output, 'man-db: /usr/bin/man')
-        path1 = os.path.realpath(image_path)
-        size1 = os.path.getsize(path1)
-        logger.info('First image %s has size %i' % (path1, size1))
-
-        logger.info('Running bitbake without man in the image package list')
-        self.append_config('IMAGE_INSTALL_remove = " man "')
-        bitbake('-c cleanall man-db')
-        bitbake('core-image-minimal')
-        result = runCmd('oe-pkgdata-util find-path /usr/bin/man', ignore_status=True)
-        self.assertEqual(result.status, 1, "Status different than 1. output: %s" % result.output)
-        self.assertEqual(result.output, 'ERROR: Unable to find any package producing path /usr/bin/man')
-        path2 = os.path.realpath(image_path)
-        size2 = os.path.getsize(path2)
-        logger.info('Second image %s has size %i', path2, size2)
-        self.assertNotEqual(path1, path2, "Image paths are identical; image was not rebuilt.")
-        self.assertNotEqual(size1, size2, "Image sizes are identical; image was not rebuilt.")
-
 
 class AktualizrToolsTests(OESelftestTestCase):
 
