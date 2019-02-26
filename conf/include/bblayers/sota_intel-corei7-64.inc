@@ -1,2 +1,2 @@
-
-BBLAYERS += " ${METADIR}/meta-updater-minnowboard ${METADIR}/meta-intel "
+BBLAYERS += "${METADIR}/meta-updater-minnowboard"
+BBLAYERS += "${METADIR}/meta-intel"
