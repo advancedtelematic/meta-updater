@@ -1,9 +1,6 @@
 SUMMARY = "Aktualizr configuration for implicit provisioning with CA"
 DESCRIPTION = "Configuration for implicitly provisioning Aktualizr using externally provided or generated CA"
 
-# WARNING: it is NOT a production solution. The secure way to provision devices is to create certificate request directly on the device
-#  (either with HSM/TPM or with software) and then sign it with a CA stored on a disconnected machine
-
 HOMEPAGE = "https://github.com/advancedtelematic/aktualizr"
 SECTION = "base"
 LICENSE = "MPL-2.0"
