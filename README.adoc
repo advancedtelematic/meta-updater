@@ -151,6 +151,7 @@ First, you can set `SOTA_CLIENT_PROV` to control which provisioning recipe is us
 
 Second, you can write recipes to install additional config files with customized options. A few recipes already exist to address common needs and provide an example:
 
+* link:recipes-sota/config/aktualizr-auto-reboot.bb[aktualizr-auto-reboot.bb] configures aktualizr to automatically reboot after new updates are installed in order to apply the updates immediately. This is only relevant for package managers (such as OSTree) that require a reboot to complete the installation process. If this is not enabled, you will need to reboot the system through other means.
 * link:recipes-sota/config/aktualizr-disable-send-ip.bb[aktualizr-disable-send-ip.bb] disables the reporting of networking information to the server. This is enabled by default and supported by https://connect.ota.here.com/[HERE OTA Connect]. However, if you are using a different server that does not support this feature, you may want to disable it in aktualizr.
 * link:recipes-sota/config/aktualizr-log-debug.bb[aktualizr-log-debug.bb] sets the log level of aktualizr to 0 (trace). The default is 2 (info). This recipe is intended for development and debugging purposes.
 
