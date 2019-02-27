@@ -1,5 +1,5 @@
 SUMMARY = "Enable auto reboot to apply updates"
-DESCRIPTION = "Configures aktualizr to auto reboot just after new updates installation in order to apply them"
+DESCRIPTION = "Configures aktualizr to automatically reboot after new updates are installed in order to apply the updates immediately"
 HOMEPAGE = "https://github.com/advancedtelematic/aktualizr"
 SECTION = "base"
 LICENSE = "MPL-2.0"
