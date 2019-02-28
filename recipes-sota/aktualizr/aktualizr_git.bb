@@ -11,6 +11,8 @@ RDEPENDS_${PN}_class-target = "aktualizr-check-discovery aktualizr-configs lshw"
 RDEPENDS_${PN}-secondary = "aktualizr-check-discovery"
 RDEPENDS_${PN}-host-tools = "aktualizr aktualizr-repo aktualizr-cert-provider ${@bb.utils.contains('PACKAGECONFIG', 'sota-tools', 'garage-deploy garage-push', '', d)}"
 
+RDEPENDS_${PN}-ptest += "bash cmake python3-core python3-io python3-json python3-netserver sqlite3 valgrind"
+
 PV = "1.0+git${SRCPV}"
 PR = "7"
 
@@ -18,6 +20,7 @@ GARAGE_SIGN_PV = "0.6.0-3-gc38b9f3"
 
 SRC_URI = " \
   gitsm://github.com/advancedtelematic/aktualizr;branch=${BRANCH} \
+  file://run-ptest \
   file://aktualizr.service \
   file://aktualizr-secondary.service \
   file://aktualizr-secondary.socket \
@@ -40,7 +43,7 @@ SYSTEMD_PACKAGES = "${PN} ${PN}-secondary"
 SYSTEMD_SERVICE_${PN} = "aktualizr.service"
 SYSTEMD_SERVICE_${PN}-secondary = "aktualizr-secondary.socket"
 
-EXTRA_OECMAKE = "-DCMAKE_BUILD_TYPE=Release -DAKTUALIZR_VERSION=${PV}"
+EXTRA_OECMAKE = "-DCMAKE_BUILD_TYPE=Release -DAKTUALIZR_VERSION=${PV} ${@bb.utils.contains('PTEST_ENABLED', '1', '-DTESTSUITE_VALGRIND=on', '', d)}"
 
 GARAGE_SIGN_OPS = "${@ d.expand('-DGARAGE_SIGN_ARCHIVE=${WORKDIR}/cli-${GARAGE_SIGN_PV}.tgz') if d.getVar('GARAGE_SIGN_AUTOVERSION') != '1' else ''}"
 
@@ -57,6 +60,19 @@ PACKAGECONFIG[ubootenv] = ",,,u-boot-fw-utils aktualizr-uboot-env-rollback"
 
 do_compile_ptest() {
     cmake_runcmake_build --target build_tests
+}
+
+do_install_ptest() {
+    # copy the complete source directory (contains build)
+    cp -r ${B}/ ${D}/${PTEST_PATH}/build
+    cp -r ${S}/ ${D}/${PTEST_PATH}/src
+
+    # remove bogus elf file
+    rm ${D}/${PTEST_PATH}/src/partial/extern/RIOT/cpu/esp32/bin/bootloader.elf
+
+    # fix the absolute paths
+    find ${D}/${PTEST_PATH}/build -name "CMakeFiles" | xargs rm -rf
+    find ${D}/${PTEST_PATH}/build -name "*.cmake" -or -name "DartConfiguration.tcl" -or -name "run-valgrind" | xargs sed -e "s|${S}|${PTEST_PATH}/src|g" -e "s|${B}|${PTEST_PATH}/build|g" -e "s|\"--gtest_output[^\"]*\"||g" -i
 }
 
 do_install_append () {
