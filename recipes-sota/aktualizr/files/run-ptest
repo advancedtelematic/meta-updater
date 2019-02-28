@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -e
+
+filter_logs() {
+    awk '/^.*Test[[:space:]]*#[[:digit:]]+:/ {
+        a = gensub(/^.*Test[[:space:]]*#[[:digit:]]+:[[:space:]]*([^[:space:]]+).*(Passed|Skipped|Not Run|Failed|Timeout|Exception)[[:space:]:].*$/, "\\2: \\1", "g");
+        a = gensub(/^Passed/, "PASS", "g", a);
+        a = gensub(/^(Skipped|Disabled)/, "SKIP", "g", a);
+        a = gensub(/^(Not Run|Failed|Timeout|Exception)/, "FAIL", "g", a);
+        print a;
+    }'
+}
+
+cd build
+ctest -j 8 -O /tmp/aktualizr-ptest.log --output-on-failure -LE 'noptest' 2> /dev/null | filter_logs
