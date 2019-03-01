@@ -31,7 +31,7 @@ do_install() {
     install -m 0700 -d ${D}${libdir}/sota/conf.d
     aktualizr_toml=${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'secondary-network', 'sota_autoprov_primary.toml', 'sota_autoprov.toml', d)}
 
-    install -m 0644 ${STAGING_DIR_NATIVE}${libdir}/sota/${aktualizr_toml} \
+    install -m 0644 ${STAGING_DIR_NATIVE}${libdir_native}/sota/${aktualizr_toml} \
         ${D}${libdir}/sota/conf.d/20-${aktualizr_toml}
 }
 

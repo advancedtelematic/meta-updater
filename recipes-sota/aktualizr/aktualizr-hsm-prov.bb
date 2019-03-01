@@ -16,7 +16,7 @@ require credentials.inc
 
 do_install() {
     install -m 0700 -d ${D}${libdir}/sota/conf.d
-    install -m 0644 ${STAGING_DIR_NATIVE}${libdir}/sota/sota_hsm_prov.toml \
+    install -m 0644 ${STAGING_DIR_NATIVE}${libdir_native}/sota/sota_hsm_prov.toml \
         ${D}${libdir}/sota/conf.d/20-sota_hsm_prov.toml
 }
 
