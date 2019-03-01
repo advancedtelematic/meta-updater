@@ -28,7 +28,7 @@ SRC_URI = " \
 SRC_URI[md5sum] = "30d7f0931e2236954679e75d1bae174f"
 SRC_URI[sha256sum] = "46d8c6448ce14cbb9af6a93eba7e29d38579e566dcd6518d22f723a8da16cad5"
 
-SRCREV = "ea03a5cf57def6b8d368f783cb12b91255365a80"
+SRCREV = "2e3ccbbdd43fdf70eb815454ea64f0bd8085856c"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
