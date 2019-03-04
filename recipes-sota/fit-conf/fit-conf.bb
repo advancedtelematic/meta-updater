@@ -2,6 +2,8 @@ SUMMARY = "FIT image configuration for u-boot to use"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/COPYING.MIT;md5=3da9cfbcb788c80a0384361b4de20420"
 
+PACKAGE_ARCH = "${MACHINE_ARCH}"
+
 do_install() {
 	mkdir -p ${D}${libdir}
 	echo -n "fit_conf=" >${D}${libdir}/fit_conf
