@@ -39,6 +39,10 @@ S = "${WORKDIR}/git"
 
 inherit cmake pkgconfig ptest systemd
 
+# disable ptest by default as it slows down builds quite a lot
+# can be enabled manually by setting 'PTEST_ENABLED_pn-aktualizr' to '1' in local.conf
+PTEST_ENABLED = "0"
+
 SYSTEMD_PACKAGES = "${PN} ${PN}-secondary"
 SYSTEMD_SERVICE_${PN} = "aktualizr.service"
 SYSTEMD_SERVICE_${PN}-secondary = "aktualizr-secondary.socket"
