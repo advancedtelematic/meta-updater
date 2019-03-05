@@ -3,6 +3,8 @@ RPI_USE_U_BOOT_sota = "1"
 KERNEL_CLASSES_append_sota = " kernel-fitimage"
 KERNEL_IMAGETYPE_sota = "fitImage"
 
+IMAGE_INSTALL_append_sota = " connman connman-client"
+
 PREFERRED_PROVIDER_virtual/bootloader_sota ?= "u-boot"
 UBOOT_ENTRYPOINT_sota ?= "0x00008000"
 
