@@ -57,13 +57,13 @@ FILES_${PN} = "${bindir} \
     ${sysconfdir}/ostree \
     ${datadir}/ostree \
     ${libdir}/*.so.* \
-    ${libdir}/ostree/ostree-grub-generator \
-    ${libdir}/ostree/ostree-remount \
+    /usr/lib/ostree/ostree-grub-generator \
+    /usr/lib/ostree/ostree-remount \
     ${libdir}/girepository-1.0/* \
-    ${@bb.utils.contains('DISTRO_FEATURES','systemd','${libdir}/tmpfiles.d', '', d)} \
+    ${@bb.utils.contains('DISTRO_FEATURES','systemd','/usr/lib/tmpfiles.d', '', d)} \
     ${@bb.utils.contains('DISTRO_FEATURES','systemd','${systemd_unitdir}/system/*.path', '', d)} \
     ${@bb.utils.contains('DISTRO_FEATURES','systemd','${systemd_unitdir}/system-generators', '', d)} \
 "
 FILES_${PN}-dev += " ${datadir}/gir-1.0"
-FILES_${PN}-dracut = "${sysconfdir}/dracut.conf.d ${libdir}/dracut"
-FILES_${PN}-switchroot = "${libdir}/ostree/ostree-prepare-root"
+FILES_${PN}-dracut = "${sysconfdir}/dracut.conf.d /usr/lib/dracut"
+FILES_${PN}-switchroot = "/usr/lib/ostree/ostree-prepare-root"
