@@ -17,6 +17,7 @@ IMAGE_INSTALL_remove = " \
                         aktualizr-uboot-env-rollback \
                         connman \
                         connman-client \
+                        networkd-dhcp-conf \
                         "
 
 IMAGE_INSTALL_append = " \
