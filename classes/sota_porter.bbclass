@@ -7,3 +7,4 @@ IMAGE_BOOT_FILES_sota += "porter-bootfiles/*"
 OSTREE_BOOTLOADER ?= "u-boot"
 UBOOT_MACHINE_sota = "porter_config"
 
+IMAGE_INSTALL_append_sota = " connman connman-client"

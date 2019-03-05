@@ -11,6 +11,7 @@ UBOOT_DTBO_LOADADDRESS = "0x06000000"
 
 # Deploy config fragment list to OSTree root fs
 IMAGE_INSTALL_append = " fit-conf"
+IMAGE_INSTALL_append_sota = " connman connman-client"
 
 PREFERRED_PROVIDER_virtual/bootloader_sota ?= "u-boot"
 UBOOT_ENTRYPOINT_sota ?= "0x00008000"
@@ -34,4 +35,3 @@ SOTA_DT_OVERLAYS_raspberrypi3 ?= "vc4-kms-v3d.dtbo rpi-ft5406.dtbo"
 OSTREE_KERNEL_ARGS_sota ?= " 8250.nr_uarts=1 bcm2708_fb.fbwidth=656 bcm2708_fb.fbheight=614 bcm2708_fb.fbswap=1 vc_mem.mem_base=0x3ec00000 vc_mem.mem_size=0x40000000 dwc_otg.lpm_enable=0 console=ttyS0,115200 usbhid.mousepoll=0 "
 
 SOTA_CLIENT_FEATURES_append = " ubootenv"
-
