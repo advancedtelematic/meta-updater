@@ -11,7 +11,9 @@ UBOOT_DTBO_LOADADDRESS = "0x06000000"
 
 # Deploy config fragment list to OSTree root fs
 IMAGE_INSTALL_append = " fit-conf"
-IMAGE_INSTALL_append_sota = " connman connman-client"
+
+PREFERRED_RPROVIDER_virtual/network-configuration ?= "connman"
+IMAGE_INSTALL_append_sota = " virtual/network-configuration "
 
 PREFERRED_PROVIDER_virtual/bootloader_sota ?= "u-boot"
 UBOOT_ENTRYPOINT_sota ?= "0x00008000"
