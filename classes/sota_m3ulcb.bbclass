@@ -7,4 +7,5 @@ IMAGE_BOOT_FILES_sota += "renesas-ota-bootfiles/*"
 OSTREE_BOOTLOADER ?= "u-boot"
 UBOOT_MACHINE_sota = "m3ulcb_defconfig"
 
-IMAGE_INSTALL_append_sota = " connman connman-client"
+PREFERRED_RPROVIDER_virtual/network-configuration ?= "connman"
+IMAGE_INSTALL_append_sota = " virtual/network-configuration "
