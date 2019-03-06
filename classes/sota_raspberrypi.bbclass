@@ -12,7 +12,7 @@ UBOOT_DTBO_LOADADDRESS = "0x06000000"
 # Deploy config fragment list to OSTree root fs
 IMAGE_INSTALL_append = " fit-conf"
 
-PREFERRED_RPROVIDER_virtual/network-configuration ?= "connman"
+DEV_MATCH_DIRECTIVE_pn-networkd-dhcp-conf = "Driver=smsc95xx lan78xx"
 IMAGE_INSTALL_append_sota = " virtual/network-configuration "
 
 PREFERRED_PROVIDER_virtual/bootloader_sota ?= "u-boot"
