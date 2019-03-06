@@ -6,6 +6,8 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7
 
 inherit systemd
 
+RPROVIDES_${PN} = "virtual/network-configuration"
+
 SRC_URI_append = " file://20-wired-dhcp.network"
 PR = "r1"
 
