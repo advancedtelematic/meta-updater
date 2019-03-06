@@ -74,6 +74,8 @@ You may take a look into https://github.com/advancedtelematic/meta-updater-minno
 
 Although we have used U-Boot so far, other boot loaders can be configured work with OSTree as well.
 
+Your images will also need network connectivity to be able to reach an actual OTA backend. Our 'poky-sota' distribution does not mandate or install a default network manager but our supported platforms use the `virtual/network-configuration` recipe, which can be used as a starting example.
+
 == SOTA-related variables in local.conf
 
 * `OSTREE_REPO` - path to your OSTree repository. Defaults to `$\{DEPLOY_DIR_IMAGE}/ostree_repo`
