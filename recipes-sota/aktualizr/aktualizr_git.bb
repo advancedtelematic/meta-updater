@@ -5,8 +5,6 @@ SECTION = "base"
 LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=9741c346eef56131163e13b9db1241b3"
 
-require garage-sign-version.inc
-
 DEPENDS = "boost curl openssl libarchive libsodium sqlite3 asn1c-native"
 RDEPENDS_${PN}_class-target = "aktualizr-check-discovery aktualizr-configs lshw"
 RDEPENDS_${PN}-secondary = "aktualizr-check-discovery"
@@ -15,16 +13,22 @@ RDEPENDS_${PN}-host-tools = "aktualizr aktualizr-repo aktualizr-cert-provider ${
 PV = "1.0+git${SRCPV}"
 PR = "7"
 
+GARAGE_SIGN_PV = "0.6.0-3-gc38b9f3"
+
 SRC_URI = " \
   gitsm://github.com/advancedtelematic/aktualizr;branch=${BRANCH} \
   file://aktualizr.service \
   file://aktualizr-secondary.service \
   file://aktualizr-secondary.socket \
   file://aktualizr-serialcan.service \
+  ${@ d.expand("https://ats-tuf-cli-releases.s3-eu-central-1.amazonaws.com/cli-${GARAGE_SIGN_PV}.tgz;unpack=0") if d.getVar('GARAGE_SIGN_AUTOVERSION') != '1' else ''} \
   "
 
+# for garage-sign archive
+SRC_URI[md5sum] = "30d7f0931e2236954679e75d1bae174f"
+SRC_URI[sha256sum] = "46d8c6448ce14cbb9af6a93eba7e29d38579e566dcd6518d22f723a8da16cad5"
 
-SRCREV = "c71ec0a320d85a3e75ba37bff7dc40ad02e9d655"
+SRCREV = "ea03a5cf57def6b8d368f783cb12b91255365a80"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -37,9 +41,7 @@ SYSTEMD_SERVICE_${PN}-secondary = "aktualizr-secondary.socket"
 
 EXTRA_OECMAKE = "-DCMAKE_BUILD_TYPE=Release -DAKTUALIZR_VERSION=${PV}"
 
-GARAGE_SIGN_OPS = "${@ '-DGARAGE_SIGN_VERSION=%s' % d.getVar('GARAGE_SIGN_VERSION') if d.getVar('GARAGE_SIGN_VERSION') is not None else ''} \
-                   ${@ '-DGARAGE_SIGN_SHA256=%s' % d.getVar('GARAGE_SIGN_SHA256') if d.getVar('GARAGE_SIGN_SHA256') is not None else ''} \
-                  "
+GARAGE_SIGN_OPS = "${@ d.expand('-DGARAGE_SIGN_ARCHIVE=${WORKDIR}/cli-${GARAGE_SIGN_PV}.tgz') if d.getVar('GARAGE_SIGN_AUTOVERSION') != '1' else ''}"
 
 PACKAGECONFIG ?= "ostree ${@bb.utils.filter('DISTRO_FEATURES', 'systemd', d)} ${@bb.utils.filter('SOTA_CLIENT_FEATURES', 'hsm serialcan ubootenv', d)}"
 PACKAGECONFIG_class-native = "sota-tools"
