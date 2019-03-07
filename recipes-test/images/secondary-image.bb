@@ -15,8 +15,7 @@ IMAGE_INSTALL_remove = " \
                         aktualizr-ca-implicit-prov-creds \
                         aktualizr-hsm-prov \
                         aktualizr-uboot-env-rollback \
-                        connman \
-                        connman-client \
+                        virtual/network-configuration \
                         "
 
 IMAGE_INSTALL_append = " \
