@@ -1,0 +1,250 @@
+diff --git a/VEX/priv/guest_arm_defs.h b/VEX/priv/guest_arm_defs.h
+index 2ccbe4398..90312fbd4 100644
+--- a/VEX/priv/guest_arm_defs.h
++++ b/VEX/priv/guest_arm_defs.h
+@@ -350,6 +350,10 @@ typedef
+    }
+    ARMCondcode;
+ 
++extern UInt arm_dirtyhelper_MRS_CNTFRQ ( void );
++extern ULong arm_dirtyhelper_MRRS_CNTVCT ( void );
++extern ULong arm_dirtyhelper_MRRS_CNTPCT ( void );
++
+ #endif /* ndef __VEX_GUEST_ARM_DEFS_H */
+ 
+ /*---------------------------------------------------------------*/
+diff --git a/VEX/priv/guest_arm_helpers.c b/VEX/priv/guest_arm_helpers.c
+index 8a028736e..89b17ce7b 100644
+--- a/VEX/priv/guest_arm_helpers.c
++++ b/VEX/priv/guest_arm_helpers.c
+@@ -1445,6 +1445,53 @@ VexGuestLayout
+         };
+ 
+ 
++UInt arm_dirtyhelper_MRS_CNTFRQ ( void )
++{
++#if   __ARM_ARCH_ISA_ARM  //{
++   UInt w = 0x55555555UL; /* overwritten */
++   __asm__ __volatile__("mrc p15, 0, %0, c14, c0, 0" : "=r"(w));
++   return w;
++#elif __ARM_ARCH_ISA_A64  //}{
++   UInt w;
++   __asm__ __volatile__("mrs %0,cntfrq_el0": "=r"(w));
++   return w;
++#else  //}{
++   return 0;
++#endif  //}
++}
++
++ULong arm_dirtyhelper_MRRS_CNTVCT ( void )
++{
++#if   __ARM_ARCH_ISA_ARM  //}{
++   UInt w0;
++   UInt w1;
++   __asm__ __volatile__("mrrc p15, 1, %0, %1, c14" : "=r"(w0), "=r"(w1));
++   return (((ULong)w1)<<32) | w0;
++#elif __ARM_ARCH_ISA_A64  //{
++   ULong w;
++   __asm__ __volatile__("mrs %0, cntvct_el0" : "=r"(w));
++   return w;
++#else  //}{
++   return 0;
++#endif  //}
++}
++
++ULong arm_dirtyhelper_MRRS_CNTPCT ( void )
++{
++#if   __ARM_ARCH_ISA_ARM  //}{
++   UInt w0;
++   UInt w1;
++   __asm__ __volatile__("mrrc p15, 0, %0, %1, c14" : "=r"(w0), "=r"(w1));
++   return (((ULong)w1)<<32) | w0;
++#elif __ARM_ARCH_ISA_A64  //{
++   ULong w;
++   __asm__ __volatile__("mrs %0, cntpct_el0" : "=r"(w));
++   return w;
++#else  //}{
++   return 0;
++#endif  //}
++}
++
+ /*---------------------------------------------------------------*/
+ /*--- end                                 guest_arm_helpers.c ---*/
+ /*---------------------------------------------------------------*/
+diff --git a/VEX/priv/guest_arm_toIR.c b/VEX/priv/guest_arm_toIR.c
+index d858c85e0..f96af92c4 100644
+--- a/VEX/priv/guest_arm_toIR.c
++++ b/VEX/priv/guest_arm_toIR.c
+@@ -18755,6 +18755,87 @@ DisResult disInstr_ARM_WRK (
+       /* fall through */
+    }
+ 
++   /* CNTFRQ: mrc p15, 0, rX, c14, c0, 0 */
++   if (0x0e1e0f10 == (insn & 0x0FFF0FFF)) {
++      UInt rD = INSN(15,12);
++      if (rD <= 14) {
++         /* skip r15, that's too stupid to handle */
++         IRTemp   val  = newTemp(Ity_I32);
++         IRExpr** args = mkIRExprVec_0();
++         IRDirty* d    = unsafeIRDirty_1_N(
++                            val,
++                            0/*regparms*/,
++                            "arm_dirtyhelper_MRS_CNTFRQ",
++                            &arm_dirtyhelper_MRS_CNTFRQ,
++                            args
++                         );
++         /* execute the dirty call, dumping the result in val. */
++         stmt( IRStmt_Dirty(d) );
++         putIRegA(rD, mkexpr(val), condT, Ijk_Boring);
++         DIP("mrc%s p15, 0, r%u, c14, c0, 0\n", nCC(INSN_COND), rD);
++         goto decode_success;
++      }
++      /* fall through */
++   }
++
++   /* CNTPCT */
++   if (0x0c500f0e == (insn & 0x0FF00FFF)) {
++      UInt rDhi = INSN(19,16);
++      UInt rDlo = INSN(15,12);
++      if (rDhi <= 14 && rDlo <= 14) {
++         /* skip r15, that's too stupid to handle */
++         IRTemp resHi  = newTemp(Ity_I32);
++         IRTemp resLo  = newTemp(Ity_I32);
++         IRTemp   val  = newTemp(Ity_I64);
++         IRExpr** args = mkIRExprVec_0();
++         IRDirty* d    = unsafeIRDirty_1_N(
++                            val,
++                            0/*regparms*/,
++                            "arm_dirtyhelper_MRRS_CNTPCT",
++                            &arm_dirtyhelper_MRRS_CNTPCT,
++                            args
++                         );
++         /* execute the dirty call, dumping the result in val. */
++         stmt( IRStmt_Dirty(d) );
++         assign( resHi, unop(Iop_64HIto32, mkexpr(val)) );
++         assign( resLo, unop(Iop_64to32, mkexpr(val)) );
++         putIRegA( rDhi, mkexpr(resHi), condT, Ijk_Boring );
++         putIRegA( rDlo, mkexpr(resLo), condT, Ijk_Boring );
++         DIP("mrrc%s p15, 0, r%u, r%u, c14\n", nCC(INSN_COND), rDlo, rDhi);
++         goto decode_success;
++      }
++      /* fall through */
++   }
++
++   /* CNTVCT */
++   if (0x0c500f1e == (insn & 0x0FF00FFF)) {
++      UInt rDhi = INSN(19,16);
++      UInt rDlo = INSN(15,12);
++      if (rDhi <= 14 && rDlo <= 14) {
++         /* skip r15, that's too stupid to handle */
++         IRTemp resHi  = newTemp(Ity_I32);
++         IRTemp resLo  = newTemp(Ity_I32);
++         IRTemp   val  = newTemp(Ity_I64);
++         IRExpr** args = mkIRExprVec_0();
++         IRDirty* d    = unsafeIRDirty_1_N(
++                            val,
++                            0/*regparms*/,
++                            "arm_dirtyhelper_MRRS_CNTVCT",
++                            &arm_dirtyhelper_MRRS_CNTVCT,
++                            args
++                         );
++         /* execute the dirty call, dumping the result in val. */
++         stmt( IRStmt_Dirty(d) );
++         assign( resHi, unop(Iop_64HIto32, mkexpr(val)) );
++         assign( resLo, unop(Iop_64to32, mkexpr(val)) );
++         putIRegA( rDhi, mkexpr(resHi), condT, Ijk_Boring );
++         putIRegA( rDlo, mkexpr(resLo), condT, Ijk_Boring );
++         DIP("mrrc%s p15, 1, r%u, r%u, c14\n", nCC(INSN_COND), rDlo, rDhi);
++         goto decode_success;
++      }
++      /* fall through */
++   }
++
+    /* Handle various kinds of barriers.  This is rather indiscriminate
+       in the sense that they are all turned into an IR Fence, which
+       means we don't know which they are, so the back end has to
+@@ -23196,6 +23277,84 @@ DisResult disInstr_THUMB_WRK (
+       /* fall through */
+    }
+ 
++   /* CNTFRQ: mrc p15, 0, rX, c14, c0, 0 */
++   if ((INSN0(15,0) == 0xee1e) && (INSN1(11,0) == 0xf10)) {
++      UInt rD = INSN1(15,12);
++      if (!isBadRegT(rD)) {
++         IRTemp   val  = newTemp(Ity_I32);
++         IRExpr** args = mkIRExprVec_0();
++         IRDirty* d    = unsafeIRDirty_1_N(
++                            val,
++                            0/*regparms*/,
++                            "arm_dirtyhelper_MRS_CNTFRQ",
++                            &arm_dirtyhelper_MRS_CNTFRQ,
++                            args
++                         );
++         /* execute the dirty call, dumping the result in val. */
++         stmt( IRStmt_Dirty(d) );
++         putIRegT(rD, mkexpr(val), condT);
++         DIP("mrc p15, 0, r%u, c14, c0, 0\n", rD);
++         goto decode_success;
++      }
++      /* fall through */
++   }
++
++   /* CNTPCT */
++   if ((INSN0(15,4) == 0xec5) && (INSN1(11,0) == 0xf0e)) {
++      UInt rDhi = INSN0(3,0);
++      UInt rDlo = INSN1(15,12);
++      if (!isBadRegT(rDhi) && !isBadRegT(rDlo)) {
++         IRTemp resHi  = newTemp(Ity_I32);
++         IRTemp resLo  = newTemp(Ity_I32);
++         IRTemp   val  = newTemp(Ity_I64);
++         IRExpr** args = mkIRExprVec_0();
++         IRDirty* d    = unsafeIRDirty_1_N(
++                            val,
++                            0/*regparms*/,
++                            "arm_dirtyhelper_MRRS_CNTPCT",
++                            &arm_dirtyhelper_MRRS_CNTPCT,
++                            args
++                         );
++         /* execute the dirty call, dumping the result in val. */
++         stmt( IRStmt_Dirty(d) );
++         assign( resHi, unop(Iop_64HIto32, mkexpr(val)) );
++         assign( resLo, unop(Iop_64to32, mkexpr(val)) );
++         putIRegT( rDhi, mkexpr(resHi), condT );
++         putIRegT( rDlo, mkexpr(resLo), condT );
++         DIP("mrrc p15, 0, r%u, r%u, c14\n", rDlo, rDhi);
++         goto decode_success;
++      }
++      /* fall through */
++   }
++
++   /* CNTVCT */
++   if ((INSN0(15,4) == 0xec5) && (INSN1(11,0) == 0xf1e)) {
++      UInt rDhi = INSN0(3,0);
++      UInt rDlo = INSN1(15,12);
++      if (!isBadRegT(rDhi) && !isBadRegT(rDlo)) {
++         IRTemp resHi  = newTemp(Ity_I32);
++         IRTemp resLo  = newTemp(Ity_I32);
++         IRTemp   val  = newTemp(Ity_I64);
++         IRExpr** args = mkIRExprVec_0();
++         IRDirty* d    = unsafeIRDirty_1_N(
++                            val,
++                            0/*regparms*/,
++                            "arm_dirtyhelper_MRRS_CNTVCT",
++                            &arm_dirtyhelper_MRRS_CNTVCT,
++                            args
++                         );
++         /* execute the dirty call, dumping the result in val. */
++         stmt( IRStmt_Dirty(d) );
++         assign( resHi, unop(Iop_64HIto32, mkexpr(val)) );
++         assign( resLo, unop(Iop_64to32, mkexpr(val)) );
++         putIRegT( rDhi, mkexpr(resHi), condT );
++         putIRegT( rDlo, mkexpr(resLo), condT );
++         DIP("mrrc p15, 1, r%u, r%u, c14\n", rDlo, rDhi);
++         goto decode_success;
++      }
++      /* fall through */
++   }
++
+    /* ------------------- CLREX ------------------ */
+    if (INSN0(15,0) == 0xF3BF && INSN1(15,0) == 0x8F2F) {
+       /* AFAICS, this simply cancels a (all?) reservations made by a
