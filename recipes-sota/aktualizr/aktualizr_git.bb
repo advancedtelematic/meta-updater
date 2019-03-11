@@ -25,6 +25,7 @@ SRC_URI = " \
   file://aktualizr-secondary.service \
   file://aktualizr-secondary.socket \
   file://aktualizr-serialcan.service \
+  file://10-resource-control.conf \
   ${@ d.expand("https://ats-tuf-cli-releases.s3-eu-central-1.amazonaws.com/cli-${GARAGE_SIGN_PV}.tgz;unpack=0") if d.getVar('GARAGE_SIGN_AUTOVERSION') != '1' else ''} \
   "
 
@@ -61,6 +62,15 @@ PACKAGECONFIG[systemd] = "-DBUILD_SYSTEMD=ON,-DBUILD_SYSTEMD=OFF,systemd,"
 PACKAGECONFIG[load-tests] = "-DBUILD_LOAD_TESTS=ON,-DBUILD_LOAD_TESTS=OFF,"
 PACKAGECONFIG[serialcan] = ",,,slcand-start"
 PACKAGECONFIG[ubootenv] = ",,,u-boot-fw-utils aktualizr-uboot-env-rollback"
+
+# can be overriden in configuration with `RESOURCE_xxx_pn-aktualizr`
+# see `man systemd.resource-control` for details
+
+# can be used to lower aktualizr priority, default is 100
+RESOURCE_CPU_WEIGHT = "100"
+# will be slowed down when it reaches 'high', killed when it reaches 'max'
+RESOURCE_MEMORY_HIGH = "100M"
+RESOURCE_MEMORY_MAX = "80%"
 
 do_compile_ptest() {
     cmake_runcmake_build --target build_tests
@@ -118,6 +128,15 @@ do_install_append () {
         install -m 0755 ${B}/src/sota_tools/garage-sign/bin/* ${D}${bindir}
         install -m 0644 ${B}/src/sota_tools/garage-sign/lib/* ${D}${libdir}
     fi
+
+    # resource control
+    install -d ${D}/${systemd_system_unitdir}/aktualizr.service.d
+    install -m 0644 ${WORKDIR}/10-resource-control.conf ${D}/${systemd_system_unitdir}/aktualizr.service.d
+
+    sed -i -e 's|@CPU_WEIGHT@|${RESOURCE_CPU_WEIGHT}|g' \
+           -e 's|@MEMORY_HIGH@|${RESOURCE_MEMORY_HIGH}|g' \
+           -e 's|@MEMORY_MAX@|${RESOURCE_MEMORY_MAX}|g' \
+           ${D}${systemd_system_unitdir}/aktualizr.service.d/10-resource-control.conf
 }
 
 PACKAGESPLITFUNCS_prepend = "split_hosttools_packages "
@@ -132,7 +151,7 @@ python split_hosttools_packages () {
 
 PACKAGES_DYNAMIC = "^aktualizr-.* ^garage-.*"
 
-PACKAGES =+ "${PN}-examples ${PN}-secondary ${PN}-configs ${PN}-host-tools"
+PACKAGES =+ "${PN}-resource-control ${PN}-examples ${PN}-secondary ${PN}-configs ${PN}-host-tools"
 
 ALLOW_EMPTY_${PN}-host-tools = "1"
 
@@ -140,6 +159,10 @@ FILES_${PN} = " \
                 ${bindir}/aktualizr \
                 ${bindir}/aktualizr-info \
                 ${systemd_unitdir}/system/aktualizr.service \
+                "
+
+FILES_${PN}-resource-control = " \
+                ${systemd_system_unitdir}/aktualizr.service.d/10-resource-control.conf \
                 "
 
 FILES_${PN}-configs = " \
@@ -157,6 +180,7 @@ FILES_${PN}-secondary = " \
                 ${systemd_unitdir}/system/aktualizr-secondary.socket \
                 ${systemd_unitdir}/system/aktualizr-secondary.service \
                 "
+
 BBCLASSEXTEND = "native"
 
 # vim:set ts=4 sw=4 sts=4 expandtab:
