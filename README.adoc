@@ -91,6 +91,7 @@ Your images will also need network connectivity to be able to reach an actual OT
 * `SOTA_CLIENT_FEATURES` - extensions to aktualizr. The only valid options are `hsm` (to build with HSM support) and `secondary-network` (to set up a simulated 'in-vehicle' network with support for a primary node with a DHCP server and a secondary node with a DHCP client).
 * `SOTA_SECONDARY_CONFIG_DIR` - a directory containing JSON configuration files for virtual secondaries on the host. These will be installed into `/etc/sota/ecus` on the device and automatically provided to aktualizr.
 * `SOTA_HARDWARE_ID` - a custom hardware ID that will be written to the aktualizr config. Defaults to MACHINE if not set.
+* `RESOURCE_xxx_pn-aktualizr` - controls maximum resource usage of the aktualizr service, when `aktualizr-resource-control` is installed on the image. See <<aktualizr service resource control>> for details.
 
 == Usage
 
@@ -155,6 +156,19 @@ Second, you can write recipes to install additional config files with customized
 * link:recipes-sota/config/aktualizr-log-debug.bb[aktualizr-log-debug.bb] sets the log level of aktualizr to 0 (trace). The default is 2 (info). This recipe is intended for development and debugging purposes.
 
 To use these recipes, you will need to add them to your image with a line such as `IMAGE_INSTALL_append = " aktualizr-log-debug "` in your `local.conf`.
+
+=== aktualizr service resource control
+
+With systemd based images, it is possible to set resource policies for the aktualizr service. The main use case is to provide a safeguard against resource exhaustion during an unforeseen failure scenario.
+
+To enable it, install `aktualizr-resource-control` on the target image and optionally override the default resource limits set in link:recipes-sota/aktualizr/aktualizr_git.bb[aktualizr_git.bb], from your `local.conf`.
+
+For example:
+
+....
+IMAGE_INSTALL_append += " aktualizr-resource-control "
+RESOURCE_CPU_WEIGHT_pn-aktualizr = "50"
+....
 
 == Development configuration
 
