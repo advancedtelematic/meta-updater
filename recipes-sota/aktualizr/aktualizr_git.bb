@@ -71,8 +71,11 @@ do_install_ptest() {
     cp -r ${B}/ ${D}/${PTEST_PATH}/build
     cp -r ${S}/ ${D}/${PTEST_PATH}/src
 
-    # remove bogus elf file
-    rm ${D}/${PTEST_PATH}/src/partial/extern/RIOT/cpu/esp32/bin/bootloader.elf
+    # remove huge external unused repository
+    rm -rf ${D}/${PTEST_PATH}/src/partial/extern/RIOT
+
+    # remove huge build artifacts
+    find ${D}/${PTEST_PATH}/build/src -name "*.a" -delete
 
     # fix the absolute paths
     find ${D}/${PTEST_PATH}/build -name "CMakeFiles" | xargs rm -rf
