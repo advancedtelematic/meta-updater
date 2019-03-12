@@ -191,7 +191,7 @@ class ManualControlTests(OESelftestTestCase):
         """
         sleep(20)
         stdout, stderr, retcode = self.qemu_command('aktualizr-info')
-        self.assertIn(b'Can\'t open database', stdout,
+        self.assertIn(b'Can\'t open database', stderr,
                       'Aktualizr should not have run yet' + stderr.decode() + stdout.decode())
 
         stdout, stderr, retcode = self.qemu_command('aktualizr once')

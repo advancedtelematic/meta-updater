@@ -6,9 +6,12 @@ LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=9741c346eef56131163e13b9db1241b3"
 
 DEPENDS = "boost curl openssl libarchive libsodium sqlite3 asn1c-native"
+DEPENDS_append = "${@bb.utils.contains('PTEST_ENABLED', '1', ' coreutils-native ostree-native aktualizr-native ', '', d)}"
 RDEPENDS_${PN}_class-target = "aktualizr-check-discovery aktualizr-configs lshw"
 RDEPENDS_${PN}-secondary = "aktualizr-check-discovery"
 RDEPENDS_${PN}-host-tools = "aktualizr aktualizr-repo aktualizr-cert-provider ${@bb.utils.contains('PACKAGECONFIG', 'sota-tools', 'garage-deploy garage-push', '', d)}"
+
+RDEPENDS_${PN}-ptest += "bash cmake curl python3-modules sqlite3 valgrind"
 
 PV = "1.0+git${SRCPV}"
 PR = "7"
@@ -17,6 +20,7 @@ GARAGE_SIGN_PV = "0.6.0-3-gc38b9f3"
 
 SRC_URI = " \
   gitsm://github.com/advancedtelematic/aktualizr;branch=${BRANCH} \
+  file://run-ptest \
   file://aktualizr.service \
   file://aktualizr-secondary.service \
   file://aktualizr-secondary.socket \
@@ -28,18 +32,22 @@ SRC_URI = " \
 SRC_URI[md5sum] = "30d7f0931e2236954679e75d1bae174f"
 SRC_URI[sha256sum] = "46d8c6448ce14cbb9af6a93eba7e29d38579e566dcd6518d22f723a8da16cad5"
 
-SRCREV = "ea03a5cf57def6b8d368f783cb12b91255365a80"
+SRCREV = "2e3ccbbdd43fdf70eb815454ea64f0bd8085856c"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
 
-inherit pkgconfig cmake systemd
+inherit cmake pkgconfig ptest systemd
+
+# disable ptest by default as it slows down builds quite a lot
+# can be enabled manually by setting 'PTEST_ENABLED_pn-aktualizr' to '1' in local.conf
+PTEST_ENABLED = "0"
 
 SYSTEMD_PACKAGES = "${PN} ${PN}-secondary"
 SYSTEMD_SERVICE_${PN} = "aktualizr.service"
 SYSTEMD_SERVICE_${PN}-secondary = "aktualizr-secondary.socket"
 
-EXTRA_OECMAKE = "-DCMAKE_BUILD_TYPE=Release -DAKTUALIZR_VERSION=${PV}"
+EXTRA_OECMAKE = "-DCMAKE_BUILD_TYPE=Release -DAKTUALIZR_VERSION=${PV} ${@bb.utils.contains('PTEST_ENABLED', '1', '-DTESTSUITE_VALGRIND=on', '', d)}"
 
 GARAGE_SIGN_OPS = "${@ d.expand('-DGARAGE_SIGN_ARCHIVE=${WORKDIR}/cli-${GARAGE_SIGN_PV}.tgz') if d.getVar('GARAGE_SIGN_AUTOVERSION') != '1' else ''}"
 
@@ -53,6 +61,26 @@ PACKAGECONFIG[systemd] = "-DBUILD_SYSTEMD=ON,-DBUILD_SYSTEMD=OFF,systemd,"
 PACKAGECONFIG[load-tests] = "-DBUILD_LOAD_TESTS=ON,-DBUILD_LOAD_TESTS=OFF,"
 PACKAGECONFIG[serialcan] = ",,,slcand-start"
 PACKAGECONFIG[ubootenv] = ",,,u-boot-fw-utils aktualizr-uboot-env-rollback"
+
+do_compile_ptest() {
+    cmake_runcmake_build --target build_tests
+}
+
+do_install_ptest() {
+    # copy the complete source directory (contains build)
+    cp -r ${B}/ ${D}/${PTEST_PATH}/build
+    cp -r ${S}/ ${D}/${PTEST_PATH}/src
+
+    # remove huge external unused repository
+    rm -rf ${D}/${PTEST_PATH}/src/partial/extern/RIOT
+
+    # remove huge build artifacts
+    find ${D}/${PTEST_PATH}/build/src -name "*.a" -delete
+
+    # fix the absolute paths
+    find ${D}/${PTEST_PATH}/build -name "CMakeFiles" | xargs rm -rf
+    find ${D}/${PTEST_PATH}/build -name "*.cmake" -or -name "DartConfiguration.tcl" -or -name "run-valgrind" | xargs sed -e "s|${S}|${PTEST_PATH}/src|g" -e "s|${B}|${PTEST_PATH}/build|g" -e "s|\"--gtest_output[^\"]*\"||g" -i
+}
 
 do_install_append () {
     install -d ${D}${libdir}/sota
