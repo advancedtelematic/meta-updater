@@ -215,6 +215,19 @@ oe-selftest --run-tests updater
 
 For more information about oe-selftest, including details about how to run individual test modules or classes, please refer to the https://wiki.yoctoproject.org/wiki/Oe-selftest[Yocto Project wiki].
 
+== Aktualizr test suite with ptest
+
+The meta-updater layer includes support for running parts of the aktualizr test suite on deployed devices through link:https://wiki.yoctoproject.org/wiki/Ptest[Yocto's ptest functionality]. Since it adds significant build time cost, it is currently disabled by default. To enable it, add the following to your `conf/local.conf`:
+
+```
+PTEST_ENABLED_pn-aktualizr = "1"
+IMAGE_INSTALL_append += " aktualizr-ptest ptest-runner "
+```
+
+Be aware that it will add several hundreds of MB to the generated file system.
+
+The aktualizr tests will now be part of the deployed ptest suite, which can be run by calling `ptest-runner`. Alternatively, the required files and run script can be found in `/usr/lib/aktualizr/ptest`.
+
 == Manual provisoning
 
 As described in <<sota-related-variables-in-localconf,SOTA-related variables in local.conf>> section you can set `SOTA_DEPLOY_CREDENTIALS` to `0` to prevent deploying credentials to the built `wic` image. In this case you get a generic image that you can use e.g. on a production line to flash a series of devices. The cost of this approach is that this image is half-baked and should be provisioned before it can connect to the backend.
