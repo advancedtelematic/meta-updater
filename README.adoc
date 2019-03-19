@@ -228,7 +228,7 @@ sudo apt install ovmf
 5. Run oe-selftest:
 +
 ```
-oe-selftest --run-tests updater
+oe-selftest -r updater_native updater_qemux86_64 updater_minnowboard updater_raspberrypi
 ```
 
 For more information about oe-selftest, including details about how to run individual test modules or classes, please refer to the https://wiki.yoctoproject.org/wiki/Oe-selftest[Yocto Project wiki].
