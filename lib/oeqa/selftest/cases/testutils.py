@@ -10,14 +10,13 @@ from qemucommand import QemuCommand
 
 def qemu_launch(efi=False, machine=None, imagename=None):
     logger = logging.getLogger("selftest")
-    logger.info('Running bitbake to build core-image-minimal')
-    bitbake('core-image-minimal')
+    if imagename is None:
+        imagename = 'core-image-minimal'
+    logger.info('Running bitbake to build {}'.format(imagename))
+    bitbake(imagename)
     # Create empty object.
     args = type('', (), {})()
-    if imagename:
-        args.imagename = imagename
-    else:
-        args.imagename = 'core-image-minimal'
+    args.imagename = imagename
     args.mac = None
     # Could use DEPLOY_DIR_IMAGE here but it's already in the machine
     # subdirectory.
