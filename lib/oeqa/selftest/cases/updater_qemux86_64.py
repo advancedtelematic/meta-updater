@@ -424,4 +424,49 @@ class PrimaryTests(OESelftestTestCase):
         self.assertEqual(retcode, 0, "Unable to run aktualizr --help")
         self.assertEqual(stderr, b'', 'Error: ' + stderr.decode())
 
+
+class ResourceControlTests(OESelftestTestCase):
+    def setUpLocal(self):
+        layer = "meta-updater-qemux86-64"
+        result = runCmd('bitbake-layers show-layers')
+        if re.search(layer, result.output) is None:
+            # Assume the directory layout for finding other layers. We could also
+            # make assumptions by using 'show-layers', but either way, if the
+            # layers we need aren't where we expect them, we are out of luck.
+            path = os.path.abspath(os.path.dirname(__file__))
+            metadir = path + "/../../../../../"
+            self.meta_qemu = metadir + layer
+            runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
+        else:
+            self.meta_qemu = None
+        self.append_config('MACHINE = "qemux86-64"')
+        self.append_config('SOTA_CLIENT_PROV = " aktualizr-auto-prov "')
+        self.append_config('IMAGE_INSTALL_append += " aktualizr-resource-control "')
+        self.append_config('RESOURCE_CPU_WEIGHT_pn-aktualizr = "1000"')
+        self.append_config('RESOURCE_MEMORY_HIGH_pn-aktualizr = "50M"')
+        self.append_config('RESOURCE_MEMORY_MAX_pn-aktualizr = "1M"')
+        self.qemu, self.s = qemu_launch(machine='qemux86-64')
+
+    def tearDownLocal(self):
+        qemu_terminate(self.s)
+        if self.meta_qemu:
+            runCmd('bitbake-layers remove-layer "%s"' % self.meta_qemu, ignore_status=True)
+
+    def qemu_command(self, command):
+        return qemu_send_command(self.qemu.ssh_port, command)
+
+    def test_aktualizr_resource_control(self):
+        print('Checking aktualizr was killed')
+        stdout, stderr, retcode = self.qemu_command('systemctl --no-pager show aktualizr')
+        self.assertIn(b'CPUWeight=1000', stdout, 'CPUWeight was not set correctly')
+        self.assertIn(b'MemoryHigh=52428800', stdout, 'MemoryHigh was not set correctly')
+        self.assertIn(b'MemoryMax=1048576', stdout, 'MemoryMax was not set correctly')
+        self.assertIn(b'ExecMainStatus=9', stdout, 'Aktualizr was not killed')
+
+        self.qemu_command('systemctl --runtime set-property aktualizr MemoryMax=')
+        self.qemu_command('systemctl restart aktualizr')
+
+        stdout, stderr, retcode = self.qemu_command('systemctl --no-pager show --property=ExecMainStatus aktualizr')
+        self.assertIn(b'ExecMainStatus=0', stdout, 'Aktualizr did not restart')
+
 # vim:set ts=4 sw=4 sts=4 expandtab:
