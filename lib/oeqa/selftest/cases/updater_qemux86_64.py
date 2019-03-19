@@ -354,13 +354,6 @@ class HsmTests(OESelftestTestCase):
 
 
 class SecondaryTests(OESelftestTestCase):
-    @classmethod
-    def setUpClass(cls):
-        super(SecondaryTests, cls).setUpClass()
-        logger = logging.getLogger("selftest")
-        logger.info('Running bitbake to build secondary-image')
-        bitbake('secondary-image')
-
     def setUpLocal(self):
         layer = "meta-updater-qemux86-64"
         result = runCmd('bitbake-layers show-layers')
@@ -399,13 +392,6 @@ class SecondaryTests(OESelftestTestCase):
 
 
 class PrimaryTests(OESelftestTestCase):
-    @classmethod
-    def setUpClass(cls):
-        super(PrimaryTests, cls).setUpClass()
-        logger = logging.getLogger("selftest")
-        logger.info('Running bitbake to build primary-image')
-        bitbake('primary-image')
-
     def setUpLocal(self):
         layer = "meta-updater-qemux86-64"
         result = runCmd('bitbake-layers show-layers')
