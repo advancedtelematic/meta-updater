@@ -97,6 +97,8 @@ class QemuCommand(object):
             "-serial", "tcp:127.0.0.1:%d,server,nowait" % self.serial_port,
             "-m", "1G",
             "-usb",
+            "-object", "rng-random,id=rng0,filename=/dev/urandom",
+            "-device", "virtio-rng-pci,rng=rng0",
             "-device", "usb-tablet",
             "-show-cursor",
             "-vga", "std",
