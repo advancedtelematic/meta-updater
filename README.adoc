@@ -95,6 +95,7 @@ Your images will also need network connectivity to be able to reach an actual OT
 * `SOTA_MAIN_DTB` - base device tree to use with the kernel. Used together with FIT images. You can change it, and the device tree will also be changed after the update.
 * `SOTA_DT_OVERLAYS` - whitespace-separated list of used device tree overlays for FIT image. This list is OSTree-updateable as well.
 * `SOTA_EXTRA_CONF_FRAGS` - extra https://lxr.missinglinkelectronics.com/uboot/doc/uImage.FIT/overlay-fdt-boot.txt[configuration fragments] for FIT image.
+* `RESOURCE_xxx_pn-aktualizr` - controls maximum resource usage of the aktualizr service, when `aktualizr-resource-control` is installed on the image. See <<aktualizr service resource control>> for details.
 
 == Usage
 
@@ -160,6 +161,19 @@ Second, you can write recipes to install additional config files with customized
 
 To use these recipes, you will need to add them to your image with a line such as `IMAGE_INSTALL_append = " aktualizr-log-debug "` in your `local.conf`.
 
+=== aktualizr service resource control
+
+With systemd based images, it is possible to set resource policies for the aktualizr service. The main use case is to provide a safeguard against resource exhaustion during an unforeseen failure scenario.
+
+To enable it, install `aktualizr-resource-control` on the target image and optionally override the default resource limits set in link:recipes-sota/aktualizr/aktualizr_git.bb[aktualizr_git.bb], from your `local.conf`.
+
+For example:
+
+....
+IMAGE_INSTALL_append += " aktualizr-resource-control "
+RESOURCE_CPU_WEIGHT_pn-aktualizr = "50"
+....
+
 == Development configuration
 
 There are a few settings that can be controlled in `local.conf` to simplify the development process:
@@ -214,7 +228,7 @@ sudo apt install ovmf
 5. Run oe-selftest:
 +
 ```
-oe-selftest --run-tests updater
+oe-selftest -r updater_native updater_qemux86_64 updater_minnowboard updater_raspberrypi
 ```
 
 For more information about oe-selftest, including details about how to run individual test modules or classes, please refer to the https://wiki.yoctoproject.org/wiki/Oe-selftest[Yocto Project wiki].
