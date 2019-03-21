@@ -1,9 +1,8 @@
 import os
 import re
-from time import sleep
 
 from oeqa.selftest.case import OESelftestTestCase
-from oeqa.utils.commands import runCmd, bitbake, get_bb_var
+from oeqa.utils.commands import runCmd, get_bb_var
 from testutils import qemu_launch, qemu_send_command, qemu_terminate, verifyProvisioned
 
 
@@ -55,16 +54,6 @@ class MinnowTests(OESelftestTestCase):
         self.assertEqual(value, machine,
                          'MACHINE does not match hostname: ' + machine + ', ' + value +
                          '\nIs TianoCore ovmf installed on your host machine?')
-        print(value)
-        print('Checking output of aktualizr-info:')
-        ran_ok = False
-        for delay in [1, 2, 5, 10, 15]:
-            stdout, stderr, retcode = self.qemu_command('aktualizr-info')
-            if retcode == 0 and stderr == b'':
-                ran_ok = True
-                break
-            sleep(delay)
-        self.assertTrue(ran_ok, 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
 
         verifyProvisioned(self, machine)
 
