@@ -81,16 +81,42 @@ def akt_native_run(testInst, cmd, **kwargs):
     testInst.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
 
 
+def verifyNotProvisioned(testInst, machine):
+    print('Checking output of aktualizr-info:')
+    ran_ok = False
+    for delay in [5, 5, 5, 5, 10, 10, 10, 10]:
+        stdout, stderr, retcode = testInst.qemu_command('aktualizr-info')
+        if retcode == 0 and stderr == b'':
+            ran_ok = True
+            break
+        sleep(delay)
+    testInst.assertTrue(ran_ok, 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
+
+    # Verify that device has NOT yet provisioned.
+    testInst.assertIn(b'Couldn\'t load device ID', stdout,
+                      'Device already provisioned!? ' + stderr.decode() + stdout.decode())
+    testInst.assertIn(b'Couldn\'t load ECU serials', stdout,
+                      'Device already provisioned!? ' + stderr.decode() + stdout.decode())
+    testInst.assertIn(b'Provisioned on server: no', stdout,
+                      'Device already provisioned!? ' + stderr.decode() + stdout.decode())
+    testInst.assertIn(b'Fetched metadata: no', stdout,
+                      'Device already provisioned!? ' + stderr.decode() + stdout.decode())
+
+
 def verifyProvisioned(testInst, machine):
     # Verify that device HAS provisioned.
+    ran_ok = False
     for delay in [5, 5, 5, 5, 10, 10, 10, 10]:
         stdout, stderr, retcode = testInst.qemu_command('aktualizr-info')
         if retcode == 0 and stderr == b'' and stdout.decode().find('Fetched metadata: yes') >= 0:
+            ran_ok = True
             break
         sleep(delay)
+    testInst.assertTrue(ran_ok, 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
+
     testInst.assertIn(b'Device ID: ', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
     testInst.assertIn(b'Primary ecu hardware ID: ' + machine.encode(), stdout,
-                  'Provisioning failed: ' + stderr.decode() + stdout.decode())
+                      'Provisioning failed: ' + stderr.decode() + stdout.decode())
     testInst.assertIn(b'Fetched metadata: yes', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
     p = re.compile(r'Device ID: ([a-z0-9-]*)\n')
     m = p.search(stdout.decode())

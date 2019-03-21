@@ -8,7 +8,7 @@ from time import sleep
 from oeqa.selftest.case import OESelftestTestCase
 from oeqa.utils.commands import runCmd, bitbake, get_bb_var, get_bb_vars
 from testutils import qemu_launch, qemu_send_command, qemu_terminate, \
-    akt_native_run, verifyProvisioned
+    akt_native_run, verifyNotProvisioned, verifyProvisioned
 
 
 class GeneralTests(OESelftestTestCase):
@@ -106,16 +106,6 @@ class AutoProvTests(OESelftestTestCase):
         value = stdout.decode()[:-1]
         self.assertEqual(value, machine,
                          'MACHINE does not match hostname: ' + machine + ', ' + value)
-        print(value)
-        print('Checking output of aktualizr-info:')
-        ran_ok = False
-        for delay in [1, 2, 5, 10, 15]:
-            stdout, stderr, retcode = self.qemu_command('aktualizr-info')
-            if retcode == 0 and stderr == b'':
-                ran_ok = True
-                break
-            sleep(delay)
-        self.assertTrue(ran_ok, 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
 
         verifyProvisioned(self, machine)
 
@@ -204,25 +194,8 @@ class ImplProvTests(OESelftestTestCase):
         value = stdout.decode()[:-1]
         self.assertEqual(value, machine,
                          'MACHINE does not match hostname: ' + machine + ', ' + value)
-        print(value)
-        print('Checking output of aktualizr-info:')
-        ran_ok = False
-        for delay in [1, 2, 5, 10, 15]:
-            stdout, stderr, retcode = self.qemu_command('aktualizr-info')
-            if retcode == 0 and stderr == b'':
-                ran_ok = True
-                break
-            sleep(delay)
-        self.assertTrue(ran_ok, 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
-        # Verify that device has NOT yet provisioned.
-        self.assertIn(b'Couldn\'t load device ID', stdout,
-                      'Device already provisioned!? ' + stderr.decode() + stdout.decode())
-        self.assertIn(b'Couldn\'t load ECU serials', stdout,
-                      'Device already provisioned!? ' + stderr.decode() + stdout.decode())
-        self.assertIn(b'Provisioned on server: no', stdout,
-                      'Device already provisioned!? ' + stderr.decode() + stdout.decode())
-        self.assertIn(b'Fetched metadata: no', stdout,
-                      'Device already provisioned!? ' + stderr.decode() + stdout.decode())
+
+        verifyNotProvisioned(self, machine)
 
         # Run aktualizr-cert-provider.
         bb_vars = get_bb_vars(['SOTA_PACKED_CREDENTIALS'], 'aktualizr-native')
@@ -279,25 +252,8 @@ class HsmTests(OESelftestTestCase):
         value = stdout.decode()[:-1]
         self.assertEqual(value, machine,
                          'MACHINE does not match hostname: ' + machine + ', ' + value)
-        print(value)
-        print('Checking output of aktualizr-info:')
-        ran_ok = False
-        for delay in [1, 2, 5, 10, 15]:
-            stdout, stderr, retcode = self.qemu_command('aktualizr-info')
-            if retcode == 0 and stderr == b'':
-                ran_ok = True
-                break
-            sleep(delay)
-        self.assertTrue(ran_ok, 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
-        # Verify that device has NOT yet provisioned.
-        self.assertIn(b'Couldn\'t load device ID', stdout,
-                      'Device already provisioned!? ' + stderr.decode() + stdout.decode())
-        self.assertIn(b'Couldn\'t load ECU serials', stdout,
-                      'Device already provisioned!? ' + stderr.decode() + stdout.decode())
-        self.assertIn(b'Provisioned on server: no', stdout,
-                      'Device already provisioned!? ' + stderr.decode() + stdout.decode())
-        self.assertIn(b'Fetched metadata: no', stdout,
-                      'Device already provisioned!? ' + stderr.decode() + stdout.decode())
+
+        verifyNotProvisioned(self, machine)
 
         # Verify that HSM is not yet initialized.
         pkcs11_command = 'pkcs11-tool --module=/usr/lib/softhsm/libsofthsm2.so -O'
