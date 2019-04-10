@@ -11,7 +11,7 @@ RDEPENDS_${PN}_class-target = "aktualizr-check-discovery aktualizr-configs lshw"
 RDEPENDS_${PN}-secondary = "aktualizr-check-discovery"
 RDEPENDS_${PN}-host-tools = "aktualizr aktualizr-repo aktualizr-cert-provider ${@bb.utils.contains('PACKAGECONFIG', 'sota-tools', 'garage-deploy garage-push', '', d)}"
 
-RDEPENDS_${PN}-ptest += "bash cmake curl python3-modules sqlite3 valgrind"
+RDEPENDS_${PN}-ptest += "bash cmake curl python3-modules openssl-bin sqlite3 valgrind"
 
 PV = "1.0+git${SRCPV}"
 PR = "7"
