@@ -1,6 +1,8 @@
 #!/bin/sh
 
-set -e
+set -eu
+
+AKTUALIZR_PTEST_PARALLEL_LEVEL=${AKTUALIZR_PTEST_PARALLEL_LEVEL:-2}
 
 filter_logs() {
     awk '/^.*Test[[:space:]]*#[[:digit:]]+:/ {
@@ -13,4 +15,4 @@ filter_logs() {
 }
 
 cd build
-ctest -j 8 -O /tmp/aktualizr-ptest.log --output-on-failure -LE 'noptest' 2> /dev/null | filter_logs
+ctest -j "$AKTUALIZR_PTEST_PARALLEL_LEVEL" -O /tmp/aktualizr-ptest.log --output-on-failure -LE 'noptest' 2> /dev/null | filter_logs
