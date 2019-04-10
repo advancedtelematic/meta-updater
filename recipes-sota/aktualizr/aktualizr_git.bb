@@ -73,7 +73,7 @@ RESOURCE_MEMORY_HIGH = "100M"
 RESOURCE_MEMORY_MAX = "80%"
 
 do_compile_ptest() {
-    cmake_runcmake_build --target build_tests
+    cmake_runcmake_build --target build_tests "${PARALLEL_MAKE}"
 }
 
 do_install_ptest() {
