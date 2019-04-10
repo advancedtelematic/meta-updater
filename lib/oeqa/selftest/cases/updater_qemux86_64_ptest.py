@@ -37,8 +37,8 @@ class PtestTests(OESelftestTestCase):
         return qemu_send_command(self.qemu.ssh_port, command, timeout=timeout)
 
     def test_run_ptests(self):
-        # logger = logging.getLogger("selftest")
-        stdout, stderr, retcode = self.qemu_command('ptest-runner', timeout=None)
+        # simulate a login shell, so that /usr/sbin is in $PATH (from /etc/profile)
+        stdout, stderr, retcode = self.qemu_command('sh -l -c ptest-runner', timeout=None)
         output = stdout.decode()
         print(output)
         self.assertEqual(retcode, 0)
