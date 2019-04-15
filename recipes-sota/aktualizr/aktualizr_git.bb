@@ -11,12 +11,12 @@ RDEPENDS_${PN}_class-target = "aktualizr-check-discovery aktualizr-configs lshw"
 RDEPENDS_${PN}-secondary = "aktualizr-check-discovery"
 RDEPENDS_${PN}-host-tools = "aktualizr aktualizr-repo aktualizr-cert-provider ${@bb.utils.contains('PACKAGECONFIG', 'sota-tools', 'garage-deploy garage-push', '', d)}"
 
-RDEPENDS_${PN}-ptest += "bash cmake curl python3-modules sqlite3 valgrind"
+RDEPENDS_${PN}-ptest += "bash cmake curl python3-modules openssl-bin sqlite3 valgrind"
 
 PV = "1.0+git${SRCPV}"
 PR = "7"
 
-GARAGE_SIGN_PV = "0.6.0-3-gc38b9f3"
+GARAGE_SIGN_PV = "0.6.0-18-g5b8b259"
 
 SRC_URI = " \
   gitsm://github.com/advancedtelematic/aktualizr;branch=${BRANCH} \
@@ -30,10 +30,10 @@ SRC_URI = " \
   "
 
 # for garage-sign archive
-SRC_URI[md5sum] = "30d7f0931e2236954679e75d1bae174f"
-SRC_URI[sha256sum] = "46d8c6448ce14cbb9af6a93eba7e29d38579e566dcd6518d22f723a8da16cad5"
+SRC_URI[md5sum] = "c5e9968dfe78a7264ab9a8338c11725d"
+SRC_URI[sha256sum] = "3a19258d7a1825a308aca0da82f7a337985bec05e8951355c4c95f0fcf2444f4"
 
-SRCREV = "2e3ccbbdd43fdf70eb815454ea64f0bd8085856c"
+SRCREV = "9c5ef10b7b91cc7d51cd22fc60446e734cf84690"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -73,7 +73,7 @@ RESOURCE_MEMORY_HIGH = "100M"
 RESOURCE_MEMORY_MAX = "80%"
 
 do_compile_ptest() {
-    cmake_runcmake_build --target build_tests
+    cmake_runcmake_build --target build_tests "${PARALLEL_MAKE}"
 }
 
 do_install_ptest() {

@@ -52,11 +52,11 @@ def qemu_terminate(s):
         pass
 
 
-def qemu_send_command(port, command):
+def qemu_send_command(port, command, timeout=60):
     command = ['ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@localhost -p ' +
                str(port) + ' "' + command + '"']
     s2 = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = s2.communicate(timeout=60)
+    stdout, stderr = s2.communicate(timeout=timeout)
     return stdout, stderr, s2.returncode
 
 
