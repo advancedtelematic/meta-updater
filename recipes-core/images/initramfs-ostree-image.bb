@@ -13,6 +13,8 @@ IMAGE_LINGUAS = ""
 
 LICENSE = "MIT"
 
+OSTREE_INITRAMFS_FSTYPES ??= "${@oe.utils.ifelse(d.getVar('OSTREE_BOOTLOADER', True) == 'u-boot', 'ext4.gz.u-boot', 'ext4.gz')}"
+
 IMAGE_FSTYPES = "${OSTREE_INITRAMFS_FSTYPES}"
 
 inherit core-image
