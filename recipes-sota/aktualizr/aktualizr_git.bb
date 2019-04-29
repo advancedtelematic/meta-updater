@@ -7,8 +7,7 @@ LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=9741c346eef56131163e13b9db1241b3"
 
 DEPENDS = "boost curl openssl libarchive libsodium sqlite3 asn1c-native"
 DEPENDS_append = "${@bb.utils.contains('PTEST_ENABLED', '1', ' coreutils-native ostree-native aktualizr-native ', '', d)}"
-RDEPENDS_${PN}_class-target = "aktualizr-check-discovery aktualizr-configs lshw"
-RDEPENDS_${PN}-secondary = "aktualizr-check-discovery"
+RDEPENDS_${PN}_class-target = "aktualizr-configs lshw"
 RDEPENDS_${PN}-host-tools = "aktualizr aktualizr-repo aktualizr-cert-provider ${@bb.utils.contains('PACKAGECONFIG', 'sota-tools', 'garage-deploy garage-push', '', d)}"
 
 RDEPENDS_${PN}-ptest += "bash cmake curl python3-modules openssl-bin sqlite3 valgrind"
