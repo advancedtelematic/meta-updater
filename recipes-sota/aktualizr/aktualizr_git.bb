@@ -7,8 +7,7 @@ LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=9741c346eef56131163e13b9db1241b3"
 
 DEPENDS = "boost curl openssl libarchive libsodium sqlite3 asn1c-native"
 DEPENDS_append = "${@bb.utils.contains('PTEST_ENABLED', '1', ' coreutils-native ostree-native aktualizr-native ', '', d)}"
-RDEPENDS_${PN}_class-target = "aktualizr-check-discovery aktualizr-configs lshw"
-RDEPENDS_${PN}-secondary = "aktualizr-check-discovery"
+RDEPENDS_${PN}_class-target = "aktualizr-configs lshw"
 RDEPENDS_${PN}-host-tools = "aktualizr aktualizr-repo aktualizr-cert-provider ${@bb.utils.contains('PACKAGECONFIG', 'sota-tools', 'garage-deploy garage-push', '', d)}"
 
 RDEPENDS_${PN}-ptest += "bash cmake curl python3-modules openssl-bin sqlite3 valgrind"
@@ -33,7 +32,7 @@ SRC_URI = " \
 SRC_URI[md5sum] = "c5e9968dfe78a7264ab9a8338c11725d"
 SRC_URI[sha256sum] = "3a19258d7a1825a308aca0da82f7a337985bec05e8951355c4c95f0fcf2444f4"
 
-SRCREV = "9c5ef10b7b91cc7d51cd22fc60446e734cf84690"
+SRCREV = "c50feb37034eceb1254429d3e3ed38e5b8a0dc60"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
