@@ -408,11 +408,18 @@ class ResourceControlTests(OESelftestTestCase):
 
     def test_aktualizr_resource_control(self):
         print('Checking aktualizr was killed')
-        stdout, stderr, retcode = self.qemu_command('systemctl --no-pager show aktualizr')
+        ran_ok = False
+        for delay in [5, 5, 5, 5]:
+            sleep(delay)
+            stdout, stderr, retcode = self.qemu_command('systemctl --no-pager show aktualizr')
+            if retcode == 0 and b'ExecMainStatus=9' in stdout:
+                ran_ok = True
+                break
+        self.assertTrue(ran_ok, 'Aktualizr was not killed')
+
         self.assertIn(b'CPUWeight=1000', stdout, 'CPUWeight was not set correctly')
         self.assertIn(b'MemoryHigh=52428800', stdout, 'MemoryHigh was not set correctly')
         self.assertIn(b'MemoryMax=1048576', stdout, 'MemoryMax was not set correctly')
-        self.assertIn(b'ExecMainStatus=9', stdout, 'Aktualizr was not killed')
 
         self.qemu_command('systemctl --runtime set-property aktualizr MemoryMax=')
         self.qemu_command('systemctl restart aktualizr')
