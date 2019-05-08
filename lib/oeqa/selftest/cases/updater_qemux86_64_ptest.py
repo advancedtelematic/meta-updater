@@ -45,7 +45,7 @@ class PtestTests(OESelftestTestCase):
         has_failure = re.search('^FAIL', output, flags=re.MULTILINE) is not None
         if has_failure:
             print("Full test suite log:")
-            stdout, _, _ = self.qemu_command('sh -c "cat /tmp/aktualizr-ptest.log || cat /tmp/aktualizr-ptest.log.tmp"', timeout=None)
+            stdout, _, _ = self.qemu_command('cat /tmp/aktualizr-ptest.log || cat /tmp/aktualizr-ptest.log.tmp', timeout=None)
             print(stdout.decode())
 
         self.assertEqual(retcode, 0)
