@@ -119,6 +119,14 @@ do_install_append () {
         fi
     fi
 
+    if [ -n "${SOTA_SECONDARY_NETWORK_CONFIG}" ]; then
+        if [ -f "${SOTA_SECONDARY_NETWORK_CONFIG}" ]; then
+            install -m 0644 ${SOTA_SECONDARY_NETWORK_CONFIG} ${D}/${libdir}/sota/conf.d/35-secondary-network-config.toml
+        else
+            bbwarn "SOTA_SECONDARY_NETWORK_CONFIG is set to a non-existent file (${SOTA_SECONDARY_NETWORK_CONFIG})"
+        fi
+     fi
+
     install -m 0755 -d ${D}${systemd_unitdir}/system
     aktualizr_service=${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'serialcan', '${WORKDIR}/aktualizr-serialcan.service', '${WORKDIR}/aktualizr.service', d)}
     install -m 0644 ${aktualizr_service} ${D}${systemd_unitdir}/system/aktualizr.service
