@@ -21,6 +21,7 @@ IMAGE_INSTALL_remove = " \
 IMAGE_INSTALL_append = " \
                         aktualizr-secondary \
                         secondary-network-config \
+                        secondary-config \
                         "
 
 # vim:set ts=4 sw=4 sts=4 expandtab:

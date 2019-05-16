@@ -3,11 +3,13 @@ LICENSE = "CLOSED"
 
 inherit allarch
 
+# TODO: It configures the 'user' interface in NAT mode and provides an access to public Inet via it
+# which is not desired for Secondary. It cannot be just removed since we get SSH access to Secondary
+# VM via this interface. So, the task is to configure the interface in such way that it does provide access
+# via SSH from a host machine and forbids an access to Inet
 SRC_URI = "\
-    file://26-dhcp-client.network \
     file://27-dhcp-client-external.network \
     "
-
 
 FILES_${PN} = "/usr/lib/systemd/network"
 
@@ -15,6 +17,11 @@ PR = "1"
 
 do_install() {
     install -d ${D}/usr/lib/systemd/network
-    install -m 0644 ${WORKDIR}/26-dhcp-client.network ${D}/usr/lib/systemd/network/
     install -m 0644 ${WORKDIR}/27-dhcp-client-external.network ${D}/usr/lib/systemd/network/
 }
+
+SECONDARY_NETWORK_IP_ADDR ?= "10.0.3.2"
+
+require static-network-config.inc
+
+# vim:set ts=4 sw=4 sts=4 expandtab:
