@@ -96,6 +96,7 @@ Your images will also need network connectivity to be able to reach an actual OT
 * `SOTA_DT_OVERLAYS` - whitespace-separated list of used device tree overlays for FIT image. This list is OSTree-updateable as well.
 * `SOTA_EXTRA_CONF_FRAGS` - extra https://lxr.missinglinkelectronics.com/uboot/doc/uImage.FIT/overlay-fdt-boot.txt[configuration fragments] for FIT image.
 * `RESOURCE_xxx_pn-aktualizr` - controls maximum resource usage of the aktualizr service, when `aktualizr-resource-control` is installed on the image. See <<aktualizr service resource control>> for details.
+* `SOTA_POLLING_SEC` - sets polling interval for aktualizr to check for updates if aktualizr-polling-sec is included in the image.
 
 == Usage
 
