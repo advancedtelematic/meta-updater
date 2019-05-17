@@ -74,6 +74,8 @@ You may take a look into https://github.com/advancedtelematic/meta-updater-minno
 
 Although we have used U-Boot so far, other boot loaders can be configured work with OSTree as well.
 
+Your images will also need network connectivity to be able to reach an actual OTA backend. Our 'poky-sota' distribution does not mandate or install a default network manager but our supported platforms use the `virtual/network-configuration` recipe, which can be used as a starting example.
+
 == SOTA-related variables in local.conf
 
 * `OSTREE_REPO` - path to your OSTree repository. Defaults to `$\{DEPLOY_DIR_IMAGE}/ostree_repo`
@@ -82,12 +84,14 @@ Although we have used U-Boot so far, other boot loaders can be configured work w
 * `OSTREE_COMMIT_BODY` - Message attached to OSTree commit. Empty by default.
 * `OSTREE_COMMIT_SUBJECT` - Commit subject used by OSTree. Defaults to `Commit-id: ${IMAGE_NAME}`
 * `OSTREE_UPDATE_SUMMARY` - Set this to '1' to update summary of OSTree repository on each commit. '0' by default.
+* `GARAGE_SIGN_AUTOVERSION` - Set this to '1' to automatically fetch the last version of the garage tools installed by the aktualizr-native. Otherwise use the fixed version specified in the recipe.
 * `SOTA_PACKED_CREDENTIALS` - when set, your ostree commit will be pushed to a remote repo as a bitbake step. This should be the path to a zipped credentials file in https://github.com/advancedtelematic/aktualizr/blob/master/docs/credentials.adoc[the format accepted by garage-push].
 * `SOTA_DEPLOY_CREDENTIALS` - when set to '1' (default value), deploys credentials to the built image. Override it in `local.conf` to built a generic image that can be provisioned manually after the build.
 * `SOTA_CLIENT_PROV` - which provisioning method to use. Valid options are https://github.com/advancedtelematic/aktualizr/blob/master/docs/automatic-provisioning.adoc[`aktualizr-auto-prov`], https://github.com/advancedtelematic/aktualizr/blob/master/docs/implicit-provisioning.adoc[`aktualizr-ca-implicit-prov`], and https://github.com/advancedtelematic/aktualizr/blob/master/docs/hsm-provisioning.adoc[`aktualizr-hsm-prov`]. The default is `aktualizr-auto-prov`. This can also be set to an empty string to avoid using a provisioning recipe.
 * `SOTA_CLIENT_FEATURES` - extensions to aktualizr. The only valid options are `hsm` (to build with HSM support) and `secondary-network` (to set up a simulated 'in-vehicle' network with support for a primary node with a DHCP server and a secondary node with a DHCP client).
 * `SOTA_SECONDARY_CONFIG_DIR` - a directory containing JSON configuration files for virtual secondaries on the host. These will be installed into `/etc/sota/ecus` on the device and automatically provided to aktualizr.
 * `SOTA_HARDWARE_ID` - a custom hardware ID that will be written to the aktualizr config. Defaults to MACHINE if not set.
+* `RESOURCE_xxx_pn-aktualizr` - controls maximum resource usage of the aktualizr service, when `aktualizr-resource-control` is installed on the image. See <<aktualizr service resource control>> for details.
 
 == Usage
 
@@ -153,6 +157,19 @@ Second, you can write recipes to install additional config files with customized
 
 To use these recipes, you will need to add them to your image with a line such as `IMAGE_INSTALL_append = " aktualizr-log-debug "` in your `local.conf`.
 
+=== aktualizr service resource control
+
+With systemd based images, it is possible to set resource policies for the aktualizr service. The main use case is to provide a safeguard against resource exhaustion during an unforeseen failure scenario.
+
+To enable it, install `aktualizr-resource-control` on the target image and optionally override the default resource limits set in link:recipes-sota/aktualizr/aktualizr_git.bb[aktualizr_git.bb], from your `local.conf`.
+
+For example:
+
+....
+IMAGE_INSTALL_append += " aktualizr-resource-control "
+RESOURCE_CPU_WEIGHT_pn-aktualizr = "50"
+....
+
 == Development configuration
 
 There are a few settings that can be controlled in `local.conf` to simplify the development process:
@@ -207,10 +224,25 @@ sudo apt install ovmf
 5. Run oe-selftest:
 +
 ```
-oe-selftest --run-tests updater
+oe-selftest -r updater_native updater_qemux86_64 updater_minnowboard updater_raspberrypi
 ```
 
 For more information about oe-selftest, including details about how to run individual test modules or classes, please refer to the https://wiki.yoctoproject.org/wiki/Oe-selftest[Yocto Project wiki].
+
+== Aktualizr test suite with ptest
+
+The meta-updater layer includes support for running parts of the aktualizr test suite on deployed devices through link:https://wiki.yoctoproject.org/wiki/Ptest[Yocto's ptest functionality]. Since it adds significant build time cost, it is currently disabled by default. To enable it, add the following to your `conf/local.conf`:
+
+```
+PTEST_ENABLED_pn-aktualizr = "1"
+IMAGE_INSTALL_append += " aktualizr-ptest ptest-runner "
+```
+
+Be aware that it will add several hundreds of MB to the generated file system.
+
+The aktualizr tests will now be part of the deployed ptest suite, which can be run by calling `ptest-runner`. Alternatively, the required files and run script can be found in `/usr/lib/aktualizr/ptest`.
+
+The aktualizr ptests can be run via oe-selftest with `oe-selftest -r updater_qemux86_64_ptest`, but in the rocko and sumo branches, this is not fully supported due to valgrind issues with openssl 1.0.2 and issues with ptest timing out.
 
 == Manual provisoning
 

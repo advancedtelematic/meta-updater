@@ -5,6 +5,8 @@ SECTION = "base"
 LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7f619bab123dad"
 
+inherit allarch
+
 SRC_URI = " \
             file://30-disable-send-ip.toml \
             "

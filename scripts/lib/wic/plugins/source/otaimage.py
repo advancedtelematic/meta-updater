@@ -19,6 +19,7 @@ import logging
 import os
 import sys
 
+from wic import WicError
 from wic.plugins.source.rawcopy import RawCopyPlugin
 from wic.misc import get_bitbake_var
 
@@ -32,6 +33,18 @@ class OTAImagePlugin(RawCopyPlugin):
     name = 'otaimage'
 
     @classmethod
+    def _get_src_file(cls, image_dir_var):
+        """
+        Get OTA image file from image directory variable.
+        """
+        image_dir = get_bitbake_var(image_dir_var)
+        if not image_dir:
+            raise WicError("Couldn't find %s, exiting" % image_dir_var)
+
+        image_file = image_dir + "/" + get_bitbake_var("IMAGE_LINK_NAME") + ".otaimg"
+        return image_file if os.path.exists(image_file) else ""
+
+    @classmethod
     def do_prepare_partition(cls, part, source_params, cr, cr_workdir,
                              oe_builddir, bootimg_dir, kernel_dir,
                              rootfs_dir, native_sysroot):
@@ -39,13 +52,12 @@ class OTAImagePlugin(RawCopyPlugin):
         Called to do the actual content population for a partition i.e. it
         'prepares' the partition to be incorporated into the image.
         """
-        bootimg_dir = get_bitbake_var("DEPLOY_DIR_IMAGE")
-        if not bootimg_dir:
-            logger.error("Couldn't find DEPLOY_DIR_IMAGE, exiting\n")
 
-        logger.debug('Bootimg dir: %s' % bootimg_dir)
-
-        src = bootimg_dir + "/" + get_bitbake_var("IMAGE_LINK_NAME") + ".otaimg"
+        src = cls._get_src_file("IMGDEPLOYDIR")
+        if not src:
+            src = cls._get_src_file("DEPLOY_DIR_IMAGE")
+        if not src:
+            raise WicError("Couldn't find ota image in IMGDEPLOYDIR or DEPLOY_DIR_IMAGE, exiting")
 
         logger.debug('Preparing partition using image %s' % (src))
         source_params['file'] = src
