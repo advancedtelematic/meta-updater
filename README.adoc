@@ -92,6 +92,7 @@ Your images will also need network connectivity to be able to reach an actual OT
 * `SOTA_SECONDARY_CONFIG_DIR` - a directory containing JSON configuration files for virtual secondaries on the host. These will be installed into `/etc/sota/ecus` on the device and automatically provided to aktualizr.
 * `SOTA_HARDWARE_ID` - a custom hardware ID that will be written to the aktualizr config. Defaults to MACHINE if not set.
 * `RESOURCE_xxx_pn-aktualizr` - controls maximum resource usage of the aktualizr service, when `aktualizr-resource-control` is installed on the image. See <<aktualizr service resource control>> for details.
+* `SOTA_POLLING_SEC` - sets polling interval for aktualizr to check for updates if aktualizr-polling-sec is included in the image.
 
 == Usage
 
