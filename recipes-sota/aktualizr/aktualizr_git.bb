@@ -22,7 +22,6 @@ SRC_URI = " \
   file://run-ptest \
   file://aktualizr.service \
   file://aktualizr-secondary.service \
-  file://aktualizr-secondary.socket \
   file://aktualizr-serialcan.service \
   file://10-resource-control.conf \
   ${@ d.expand("https://ats-tuf-cli-releases.s3-eu-central-1.amazonaws.com/cli-${GARAGE_SIGN_PV}.tgz;unpack=0") if d.getVar('GARAGE_SIGN_AUTOVERSION') != '1' else ''} \
@@ -45,7 +44,7 @@ PTEST_ENABLED = "0"
 
 SYSTEMD_PACKAGES = "${PN} ${PN}-secondary"
 SYSTEMD_SERVICE_${PN} = "aktualizr.service"
-SYSTEMD_SERVICE_${PN}-secondary = "aktualizr-secondary.socket"
+SYSTEMD_SERVICE_${PN}-secondary = "aktualizr-secondary.service"
 
 EXTRA_OECMAKE = "-DCMAKE_BUILD_TYPE=Release -DAKTUALIZR_VERSION=${PV} -Dgtest_disable_pthreads=ON ${@bb.utils.contains('PTEST_ENABLED', '1', '-DTESTSUITE_VALGRIND=on', '', d)}"
 
@@ -101,7 +100,6 @@ do_install_append () {
     install -m 0644 ${S}/config/sota_secondary.toml ${D}/${libdir}/sota/sota_secondary.toml
     install -m 0644 ${S}/config/sota_uboot_env.toml ${D}/${libdir}/sota/sota_uboot_env.toml
     install -d ${D}${systemd_unitdir}/system
-    install -m 0644 ${WORKDIR}/aktualizr-secondary.socket ${D}${systemd_unitdir}/system/aktualizr-secondary.socket
     install -m 0644 ${WORKDIR}/aktualizr-secondary.service ${D}${systemd_unitdir}/system/aktualizr-secondary.service
     install -m 0700 -d ${D}${libdir}/sota/conf.d
     install -m 0700 -d ${D}${sysconfdir}/sota/conf.d
@@ -185,7 +183,6 @@ FILES_${PN}-examples = " \
 FILES_${PN}-secondary = " \
                 ${bindir}/aktualizr-secondary \
                 ${libdir}/sota/sota_secondary.toml \
-                ${systemd_unitdir}/system/aktualizr-secondary.socket \
                 ${systemd_unitdir}/system/aktualizr-secondary.service \
                 "
 
