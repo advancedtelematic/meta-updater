@@ -1,0 +1,5 @@
+[Match]
+@MATCH_DIRECTIVE@
+
+[Network]
+DHCP=yes

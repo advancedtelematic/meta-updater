@@ -3,6 +3,9 @@ RPI_USE_U_BOOT_sota = "1"
 KERNEL_CLASSES_append_sota = " kernel-fitimage"
 KERNEL_IMAGETYPE_sota = "fitImage"
 
+DEV_MATCH_DIRECTIVE_pn-networkd-dhcp-conf = "Driver=smsc95xx lan78xx"
+IMAGE_INSTALL_append_sota = " virtual/network-configuration "
+
 PREFERRED_PROVIDER_virtual/bootloader_sota ?= "u-boot"
 UBOOT_ENTRYPOINT_sota ?= "0x00008000"
 

@@ -224,6 +224,11 @@ IMAGE_CMD_garagesign () {
         # Push may fail due to race condition when multiple build machines try to push simultaneously
         #   in which case targets.json should be pulled again and the whole procedure repeated
         push_success=0
+	target_url=""
+	if [ -n "${GARAGE_TARGET_URL}" ]; then
+		target_url='--url ${GARAGE_TARGET_URL}'
+	fi
+
         for push_retries in $( seq 3 ); do
             garage-sign targets pull --repo tufrepo \
                                      --home-dir ${GARAGE_SIGN_REPO}
@@ -233,7 +238,7 @@ IMAGE_CMD_garagesign () {
                                     --format OSTREE \
                                     --version ${target_version} \
                                     --length 0 \
-                                    --url "${GARAGE_TARGET_URL}" \
+                                    ${target_url} \
                                     --sha256 ${ostree_target_hash} \
                                     --hardwareids ${SOTA_HARDWARE_ID}
             garage-sign targets sign --repo tufrepo \
