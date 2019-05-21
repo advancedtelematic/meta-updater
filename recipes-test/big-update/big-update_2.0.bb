@@ -1,5 +1,5 @@
 DESCRIPTION = "Example Package with 12MB of random, seeded content"
-LICENSE = "CLOSED"
+LICENSE = "MPL-2.0"
 
 SRC_URI = "file://rand_file.py"
 
