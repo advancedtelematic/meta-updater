@@ -4,6 +4,8 @@ SUMMARY = "A minimal Uptane Secondary image running aktualizr-secondary"
 
 LICENSE = "MIT"
 
+SECONDARY_SERIAL_ID ?= ""
+SOTA_HARDWARE_ID ?= "${MACHINE}-sndry"
 
 # Remove default aktualizr primary, and the provisioning configuration (which
 # RDEPENDS on aktualizr)
