@@ -2,7 +2,7 @@ include recipes-core/images/core-image-minimal.bb
 
 SUMMARY = "A minimal Uptane Primary image running aktualizr, for testing with a Linux secondary"
 
-LICENSE = "MIT"
+LICENSE = "MPL-2.0"
 
 IMAGE_INSTALL_remove = " \
 			virtual/network-configuration \
