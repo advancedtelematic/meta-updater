@@ -2,13 +2,13 @@ SRC_URI_append = "\
     file://26-static-client.network \
     "
 
-SECONDARY_NETWORK_INTERFACE_NAME ?= "enp0s5"
+SECONDARY_INTERFACE ?= "enp0s5"
 
 do_install_append() {
     install -d ${D}/usr/lib/systemd/network
     install -m 0644 ${WORKDIR}/26-static-client.network ${D}/usr/lib/systemd/network/
-    sed -i -e 's|@ADDR@|${SECONDARY_NETWORK_IP_ADDR}|g' \
-           -e 's|@IFNAME@|${SECONDARY_NETWORK_INTERFACE_NAME}|g' \
+    sed -i -e 's|@ADDR@|${IP_ADDR}|g' \
+           -e 's|@IFNAME@|${SECONDARY_INTERFACE}|g' \
            ${D}/usr/lib/systemd/network/26-static-client.network
 
 }

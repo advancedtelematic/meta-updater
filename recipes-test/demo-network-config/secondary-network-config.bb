@@ -20,7 +20,8 @@ do_install() {
     install -m 0644 ${WORKDIR}/27-dhcp-client-external.network ${D}/usr/lib/systemd/network/
 }
 
-SECONDARY_NETWORK_IP_ADDR ?= "10.0.3.2"
+SECONDARY_IP ?= "10.0.3.2"
+IP_ADDR = "${SECONDARY_IP}"
 
 require static-network-config.inc
 
