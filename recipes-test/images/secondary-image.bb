@@ -2,7 +2,7 @@ include recipes-core/images/core-image-minimal.bb
 
 SUMMARY = "A minimal Uptane Secondary image running aktualizr-secondary"
 
-LICENSE = "MIT"
+LICENSE = "MPL-2.0"
 
 SECONDARY_SERIAL_ID ?= ""
 SOTA_HARDWARE_ID ?= "${MACHINE}-sndry"
