@@ -2,13 +2,11 @@ DESCRIPTION = "Sample configuration for an Uptane Secondary"
 LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7f619bab123dad"
 
+require shared-conf.inc
+
 SECONDARY_SERIAL_ID ?= ""
 SOTA_HARDWARE_ID ?= "${MACHINE}-sndry"
 SECONDARY_HARDWARE_ID ?= "${SOTA_HARDWARE_ID}"
-
-SECONDARY_PORT ?= "9050"
-PRIMARY_IP ?= "10.0.3.1"
-PRIMARY_PORT ?= "9040"
 
 SRC_URI = "\
     file://30-fake_pacman.toml \

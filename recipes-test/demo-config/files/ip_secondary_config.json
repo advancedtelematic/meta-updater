@@ -1,0 +1,7 @@
+{
+    "IP": {
+	    "secondaries_wait_port": @PORT@,
+	    "secondaries_wait_timeout": @TIMEOUT@,
+	    "secondaries": @ADDR_ARRAY@ 
+    }
+}
