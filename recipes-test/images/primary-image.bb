@@ -9,7 +9,8 @@ IMAGE_INSTALL_remove = " \
                         "
 
 IMAGE_INSTALL_append = " \
-                        primary-network-config \
+			 primary-network-config \
+			 primary-config \
                        "
 
 # vim:set ts=4 sw=4 sts=4 expandtab:
