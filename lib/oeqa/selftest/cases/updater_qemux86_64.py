@@ -4,11 +4,12 @@ import logging
 import re
 import unittest
 from time import sleep
+from uuid import uuid4
 
 from oeqa.selftest.case import OESelftestTestCase
 from oeqa.utils.commands import runCmd, bitbake, get_bb_var, get_bb_vars
 from testutils import qemu_launch, qemu_send_command, qemu_terminate, \
-    akt_native_run, verifyNotProvisioned, verifyProvisioned
+    akt_native_run, verifyNotProvisioned, verifyProvisioned, qemu_bake_image, qemu_boot_image
 
 
 class GeneralTests(OESelftestTestCase):
@@ -309,7 +310,91 @@ class HsmTests(OESelftestTestCase):
         verifyProvisioned(self, machine)
 
 
-class SecondaryTests(OESelftestTestCase):
+class IpSecondaryTests(OESelftestTestCase):
+
+    class Image:
+        def __init__(self, imagename, binaryname, machine='qemux86-64', bake=True, **kwargs):
+            self.machine = machine
+            self.imagename = imagename
+            self.boot_kwargs = kwargs
+            self.binaryname = binaryname
+            self.stdout = ''
+            self.stderr = ''
+            self.retcode = 0
+            if bake:
+                self.bake()
+
+        def bake(self):
+            self.configure()
+            qemu_bake_image(self.imagename)
+
+        def send_command(self, cmd):
+            stdout, stderr, retcode = qemu_send_command(self.qemu.ssh_port, cmd, timeout=60)
+            return str(stdout), str(stderr), retcode
+
+        def __enter__(self):
+            self.qemu, self.process = qemu_boot_image(machine=self.machine, imagename=self.imagename,
+                                                      wait_for_boot_time=1, **self.boot_kwargs)
+            # wait until the VM is booted and is SSHable
+            self.wait_till_sshable()
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            qemu_terminate(self.process)
+
+        def wait_till_sshable(self):
+            # qemu_send_command tries to ssh into the qemu VM and blocks until it gets there or timeout happens
+            # so it helps us to block q control flow until the VM is booted and a target binary/daemon is running there
+            self.stdout, self.stderr, self.retcode = self.send_command(self.binaryname + ' --help')
+
+        def was_successfully_booted(self):
+            return self.retcode == 0
+
+    class Secondary(Image):
+        def __init__(self, test_ctx):
+            self._test_ctx = test_ctx
+            self.sndry_serial = str(uuid4())
+            self.sndry_hw_id = 'qemux86-64-oeselftest-sndry'
+            self.id = (self.sndry_hw_id, self.sndry_serial)
+            super(IpSecondaryTests.Secondary, self).__init__('secondary-image', 'aktualizr-secondary',
+                                                             secondary_network=True)
+
+        def configure(self):
+            self._test_ctx.append_config('SECONDARY_SERIAL_ID = "{}"'.format(self.sndry_serial))
+            self._test_ctx.append_config('SECONDARY_HARDWARE_ID = "{}"'.format(self.sndry_hw_id))
+
+    class Primary(Image):
+        def __init__(self, test_ctx):
+            self._test_ctx = test_ctx
+            super(IpSecondaryTests.Primary, self).__init__('primary-image', 'aktualizr', secondary_network=True)
+
+        def configure(self):
+            self._test_ctx.append_config('MACHINE = "qemux86-64"')
+            self._test_ctx.append_config('SOTA_CLIENT_PROV = " aktualizr-auto-prov "')
+
+        def is_ecu_registered(self, ecu_id):
+            max_number_of_tries = 20
+            try_counter = 0
+
+            # aktualizr-info is not always able to load ECU serials from DB
+            # so, let's run it a few times until it actually succeeds
+            while try_counter < max_number_of_tries:
+                device_status = self.get_info()
+                try_counter += 1
+                if device_status.find("load ECU serials") == -1:
+                    break
+                sleep(1)
+
+            if not ((device_status.find(ecu_id[0]) != -1) and (device_status.find(ecu_id[1]) != -1)):
+                return False
+            not_registered_field = "Removed or not registered ecus:"
+            not_reg_start = device_status.find(not_registered_field)
+            return not_reg_start == -1 or (device_status.find(ecu_id[1], not_reg_start) == -1)
+
+        def get_info(self):
+            stdout, stderr, retcode = self.send_command('aktualizr-info')
+            self._test_ctx.assertEqual(retcode, 0, 'Unable to run aktualizr-info: {}'.format(stderr))
+            return stdout
+
     def setUpLocal(self):
         layer = "meta-updater-qemux86-64"
         result = runCmd('bitbake-layers show-layers')
@@ -323,57 +408,37 @@ class SecondaryTests(OESelftestTestCase):
             runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
         else:
             self.meta_qemu = None
-        self.append_config('MACHINE = "qemux86-64"')
-        self.append_config('SOTA_CLIENT_PROV = " aktualizr-auto-prov "')
-        self.qemu, self.s = qemu_launch(machine='qemux86-64', imagename='secondary-image')
+
+        self.primary = IpSecondaryTests.Primary(self)
+        self.secondary = IpSecondaryTests.Secondary(self)
 
     def tearDownLocal(self):
-        qemu_terminate(self.s)
         if self.meta_qemu:
             runCmd('bitbake-layers remove-layer "%s"' % self.meta_qemu, ignore_status=True)
 
-    def qemu_command(self, command):
-        return qemu_send_command(self.qemu.ssh_port, command)
+    def test_ip_secondary_registration_if_secondary_starts_first(self):
+        with self.secondary:
+            self.assertTrue(self.secondary.was_successfully_booted(),
+                            'The secondary failed to boot: {}'.format(self.secondary.stderr))
 
-    def test_secondary_present(self):
-        print('Checking aktualizr-secondary is present')
-        stdout, stderr, retcode = self.qemu_command('aktualizr-secondary --help')
-        self.assertEqual(retcode, 0, "Unable to run aktualizr-secondary --help")
-        self.assertEqual(stderr, b'', 'Error: ' + stderr.decode())
+            with self.primary:
+                self.assertTrue(self.primary.was_successfully_booted(),
+                                'The primary failed to boot: {}'.format(self.primary.stderr))
 
+                self.assertTrue(self.primary.is_ecu_registered(self.secondary.id),
+                                "The secondary wasn't registered at the primary: {}".format(self.primary.get_info()))
 
-class PrimaryTests(OESelftestTestCase):
-    def setUpLocal(self):
-        layer = "meta-updater-qemux86-64"
-        result = runCmd('bitbake-layers show-layers')
-        if re.search(layer, result.output) is None:
-            # Assume the directory layout for finding other layers. We could also
-            # make assumptions by using 'show-layers', but either way, if the
-            # layers we need aren't where we expect them, we are out of luck.
-            path = os.path.abspath(os.path.dirname(__file__))
-            metadir = path + "/../../../../../"
-            self.meta_qemu = metadir + layer
-            runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
-        else:
-            self.meta_qemu = None
-        self.append_config('MACHINE = "qemux86-64"')
-        self.append_config('SOTA_CLIENT_PROV = " aktualizr-auto-prov "')
-        self.append_config('SOTA_CLIENT_FEATURES = "secondary-network"')
-        self.qemu, self.s = qemu_launch(machine='qemux86-64', imagename='primary-image')
+    def test_ip_secondary_registration_if_primary_starts_first(self):
+        with self.primary:
+            self.assertTrue(self.primary.was_successfully_booted(),
+                            'The primary failed to boot: {}'.format(self.primary.stderr))
 
-    def tearDownLocal(self):
-        qemu_terminate(self.s)
-        if self.meta_qemu:
-            runCmd('bitbake-layers remove-layer "%s"' % self.meta_qemu, ignore_status=True)
+            with self.secondary:
+                self.assertTrue(self.secondary.was_successfully_booted(),
+                                'The secondary failed to boot: {}'.format(self.secondary.stderr))
 
-    def qemu_command(self, command):
-        return qemu_send_command(self.qemu.ssh_port, command)
-
-    def test_aktualizr_present(self):
-        print('Checking aktualizr is present')
-        stdout, stderr, retcode = self.qemu_command('aktualizr --help')
-        self.assertEqual(retcode, 0, "Unable to run aktualizr --help")
-        self.assertEqual(stderr, b'', 'Error: ' + stderr.decode())
+                self.assertTrue(self.primary.is_ecu_registered(self.secondary.id),
+                                "The secondary wasn't registered at the primary: {}".format(self.primary.get_info()))
 
 
 class ResourceControlTests(OESelftestTestCase):
