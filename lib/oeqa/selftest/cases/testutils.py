@@ -7,49 +7,57 @@ from time import sleep
 from oeqa.utils.commands import runCmd, bitbake, get_bb_var, get_bb_vars
 from qemucommand import QemuCommand
 
+logger = logging.getLogger("selftest")
 
-def qemu_launch(efi=False, machine=None, imagename=None):
-    logger = logging.getLogger("selftest")
-    if imagename is None:
-        imagename = 'core-image-minimal'
-    logger.info('Running bitbake to build {}'.format(imagename))
-    bitbake(imagename)
-    # Create empty object.
-    args = type('', (), {})()
-    args.imagename = imagename
-    args.mac = None
-    # Could use DEPLOY_DIR_IMAGE here but it's already in the machine
-    # subdirectory.
-    args.dir = 'tmp/deploy/images'
-    args.efi = efi
-    args.machine = machine
-    qemu_use_kvm = get_bb_var("QEMU_USE_KVM")
-    if qemu_use_kvm and \
-            (qemu_use_kvm == 'True' and 'x86' in machine or
-             get_bb_var('MACHINE') in qemu_use_kvm.split()):
-        args.kvm = True
-    else:
-        args.kvm = None  # Autodetect
-    args.no_gui = True
-    args.gdb = False
-    args.pcap = None
-    args.overlay = None
-    args.dry_run = False
-    args.secondary_network = False
 
-    qemu = QemuCommand(args)
-    cmdline = qemu.command_line()
-    print('Booting image with run-qemu-ota...')
-    s = subprocess.Popen(cmdline)
-    sleep(10)
-    return qemu, s
+def qemu_launch(efi=False, machine=None, imagename='core-image-minimal', **kwargs):
+    qemu_bake_image(imagename)
+    return qemu_boot_image(efi=efi, machine=machine, imagename=imagename, **kwargs)
 
 
 def qemu_terminate(s):
     try:
         s.terminate()
+        s.wait(timeout=10)
     except KeyboardInterrupt:
         pass
+
+
+def qemu_boot_image(imagename, **kwargs):
+    # Create empty object.
+    args = type('', (), {})()
+    args.imagename = imagename
+    args.mac = kwargs.get('mac', None)
+    # Could use DEPLOY_DIR_IMAGE here but it's already in the machine
+    # subdirectory.
+    args.dir = 'tmp/deploy/images'
+    args.efi = kwargs.get('efi', False)
+    args.machine = kwargs.get('machine', None)
+    qemu_use_kvm = get_bb_var("QEMU_USE_KVM")
+    if qemu_use_kvm and \
+            (qemu_use_kvm == 'True' and 'x86' in args.machine or
+             get_bb_var('MACHINE') in qemu_use_kvm.split()):
+        args.kvm = True
+    else:
+        args.kvm = None  # Autodetect
+    args.no_gui = kwargs.get('no_gui', True)
+    args.gdb = kwargs.get('gdb', False)
+    args.pcap = kwargs.get('pcap', None)
+    args.overlay = kwargs.get('overlay', None)
+    args.dry_run = kwargs.get('dry_run', False)
+    args.secondary_network = kwargs.get('secondary_network', False)
+
+    qemu = QemuCommand(args)
+    cmdline = qemu.command_line()
+    print('Booting image with run-qemu-ota...')
+    s = subprocess.Popen(cmdline)
+    sleep(kwargs.get('wait_for_boot_time', 10))
+    return qemu, s
+
+
+def qemu_bake_image(imagename):
+    logger.info('Running bitbake to build {}'.format(imagename))
+    bitbake(imagename)
 
 
 def qemu_send_command(port, command, timeout=60):
@@ -122,7 +130,6 @@ def verifyProvisioned(testInst, machine):
     m = p.search(stdout.decode())
     testInst.assertTrue(m, 'Device ID could not be read: ' + stderr.decode() + stdout.decode())
     testInst.assertGreater(m.lastindex, 0, 'Device ID could not be read: ' + stderr.decode() + stdout.decode())
-    logger = logging.getLogger("selftest")
     logger.info('Device successfully provisioned with ID: ' + m.group(1))
 
 # vim:set ts=4 sw=4 sts=4 expandtab:
