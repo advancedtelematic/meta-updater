@@ -1,0 +1,7 @@
+[Match]
+Name=@IFNAME@
+
+[Network]
+Description=Private internal network between aktualizr Primary and Secondary nodes
+Address=@ADDR@
+DHCP=no
