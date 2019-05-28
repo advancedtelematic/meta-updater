@@ -31,7 +31,7 @@ SRC_URI = " \
 SRC_URI[md5sum] = "e104ccd4f32e52571a5fc0e5042db050"
 SRC_URI[sha256sum] = "c590be1a57523bfe097af82279eda5c97cf40ae47fb27162cf33c469702c8a9b"
 
-SRCREV = "8c523efc4c1f1e6d9dfd41b7e23a202ade4d9ff7"
+SRCREV = "fce5854ff10e7efd52d69bbaf68dc2af990d5746"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -92,12 +92,11 @@ do_install_ptest() {
 
 do_install_append () {
     install -d ${D}${libdir}/sota
-    install -m 0644 ${S}/config/sota_autoprov.toml ${D}/${libdir}/sota/sota_autoprov.toml
-    install -m 0644 ${S}/config/sota_autoprov_primary.toml ${D}/${libdir}/sota/sota_autoprov_primary.toml
-    install -m 0644 ${S}/config/sota_hsm_prov.toml ${D}/${libdir}/sota/sota_hsm_prov.toml
-    install -m 0644 ${S}/config/sota_implicit_prov_ca.toml ${D}/${libdir}/sota/sota_implicit_prov_ca.toml
-    install -m 0644 ${S}/config/sota_secondary.toml ${D}/${libdir}/sota/sota_secondary.toml
-    install -m 0644 ${S}/config/sota_uboot_env.toml ${D}/${libdir}/sota/sota_uboot_env.toml
+    install -m 0644 ${S}/config/sota-shared-cred.toml ${D}/${libdir}/sota/sota-shared-cred.toml
+    install -m 0644 ${S}/config/sota-device-cred-hsm.toml ${D}/${libdir}/sota/sota-device-cred-hsm.toml
+    install -m 0644 ${S}/config/sota-device-cred.toml ${D}/${libdir}/sota/sota-device-cred.toml
+    install -m 0644 ${S}/config/sota-secondary.toml ${D}/${libdir}/sota/sota-secondary.toml
+    install -m 0644 ${S}/config/sota-uboot-env.toml ${D}/${libdir}/sota/sota-uboot-env.toml
     install -d ${D}${systemd_unitdir}/system
     install -m 0644 ${WORKDIR}/aktualizr-secondary.service ${D}${systemd_unitdir}/system/aktualizr-secondary.service
     install -m 0700 -d ${D}${libdir}/sota/conf.d
@@ -173,7 +172,7 @@ FILES_${PN}-examples = " \
 
 FILES_${PN}-secondary = " \
                 ${bindir}/aktualizr-secondary \
-                ${libdir}/sota/sota_secondary.toml \
+                ${libdir}/sota/sota-secondary.toml \
                 ${systemd_unitdir}/system/aktualizr-secondary.service \
                 "
 

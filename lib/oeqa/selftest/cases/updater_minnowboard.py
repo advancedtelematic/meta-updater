@@ -29,7 +29,7 @@ class MinnowTests(OESelftestTestCase):
             self.meta_minnow = None
         self.append_config('MACHINE = "intel-corei7-64"')
         self.append_config('OSTREE_BOOTLOADER = "grub"')
-        self.append_config('SOTA_CLIENT_PROV = " aktualizr-auto-prov "')
+        self.append_config('SOTA_CLIENT_PROV = " aktualizr-shared-prov "')
         self.qemu, self.s = qemu_launch(efi=True, machine='intel-corei7-64')
 
     def tearDownLocal(self):

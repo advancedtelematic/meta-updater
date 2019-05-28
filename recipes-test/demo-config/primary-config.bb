@@ -7,7 +7,7 @@ require shared-conf.inc
 PRIMARY_SECONDARIES ?= "${SECONDARY_IP}:${SECONDARY_PORT}"
 
 SRC_URI = "\
-    file://30-secondary_config.toml \
+    file://30-secondary-config.toml \
     file://ip_secondary_config.json \
     "
 
@@ -56,8 +56,8 @@ do_install () {
 
     # install aktualizr config file (toml) that points to the secondary config file, so aktualizr is aware about it
     install -m 0700 -d ${D}${libdir}/sota/conf.d
-    install -m 0644 ${WORKDIR}/30-secondary_config.toml ${D}${libdir}/sota/conf.d
-    sed -i "s|@CFG_FILEPATH@|$SECONDARY_CONFIG_FILEPATH_ON_IMAGE|g" ${D}${libdir}/sota/conf.d/30-secondary_config.toml
+    install -m 0644 ${WORKDIR}/30-secondary-config.toml ${D}${libdir}/sota/conf.d
+    sed -i "s|@CFG_FILEPATH@|$SECONDARY_CONFIG_FILEPATH_ON_IMAGE|g" ${D}${libdir}/sota/conf.d/30-secondary-config.toml
 }
 
 FILES_${PN} = " \
