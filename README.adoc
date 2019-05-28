@@ -87,7 +87,7 @@ Your images will also need network connectivity to be able to reach an actual OT
 * `GARAGE_SIGN_AUTOVERSION` - Set this to '1' to automatically fetch the last version of the garage tools installed by the aktualizr-native. Otherwise use the fixed version specified in the recipe.
 * `SOTA_PACKED_CREDENTIALS` - when set, your ostree commit will be pushed to a remote repo as a bitbake step. This should be the path to a zipped credentials file in https://github.com/advancedtelematic/aktualizr/blob/master/docs/credentials.adoc[the format accepted by garage-push].
 * `SOTA_DEPLOY_CREDENTIALS` - when set to '1' (default value), deploys credentials to the built image. Override it in `local.conf` to built a generic image that can be provisioned manually after the build.
-* `SOTA_CLIENT_PROV` - which provisioning method to use. Valid options are `aktualizr-auto-prov`, `aktualizr-ca-implicit-prov`, and `aktualizr-hsm-prov`. For more information on these provisioning methods, see the https://docs.ota.here.com/client-config/client-provisioning-methods.html[OTA Connect documentation]. The default is `aktualizr-auto-prov`. This can also be set to an empty string to avoid using a provisioning recipe.
+* `SOTA_CLIENT_PROV` - which provisioning method to use. Valid options are `aktualizr-shared-prov`, `aktualizr-device-prov`, and `aktualizr-device-prov-hsm`. For more information on these provisioning methods, see the https://docs.ota.here.com/client-config/client-provisioning-methods.html[OTA Connect documentation]. The default is `aktualizr-shared-prov`. This can also be set to an empty string to avoid using a provisioning recipe.
 * `SOTA_CLIENT_FEATURES` - extensions to aktualizr. The only valid options are `hsm` (to build with HSM support) and `secondary-network` (to set up a simulated 'in-vehicle' network with support for a primary node with a DHCP server and a secondary node with a DHCP client).
 * `SOTA_SECONDARY_CONFIG_DIR` - a directory containing JSON configuration files for virtual secondaries on the host. These will be installed into `/etc/sota/ecus` on the device and automatically provided to aktualizr.
 * `SOTA_HARDWARE_ID` - a custom hardware ID that will be written to the aktualizr config. Defaults to MACHINE if not set.
@@ -249,13 +249,13 @@ The aktualizr ptests can be run via oe-selftest with `oe-selftest -r updater_qem
 
 As described in <<sota-related-variables-in-localconf,SOTA-related variables in local.conf>> section you can set `SOTA_DEPLOY_CREDENTIALS` to `0` to prevent deploying credentials to the built `wic` image. In this case you get a generic image that you can use e.g. on a production line to flash a series of devices. The cost of this approach is that this image is half-baked and should be provisioned before it can connect to the backend.
 
-Provisioning procedure depends on your provisioning recipe, i.e. the value of `SOTA_CLIENT_PROV` (equal to `aktualizr-auto-prov` by default):
+Provisioning procedure depends on your provisioning recipe, i.e. the value of `SOTA_CLIENT_PROV` (equal to `aktualizr-shared-prov` by default):
 
-* For `aktualizr-auto-prov` put your `credentials.zip` to `/var/sota/sota_provisioning_credentials.zip` on the filesystem of a running device. If you have the filesystem of our device mounted to your build machine, prefix all paths with `/ostree/deploy/poky` as in `/ostree/deploy/poky/var/sota/sota_provisioning_credentials.zip`.
-* For `aktualizr-ca-implicit-prov`
+* For `aktualizr-shared-prov` put your `credentials.zip` to `/var/sota/sota_provisioning_credentials.zip` on the filesystem of a running device. If you have the filesystem of our device mounted to your build machine, prefix all paths with `/ostree/deploy/poky` as in `/ostree/deploy/poky/var/sota/sota_provisioning_credentials.zip`.
+* For `aktualizr-device-prov`
 ** put URL to the backend server (together with protocol prefix and port number) at `/var/sota/gateway.url`. If you're using HERE OTA Connect, you can find the URL in the `autoprov.url` file in your credentials archive.
 ** put client certificate, private key and root CA certificate (for the *server*, not for the *device*) at `/var/sota/import/client.pem`, `/var/sota/import/pkey.pem` and `/var/sota/import/root.crt` respectively.
-* For  `aktualizr-hsm-prov`
+* For  `aktualizr-device-prov-hsm`
 ** put URL to the server backend (together with protocol prefix and port number) at `/var/sota/gateway.url`. If you're using HERE OTA Connect, you can find the URL in the `autoprov.url` file in your credentials archive.
 ** put root CA certificate (for the *server*, not for the *device*) at `/var/sota/import/root.crt`.
 ** put client certificate and private key to slots 1 and 2 of the PKCS#11-compatible device.
