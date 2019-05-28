@@ -8,7 +8,7 @@ DISTROOVERRIDES .= "${@bb.utils.contains('DISTRO_FEATURES', 'sota', ':sota', '',
 HOSTTOOLS_NONFATAL += "java"
 
 SOTA_CLIENT ??= "aktualizr"
-SOTA_CLIENT_PROV ??= "aktualizr-auto-prov"
+SOTA_CLIENT_PROV ??= "aktualizr-shared-prov"
 SOTA_DEPLOY_CREDENTIALS ?= "1"
 SOTA_HARDWARE_ID ??= "${MACHINE}"
 

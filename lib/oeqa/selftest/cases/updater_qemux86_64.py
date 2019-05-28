@@ -16,7 +16,7 @@ class GeneralTests(OESelftestTestCase):
     def test_credentials(self):
         logger = logging.getLogger("selftest")
         logger.info('Running bitbake to build core-image-minimal')
-        self.append_config('SOTA_CLIENT_PROV = "aktualizr-auto-prov"')
+        self.append_config('SOTA_CLIENT_PROV = "aktualizr-shared-prov"')
         bitbake('core-image-minimal')
         credentials = get_bb_var('SOTA_PACKED_CREDENTIALS')
         # skip the test if the variable SOTA_PACKED_CREDENTIALS is not set
@@ -46,13 +46,13 @@ class AktualizrToolsTests(OESelftestTestCase):
 
     def test_cert_provider_local_output(self):
         logger = logging.getLogger("selftest")
-        logger.info('Running bitbake to build aktualizr-ca-implicit-prov')
-        bitbake('aktualizr-ca-implicit-prov')
+        logger.info('Running bitbake to build aktualizr-device-prov')
+        bitbake('aktualizr-device-prov')
         bb_vars = get_bb_vars(['SOTA_PACKED_CREDENTIALS', 'T'], 'aktualizr-native')
         creds = bb_vars['SOTA_PACKED_CREDENTIALS']
         temp_dir = bb_vars['T']
-        bb_vars_prov = get_bb_vars(['STAGING_DIR_HOST', 'libdir'], 'aktualizr-ca-implicit-prov')
-        config = bb_vars_prov['STAGING_DIR_HOST'] + bb_vars_prov['libdir'] + '/sota/sota_implicit_prov_ca.toml'
+        bb_vars_prov = get_bb_vars(['STAGING_DIR_HOST', 'libdir'], 'aktualizr-device-prov')
+        config = bb_vars_prov['STAGING_DIR_HOST'] + bb_vars_prov['libdir'] + '/sota/sota-device-cred.toml'
 
         akt_native_run(self, 'aktualizr-cert-provider -c {creds} -r -l {temp} -g {config}'
                        .format(creds=creds, temp=temp_dir, config=config))
@@ -69,7 +69,7 @@ class AktualizrToolsTests(OESelftestTestCase):
         self.assertTrue(os.path.getsize(ca_path) > 0, "Client certificate at %s is empty." % ca_path)
 
 
-class AutoProvTests(OESelftestTestCase):
+class SharedCredProvTests(OESelftestTestCase):
 
     def setUpLocal(self):
         layer = "meta-updater-qemux86-64"
@@ -85,7 +85,7 @@ class AutoProvTests(OESelftestTestCase):
         else:
             self.meta_qemu = None
         self.append_config('MACHINE = "qemux86-64"')
-        self.append_config('SOTA_CLIENT_PROV = " aktualizr-auto-prov "')
+        self.append_config('SOTA_CLIENT_PROV = " aktualizr-shared-prov "')
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
     def tearDownLocal(self):
@@ -127,7 +127,7 @@ class ManualControlTests(OESelftestTestCase):
         else:
             self.meta_qemu = None
         self.append_config('MACHINE = "qemux86-64"')
-        self.append_config('SOTA_CLIENT_PROV = " aktualizr-auto-prov "')
+        self.append_config('SOTA_CLIENT_PROV = " aktualizr-shared-prov "')
         self.append_config('SYSTEMD_AUTO_ENABLE_aktualizr = "disable"')
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
@@ -155,7 +155,7 @@ class ManualControlTests(OESelftestTestCase):
                       'Aktualizr should have run' + stderr.decode() + stdout.decode())
 
 
-class ImplProvTests(OESelftestTestCase):
+class DeviceCredProvTests(OESelftestTestCase):
 
     def setUpLocal(self):
         layer = "meta-updater-qemux86-64"
@@ -171,9 +171,9 @@ class ImplProvTests(OESelftestTestCase):
         else:
             self.meta_qemu = None
         self.append_config('MACHINE = "qemux86-64"')
-        self.append_config('SOTA_CLIENT_PROV = " aktualizr-ca-implicit-prov "')
+        self.append_config('SOTA_CLIENT_PROV = " aktualizr-device-prov "')
         self.append_config('SOTA_DEPLOY_CREDENTIALS = "0"')
-        runCmd('bitbake -c cleanall aktualizr aktualizr-ca-implicit-prov')
+        runCmd('bitbake -c cleanall aktualizr aktualizr-device-prov')
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
     def tearDownLocal(self):
@@ -201,8 +201,8 @@ class ImplProvTests(OESelftestTestCase):
         # Run aktualizr-cert-provider.
         bb_vars = get_bb_vars(['SOTA_PACKED_CREDENTIALS'], 'aktualizr-native')
         creds = bb_vars['SOTA_PACKED_CREDENTIALS']
-        bb_vars_prov = get_bb_vars(['STAGING_DIR_HOST', 'libdir'], 'aktualizr-ca-implicit-prov')
-        config = bb_vars_prov['STAGING_DIR_HOST'] + bb_vars_prov['libdir'] + '/sota/sota_implicit_prov_ca.toml'
+        bb_vars_prov = get_bb_vars(['STAGING_DIR_HOST', 'libdir'], 'aktualizr-device-prov')
+        config = bb_vars_prov['STAGING_DIR_HOST'] + bb_vars_prov['libdir'] + '/sota/sota-device-cred.toml'
 
         print('Provisining at root@localhost:%d' % self.qemu.ssh_port)
         akt_native_run(self, 'aktualizr-cert-provider -c {creds} -t root@localhost -p {port} -s -u -r -g {config}'
@@ -211,7 +211,7 @@ class ImplProvTests(OESelftestTestCase):
         verifyProvisioned(self, machine)
 
 
-class HsmTests(OESelftestTestCase):
+class DeviceCredProvHsmTests(OESelftestTestCase):
 
     def setUpLocal(self):
         layer = "meta-updater-qemux86-64"
@@ -227,11 +227,11 @@ class HsmTests(OESelftestTestCase):
         else:
             self.meta_qemu = None
         self.append_config('MACHINE = "qemux86-64"')
-        self.append_config('SOTA_CLIENT_PROV = "aktualizr-hsm-prov"')
+        self.append_config('SOTA_CLIENT_PROV = "aktualizr-device-prov-hsm"')
         self.append_config('SOTA_DEPLOY_CREDENTIALS = "0"')
         self.append_config('SOTA_CLIENT_FEATURES = "hsm"')
         self.append_config('IMAGE_INSTALL_append = " softhsm-testtoken"')
-        runCmd('bitbake -c cleanall aktualizr aktualizr-hsm-prov')
+        runCmd('bitbake -c cleanall aktualizr aktualizr-device-prov-hsm')
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
     def tearDownLocal(self):
@@ -269,8 +269,8 @@ class HsmTests(OESelftestTestCase):
         # Run aktualizr-cert-provider.
         bb_vars = get_bb_vars(['SOTA_PACKED_CREDENTIALS'], 'aktualizr-native')
         creds = bb_vars['SOTA_PACKED_CREDENTIALS']
-        bb_vars_prov = get_bb_vars(['STAGING_DIR_NATIVE', 'libdir'], 'aktualizr-hsm-prov')
-        config = bb_vars_prov['STAGING_DIR_NATIVE'] + bb_vars_prov['libdir'] + '/sota/sota_hsm_prov.toml'
+        bb_vars_prov = get_bb_vars(['STAGING_DIR_NATIVE', 'libdir'], 'aktualizr-device-prov-hsm')
+        config = bb_vars_prov['STAGING_DIR_NATIVE'] + bb_vars_prov['libdir'] + '/sota/sota-device-cred-hsm.toml'
 
         akt_native_run(self, 'aktualizr-cert-provider -c {creds} -t root@localhost -p {port} -r -s -u -g {config}'
                        .format(creds=creds, port=self.qemu.ssh_port, config=config))
@@ -369,7 +369,7 @@ class IpSecondaryTests(OESelftestTestCase):
 
         def configure(self):
             self._test_ctx.append_config('MACHINE = "qemux86-64"')
-            self._test_ctx.append_config('SOTA_CLIENT_PROV = " aktualizr-auto-prov "')
+            self._test_ctx.append_config('SOTA_CLIENT_PROV = " aktualizr-shared-prov "')
 
         def is_ecu_registered(self, ecu_id):
             max_number_of_tries = 20
@@ -456,7 +456,7 @@ class ResourceControlTests(OESelftestTestCase):
         else:
             self.meta_qemu = None
         self.append_config('MACHINE = "qemux86-64"')
-        self.append_config('SOTA_CLIENT_PROV = " aktualizr-auto-prov "')
+        self.append_config('SOTA_CLIENT_PROV = " aktualizr-shared-prov "')
         self.append_config('IMAGE_INSTALL_append += " aktualizr-resource-control "')
         self.append_config('RESOURCE_CPU_WEIGHT_pn-aktualizr = "1000"')
         self.append_config('RESOURCE_MEMORY_HIGH_pn-aktualizr = "50M"')
