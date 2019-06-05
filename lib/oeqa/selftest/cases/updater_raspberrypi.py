@@ -47,7 +47,7 @@ class RpiTests(OESelftestTestCase):
             self.meta_qemu = None
 
         self.append_config('MACHINE = "raspberrypi3"')
-        self.append_config('SOTA_CLIENT_PROV = " aktualizr-auto-prov "')
+        self.append_config('SOTA_CLIENT_PROV = " aktualizr-shared-prov "')
 
     def tearDownLocal(self):
         if self.meta_qemu:
@@ -60,7 +60,6 @@ class RpiTests(OESelftestTestCase):
     def test_build(self):
         logger = logging.getLogger("selftest")
         logger.info('Running bitbake to build core-image-minimal')
-        self.append_config('SOTA_CLIENT_PROV = "aktualizr-auto-prov"')
         bitbake('core-image-minimal')
         credentials = get_bb_var('SOTA_PACKED_CREDENTIALS')
         # Skip the test if the variable SOTA_PACKED_CREDENTIALS is not set.

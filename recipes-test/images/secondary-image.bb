@@ -11,11 +11,11 @@ SOTA_HARDWARE_ID ?= "${MACHINE}-sndry"
 # RDEPENDS on aktualizr)
 IMAGE_INSTALL_remove = " \
                         aktualizr \
-                        aktualizr-auto-prov \
-                        aktualizr-auto-prov-creds \
-                        aktualizr-ca-implicit-prov \
-                        aktualizr-ca-implicit-prov-creds \
-                        aktualizr-hsm-prov \
+                        aktualizr-shared-prov \
+                        aktualizr-shared-prov-creds \
+                        aktualizr-device-prov \
+                        aktualizr-device-prov-creds \
+                        aktualizr-device-prov-hsm \
                         aktualizr-uboot-env-rollback \
                         virtual/network-configuration \
                         "
