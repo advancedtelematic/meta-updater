@@ -11,7 +11,7 @@ RDEPENDS_${PN} = "aktualizr"
 
 do_install() {
     install -m 0700 -d ${D}${libdir}/sota/conf.d
-    install -m 0644 ${STAGING_DIR_NATIVE}${libdir_native}/sota/sota_uboot_env.toml ${D}${libdir}/sota/conf.d/30-rollback.toml
+    install -m 0644 ${STAGING_DIR_NATIVE}${libdir_native}/sota/sota-uboot-env.toml ${D}${libdir}/sota/conf.d/30-rollback.toml
 }
 
 FILES_${PN} = " \
