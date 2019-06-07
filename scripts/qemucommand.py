@@ -109,8 +109,8 @@ class QemuCommand(object):
             cmdline += ['-net', 'dump,file=' + self.pcap]
         if self.secondary_network:
             cmdline += [
-                '-net', 'nic,vlan=1,macaddr='+random_mac(),
-                '-net', 'socket,vlan=1,mcast=230.0.0.1:1234,localaddr=127.0.0.1',
+                '-netdev', 'socket,id=vlan1,mcast=230.0.0.1:1234,localaddr=127.0.0.1',
+                '-device', 'e1000,netdev=vlan1,mac='+random_mac(),
             ]
         if self.gui:
             cmdline += ["-serial", "stdio"]

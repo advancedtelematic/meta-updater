@@ -1,4 +1,5 @@
-SUMMARY = "Credentials for implicit provisioning with CA certificate"
+SUMMARY = "Credentials for device provisioning with fleet CA certificate"
+HOMEPAGE = "https://github.com/advancedtelematic/aktualizr"
 SECTION = "base"
 LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7f619bab123dad"
@@ -13,8 +14,8 @@ DEPENDS = "aktualizr aktualizr-native"
 ALLOW_EMPTY_${PN} = "1"
 
 SRC_URI = " \
-  file://ca.cnf \
-  "
+            file://ca.cnf \
+            "
 
 require credentials.inc
 
@@ -39,7 +40,7 @@ do_install() {
         fi
 
         if [ -z ${SOTA_CAKEY_PATH} ]; then
-            bbfatal "SOTA_CAKEY_PATH should be set when using implicit provisioning"
+            bbfatal "SOTA_CAKEY_PATH should be set when using device credential provisioning"
         fi
 
         install -m 0700 -d ${D}${localstatedir}/sota
@@ -49,9 +50,11 @@ do_install() {
                                 --root-ca \
                                 --server-url \
                                 --local ${D} \
-                                --config ${STAGING_DIR_HOST}${libdir}/sota/sota_implicit_prov_ca.toml
+                                --config ${STAGING_DIR_HOST}${libdir}/sota/sota-device-cred.toml
     fi
 }
 
 FILES_${PN} = " \
                 ${localstatedir}/sota/*"
+
+# vim:set ts=4 sw=4 sts=4 expandtab:

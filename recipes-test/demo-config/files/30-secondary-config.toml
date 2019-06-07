@@ -1,0 +1,2 @@
+[uptane]
+secondary_config_file = "@CFG_FILEPATH@"
