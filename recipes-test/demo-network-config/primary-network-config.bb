@@ -19,7 +19,8 @@ do_install() {
 
 PRIMARY_IP ?= "10.0.3.1"
 IP_ADDR = "${PRIMARY_IP}"
+IMAGE_TYPE = "primary"
 
-require static-network-config.inc
+require network-config.inc
 
 # vim:set ts=4 sw=4 sts=4 expandtab:
