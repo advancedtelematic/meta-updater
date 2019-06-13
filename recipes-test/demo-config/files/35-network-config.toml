@@ -1,0 +1,4 @@
+[network]
+port = @PORT@
+primary_ip = @PRIMARY_IP@
+primary_port = @PRIMARY_PORT@

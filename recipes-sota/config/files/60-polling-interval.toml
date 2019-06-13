@@ -1,0 +1,2 @@
+[uptane]
+polling_sec = @POLLING_SEC@

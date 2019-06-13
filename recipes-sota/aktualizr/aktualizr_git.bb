@@ -15,24 +15,23 @@ RDEPENDS_${PN}-ptest += "bash cmake curl python3-misc python3-modules openssl-bi
 PV = "1.0+git${SRCPV}"
 PR = "7"
 
-GARAGE_SIGN_PV = "0.6.0-18-g5b8b259"
+GARAGE_SIGN_PV = "0.7.0-3-gf5ba640"
 
 SRC_URI = " \
   gitsm://github.com/advancedtelematic/aktualizr;branch=${BRANCH} \
   file://run-ptest \
   file://aktualizr.service \
   file://aktualizr-secondary.service \
-  file://aktualizr-secondary.socket \
   file://aktualizr-serialcan.service \
   file://10-resource-control.conf \
   ${@ d.expand("https://ats-tuf-cli-releases.s3-eu-central-1.amazonaws.com/cli-${GARAGE_SIGN_PV}.tgz;unpack=0") if d.getVar('GARAGE_SIGN_AUTOVERSION') != '1' else ''} \
   "
 
 # for garage-sign archive
-SRC_URI[md5sum] = "c5e9968dfe78a7264ab9a8338c11725d"
-SRC_URI[sha256sum] = "3a19258d7a1825a308aca0da82f7a337985bec05e8951355c4c95f0fcf2444f4"
+SRC_URI[md5sum] = "e104ccd4f32e52571a5fc0e5042db050"
+SRC_URI[sha256sum] = "c590be1a57523bfe097af82279eda5c97cf40ae47fb27162cf33c469702c8a9b"
 
-SRCREV = "c50feb37034eceb1254429d3e3ed38e5b8a0dc60"
+SRCREV = "fce5854ff10e7efd52d69bbaf68dc2af990d5746"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -45,7 +44,7 @@ PTEST_ENABLED = "0"
 
 SYSTEMD_PACKAGES = "${PN} ${PN}-secondary"
 SYSTEMD_SERVICE_${PN} = "aktualizr.service"
-SYSTEMD_SERVICE_${PN}-secondary = "aktualizr-secondary.socket"
+SYSTEMD_SERVICE_${PN}-secondary = "aktualizr-secondary.service"
 
 EXTRA_OECMAKE = "-DCMAKE_BUILD_TYPE=Release -DAKTUALIZR_VERSION=${PV} ${@bb.utils.contains('PTEST_ENABLED', '1', '-DTESTSUITE_VALGRIND=on', '', d)}"
 
@@ -93,14 +92,12 @@ do_install_ptest() {
 
 do_install_append () {
     install -d ${D}${libdir}/sota
-    install -m 0644 ${S}/config/sota_autoprov.toml ${D}/${libdir}/sota/sota_autoprov.toml
-    install -m 0644 ${S}/config/sota_autoprov_primary.toml ${D}/${libdir}/sota/sota_autoprov_primary.toml
-    install -m 0644 ${S}/config/sota_hsm_prov.toml ${D}/${libdir}/sota/sota_hsm_prov.toml
-    install -m 0644 ${S}/config/sota_implicit_prov_ca.toml ${D}/${libdir}/sota/sota_implicit_prov_ca.toml
-    install -m 0644 ${S}/config/sota_secondary.toml ${D}/${libdir}/sota/sota_secondary.toml
-    install -m 0644 ${S}/config/sota_uboot_env.toml ${D}/${libdir}/sota/sota_uboot_env.toml
+    install -m 0644 ${S}/config/sota-shared-cred.toml ${D}/${libdir}/sota/sota-shared-cred.toml
+    install -m 0644 ${S}/config/sota-device-cred-hsm.toml ${D}/${libdir}/sota/sota-device-cred-hsm.toml
+    install -m 0644 ${S}/config/sota-device-cred.toml ${D}/${libdir}/sota/sota-device-cred.toml
+    install -m 0644 ${S}/config/sota-secondary.toml ${D}/${libdir}/sota/sota-secondary.toml
+    install -m 0644 ${S}/config/sota-uboot-env.toml ${D}/${libdir}/sota/sota-uboot-env.toml
     install -d ${D}${systemd_unitdir}/system
-    install -m 0644 ${WORKDIR}/aktualizr-secondary.socket ${D}${systemd_unitdir}/system/aktualizr-secondary.socket
     install -m 0644 ${WORKDIR}/aktualizr-secondary.service ${D}${systemd_unitdir}/system/aktualizr-secondary.service
     install -m 0700 -d ${D}${libdir}/sota/conf.d
     install -m 0700 -d ${D}${sysconfdir}/sota/conf.d
@@ -175,8 +172,7 @@ FILES_${PN}-examples = " \
 
 FILES_${PN}-secondary = " \
                 ${bindir}/aktualizr-secondary \
-                ${libdir}/sota/sota_secondary.toml \
-                ${systemd_unitdir}/system/aktualizr-secondary.socket \
+                ${libdir}/sota/sota-secondary.toml \
                 ${systemd_unitdir}/system/aktualizr-secondary.service \
                 "
 
