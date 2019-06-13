@@ -1,0 +1,9 @@
+[Match]
+Name=@IFNAME@
+
+[Network]
+Description=Multihomed network. DHCP-assigned IP for Primary<->Backend. Statically assigned IP for Primary<->Secondary
+DHCP=yes
+
+[Address]
+Address=@ADDR@
