@@ -23,7 +23,8 @@ do_install() {
 
 SECONDARY_IP ?= "10.0.3.2"
 IP_ADDR = "${SECONDARY_IP}"
+IMAGE_TYPE = "secondary"
 
-require static-network-config.inc
+require network-config.inc
 
 # vim:set ts=4 sw=4 sts=4 expandtab:
