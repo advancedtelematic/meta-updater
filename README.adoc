@@ -19,6 +19,20 @@ toc::[]
 
 If you don't already have a Yocto project that you want to add OTA to, you can use the https://docs.atsgarage.com/quickstarts/raspberry-pi.html[HERE OTA Connect Quickstart] project to rapidly get up and running on a Raspberry Pi. It takes a standard https://www.yoctoproject.org/tools-resources/projects/poky[poky] distribution, and adds OTA and OSTree capabilities.
 
+=== Dependencies
+
+In addition to the link:https://www.yoctoproject.org/docs/current/ref-manual/ref-manual.html#required-packages-for-the-build-host[standard Yocto dependencies], meta-updater generally requires a few additional dependencies, depending on your use case and target platform. To install these additional packages on Debian/Ubuntu, run this:
+
+....
+sudo apt install cpu-checker default-jre parted
+....
+
+To build for https://github.com/advancedtelematic/meta-updater-minnowboard[Minnowboard] with GRUB, you will also need to install https://github.com/tianocore/tianocore.github.io/wiki/OVMF[TianoCore's ovmf] package on your host system. On Debian/Ubuntu, you can do so with this command:
+
+....
+sudo apt install ovmf
+....
+
 === Adding meta-updater capabilities to your build
 
 If you already have a Yocto-based project and you want to add atomic filesystem updates to it, you just need to do three things:
@@ -72,7 +86,7 @@ If your board isn't supported yet, you can add board integration code yourself. 
 
 You may take a look into https://github.com/advancedtelematic/meta-updater-minnowboard[Minnowboard] or https://github.com/advancedtelematic/meta-updater-raspberrypi[Raspberry Pi] integration layers for examples.
 
-Although we have used U-Boot so far, other boot loaders can be configured work with OSTree as well.
+Although we have focused on U-Boot and GRUB so far, other bootloaders can be configured to work with OSTree as well.
 
 Your images will also need network connectivity to be able to reach an actual OTA backend. Our 'poky-sota' distribution does not mandate or install a default network manager but our supported platforms use the `virtual/network-configuration` recipe, which can be used as a starting example.
 
@@ -220,11 +234,7 @@ IMAGE_INSTALL_append = " dropbear "
 
 3. Some tests require that `SOTA_PACKED_CREDENTIALS` is set in your `conf/local.conf`. See the <<sota-related-variables-in-localconf,SOTA-related variables in local.conf>> section.
 
-4. To be able to build an image for the grub tests, you will need to install https://github.com/tianocore/tianocore.github.io/wiki/OVMF[TianoCore's ovmf] package on your host system. On Debian-like systems, you can do so with this command:
-+
-```
-sudo apt install ovmf
-```
+4. To be able to build an image for the GRUB tests, you will need to install the ovmf package as described in the <<Dependencies,dependencies>>.
 
 5. Run oe-selftest:
 +
