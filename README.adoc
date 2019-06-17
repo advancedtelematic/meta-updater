@@ -269,3 +269,9 @@ Provisioning procedure depends on your provisioning recipe, i.e. the value of `S
 ** put URL to the server backend (together with protocol prefix and port number) at `/var/sota/gateway.url`. If you're using HERE OTA Connect, you can find the URL in the `autoprov.url` file in your credentials archive.
 ** put root CA certificate (for the *server*, not for the *device*) at `/var/sota/import/root.crt`.
 ** put client certificate and private key to slots 1 and 2 of the PKCS#11-compatible device.
+
+== License
+
+This code is licensed under the link:COPYING.MIT[MIT license], a copy of which can be found in this repository. All code is copyright HERE Europe B.V., 2016-2019.
+
+We require that contributors accept the terms of Linux Foundation's link:https://developercertificate.org/[Developer Certificate of Origin]. Please see the https://github.com/advancedtelematic/aktualizr/blob/master/CONTRIBUTING.md[contribution instructions of aktualizr] for more information.
