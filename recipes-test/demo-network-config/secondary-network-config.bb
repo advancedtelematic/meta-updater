@@ -23,7 +23,7 @@ do_install() {
 
 SECONDARY_IP ?= "10.0.3.2"
 IP_ADDR = "${SECONDARY_IP}"
-IMAGE_TYPE = "secondary"
+CONF_TYPE = "static"
 
 require network-config.inc
 
