@@ -1,5 +1,3 @@
-CONF_TYPE ?= "${@ 'multihomed' if d.getVar('MACHINE') == 'raspberrypi3' and d.getVar('IMAGE_TYPE') == 'primary' else 'static'}"
-
 SRC_URI_append = "\
     file://26-${CONF_TYPE}-client.network \
     "
