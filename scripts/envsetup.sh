@@ -21,7 +21,7 @@ if [[ $SOURCED -ne 1 ]]; then
   exit 1
 fi
 
-METADIR="${SOURCEDIR}/../.."
+METADIR=${METADIR:-${SOURCEDIR}/../..}
 
 if [[ ! -f "${BUILDDIR}/conf/local.conf" ]]; then
   source "$METADIR/poky/oe-init-build-env" "$BUILDDIR"
