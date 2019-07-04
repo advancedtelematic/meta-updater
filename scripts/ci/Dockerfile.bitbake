@@ -1,8 +1,8 @@
-FROM debian:stable
+FROM debian:stretch
 LABEL Description="Image for bitbaking"
 
-RUN sed -i 's#deb http://deb.debian.org/debian stable main#deb http://deb.debian.org/debian stable main contrib#g' /etc/apt/sources.list
-RUN sed -i 's#deb http://deb.debian.org/debian stable-updates main#deb http://deb.debian.org/debian stable-updates main contrib#g' /etc/apt/sources.list
+RUN sed -i 's#deb http://deb.debian.org/debian stretch main#deb http://deb.debian.org/debian stretch main contrib#g' /etc/apt/sources.list
+RUN sed -i 's#deb http://deb.debian.org/debian stretch-updates main#deb http://deb.debian.org/debian stretch-updates main contrib#g' /etc/apt/sources.list
 RUN apt-get update -q && apt-get install -qy \
      build-essential \
      bzip2 \
@@ -31,8 +31,8 @@ RUN apt-get update -q && apt-get install -qy \
      xterm \
      xz-utils
 
-ARG uid=1000
-ARG gid=1000
+ARG uid=4321
+ARG gid=4321
 RUN groupadd -g $gid bitbake
 RUN useradd -m -u $uid -g $gid bitbake
 
@@ -40,3 +40,5 @@ RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && locale-gen
 ENV LC_ALL="en_US.UTF-8"
 ENV LANG="en_US.UTF-8"
 ENV LANGUAGE="en_US.UTF-8"
+
+USER "bitbake"

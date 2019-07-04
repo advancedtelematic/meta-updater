@@ -1,0 +1,63 @@
+stages:
+  - docker
+  - checkout
+  - test
+
+# notes:
+# - could be useful https://docs.gitlab.com/ee/ci/yaml/#include
+
+variables:
+  # Needs $PR_BASE_BRANCH to be defined as a pipeline variable to work correctly
+
+  BITBAKE_MASTER_IMAGE: ${CI_REGISTRY_IMAGE}:ci-${PR_BASE_BRANCH}-bitbake
+  BITBAKE_PR_IMAGE: ${CI_REGISTRY_IMAGE}:ci-${CI_COMMIT_REF_SLUG}-bitbake
+
+  CHECKOUT_MASTER_IMAGE: ${CI_REGISTRY_IMAGE}:ci-${PR_BASE_BRANCH}-xml
+  CHECKOUT_PR_IMAGE: ${CI_REGISTRY_IMAGE}:ci-${CI_COMMIT_REF_SLUG}-xml
+
+
+Docker Setup:
+  image: docker:stable
+  stage: docker
+  services:
+    - docker:dind
+  except:
+    - pushes
+  before_script:
+    - docker login -u gitlab-ci-token -p "$CI_JOB_TOKEN" "$CI_REGISTRY"
+  script:
+    - docker pull "$BITBAKE_PR_IMAGE" || docker pull "$BITBAKE_MASTER_IMAGE" || true
+    - docker build --pull --cache-from "$BITBAKE_MASTER_IMAGE" --cache-from "$BITBAKE_PR_IMAGE" -f ./scripts/ci/Dockerfile.bitbake -t "$BITBAKE_PR_IMAGE" ./scripts/ci
+    - docker push "$BITBAKE_PR_IMAGE"
+
+    - docker pull "$CHECKOUT_PR_IMAGE" || docker pull "$CHECKOUT_MASTER_IMAGE" || true
+    - docker build --pull --cache-from "$CHECKOUT_MASTER_IMAGE" --cache-from "$CHECKOUT_PR_IMAGE" -f ./scripts/ci/Dockerfile.checkout -t "$CHECKOUT_PR_IMAGE" ./scripts/ci
+    - docker push "$CHECKOUT_PR_IMAGE"
+
+Checkout:
+  image: "$CHECKOUT_PR_IMAGE"
+  stage: checkout
+  except:
+    - pushes
+  cache:
+    paths:
+      - updater-repo
+  artifacts:
+    expire_in: "1 day"
+    paths:
+      - updater-repo
+  script:
+    - MANIFEST=$PR_BASE_BRANCH ./scripts/ci/checkout-oe.sh
+
+Build core-image-minimal:
+  image: "$BITBAKE_PR_IMAGE"
+  stage: test
+  except:
+    - pushes
+  dependencies:
+    - Checkout
+  tags:
+    - bitbake
+  script:
+    - ./scripts/ci/configure.sh
+    - ./scripts/ci/build.sh core-image-minimal
