@@ -1,4 +1,5 @@
 import os
+import oe.path
 import logging
 import re
 import subprocess
@@ -72,20 +73,16 @@ def akt_native_run(testInst, cmd, **kwargs):
     # run a command supplied by aktualizr-native and checks that:
     # - the executable exists
     # - the command runs without error
-    # NOTE: the base test class must have built aktualizr-native (in
-    # setUpClass, for example)
-    bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'base_prefix', 'libdir', 'bindir'],
-                          'aktualizr-native')
-    sysroot = bb_vars['SYSROOT_DESTDIR'] + bb_vars['base_prefix']
-    sysrootbin = bb_vars['SYSROOT_DESTDIR'] + bb_vars['bindir']
-    libdir = bb_vars['libdir']
+    #
+    # Requirements in base test class (setUpClass for example):
+    #   bitbake aktualizr-native
+    #   bitbake build-sysroots -c build_native_sysroot
+    #
+    # (technique found in poky/meta/lib/oeqa/selftest/cases/package.py)
+    bb_vars = get_bb_vars(['STAGING_DIR', 'BUILD_ARCH'])
+    sysroot = oe.path.join(bb_vars['STAGING_DIR'], bb_vars['BUILD_ARCH'])
 
-    program, *_ = cmd.split(' ')
-    p = '{}/{}'.format(sysrootbin, program)
-    testInst.assertTrue(os.path.isfile(p), msg="No {} found ({})".format(program, p))
-    env = dict(os.environ)
-    env['LD_LIBRARY_PATH'] = libdir
-    result = runCmd(cmd, env=env, native_sysroot=sysroot, ignore_status=True, **kwargs)
+    result = runCmd(cmd, native_sysroot=sysroot, ignore_status=True, **kwargs)
     testInst.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
 
 
