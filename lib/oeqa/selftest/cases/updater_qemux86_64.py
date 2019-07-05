@@ -39,7 +39,8 @@ class AktualizrToolsTests(OESelftestTestCase):
         super(AktualizrToolsTests, cls).setUpClass()
         logger = logging.getLogger("selftest")
         logger.info('Running bitbake to build aktualizr-native tools')
-        bitbake('aktualizr-native')
+        bitbake('aktualizr-native aktualizr-device-prov')
+        bitbake('build-sysroots -c build_native_sysroot')
 
     def test_cert_provider_help(self):
         akt_native_run(self, 'aktualizr-cert-provider --help')
@@ -47,12 +48,11 @@ class AktualizrToolsTests(OESelftestTestCase):
     def test_cert_provider_local_output(self):
         logger = logging.getLogger("selftest")
         logger.info('Running bitbake to build aktualizr-device-prov')
-        bitbake('aktualizr-device-prov')
         bb_vars = get_bb_vars(['SOTA_PACKED_CREDENTIALS', 'T'], 'aktualizr-native')
         creds = bb_vars['SOTA_PACKED_CREDENTIALS']
         temp_dir = bb_vars['T']
-        bb_vars_prov = get_bb_vars(['STAGING_DIR_HOST', 'libdir'], 'aktualizr-device-prov')
-        config = bb_vars_prov['STAGING_DIR_HOST'] + bb_vars_prov['libdir'] + '/sota/sota-device-cred.toml'
+        bb_vars_prov = get_bb_vars(['WORKDIR', 'libdir'], 'aktualizr-device-prov')
+        config = bb_vars_prov['WORKDIR'] + '/sysroot-destdir' + bb_vars_prov['libdir'] + '/sota/conf.d/20-sota-device-cred.toml'
 
         akt_native_run(self, 'aktualizr-cert-provider -c {creds} -r -l {temp} -g {config}'
                        .format(creds=creds, temp=temp_dir, config=config))
@@ -173,8 +173,8 @@ class DeviceCredProvTests(OESelftestTestCase):
         self.append_config('MACHINE = "qemux86-64"')
         self.append_config('SOTA_CLIENT_PROV = " aktualizr-device-prov "')
         self.append_config('SOTA_DEPLOY_CREDENTIALS = "0"')
-        runCmd('bitbake -c cleanall aktualizr aktualizr-device-prov')
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
+        bitbake('build-sysroots -c build_native_sysroot')
 
     def tearDownLocal(self):
         qemu_terminate(self.s)
@@ -201,8 +201,8 @@ class DeviceCredProvTests(OESelftestTestCase):
         # Run aktualizr-cert-provider.
         bb_vars = get_bb_vars(['SOTA_PACKED_CREDENTIALS'], 'aktualizr-native')
         creds = bb_vars['SOTA_PACKED_CREDENTIALS']
-        bb_vars_prov = get_bb_vars(['STAGING_DIR_HOST', 'libdir'], 'aktualizr-device-prov')
-        config = bb_vars_prov['STAGING_DIR_HOST'] + bb_vars_prov['libdir'] + '/sota/sota-device-cred.toml'
+        bb_vars_prov = get_bb_vars(['WORKDIR', 'libdir'], 'aktualizr-device-prov')
+        config = bb_vars_prov['WORKDIR'] + '/sysroot-destdir' + bb_vars_prov['libdir'] + '/sota/conf.d/20-sota-device-cred.toml'
 
         print('Provisining at root@localhost:%d' % self.qemu.ssh_port)
         akt_native_run(self, 'aktualizr-cert-provider -c {creds} -t root@localhost -p {port} -s -u -r -g {config}'
@@ -231,8 +231,8 @@ class DeviceCredProvHsmTests(OESelftestTestCase):
         self.append_config('SOTA_DEPLOY_CREDENTIALS = "0"')
         self.append_config('SOTA_CLIENT_FEATURES = "hsm"')
         self.append_config('IMAGE_INSTALL_append = " softhsm-testtoken"')
-        runCmd('bitbake -c cleanall aktualizr aktualizr-device-prov-hsm')
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
+        bitbake('build-sysroots -c build_native_sysroot')
 
     def tearDownLocal(self):
         qemu_terminate(self.s)
@@ -269,8 +269,8 @@ class DeviceCredProvHsmTests(OESelftestTestCase):
         # Run aktualizr-cert-provider.
         bb_vars = get_bb_vars(['SOTA_PACKED_CREDENTIALS'], 'aktualizr-native')
         creds = bb_vars['SOTA_PACKED_CREDENTIALS']
-        bb_vars_prov = get_bb_vars(['STAGING_DIR_HOST', 'libdir'], 'aktualizr-device-prov-hsm')
-        config = bb_vars_prov['STAGING_DIR_HOST'] + bb_vars_prov['libdir'] + '/sota/sota-device-cred-hsm.toml'
+        bb_vars_prov = get_bb_vars(['WORKDIR', 'libdir'], 'aktualizr-device-prov-hsm')
+        config = bb_vars_prov['WORKDIR'] + '/sysroot-destdir' + bb_vars_prov['libdir'] + '/sota/conf.d/20-sota-device-cred-hsm.toml'
 
         akt_native_run(self, 'aktualizr-cert-provider -c {creds} -t root@localhost -p {port} -r -s -u -g {config}'
                        .format(creds=creds, port=self.qemu.ssh_port, config=config))
