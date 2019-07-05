@@ -7,3 +7,7 @@ RUN apt-get update -q && apt-get install -qy \
     git \
     repo \
     xmlstarlet
+
+# checkout script
+RUN mkdir /scripts
+COPY checkout-oe.sh /scripts/
