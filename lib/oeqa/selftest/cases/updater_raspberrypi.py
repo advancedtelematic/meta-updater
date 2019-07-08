@@ -7,6 +7,8 @@ import unittest
 from oeqa.selftest.case import OESelftestTestCase
 from oeqa.utils.commands import runCmd, bitbake, get_bb_var
 
+from testutils import metadir
+
 
 class RpiTests(OESelftestTestCase):
 
@@ -16,18 +18,13 @@ class RpiTests(OESelftestTestCase):
         layer_rpi = "meta-raspberrypi"
         layer_upd_rpi = "meta-updater-raspberrypi"
         result = runCmd('bitbake-layers show-layers')
-        # Assume the directory layout for finding other layers. We could also
-        # make assumptions by using 'show-layers', but either way, if the
-        # layers we need aren't where we expect them, we are out of luck.
-        path = os.path.abspath(os.path.dirname(__file__))
-        metadir = path + "/../../../../../"
         if re.search(layer_rpi, result.output) is None:
-            self.meta_rpi = metadir + layer_rpi
+            self.meta_rpi = metadir() + layer_rpi
             runCmd('bitbake-layers add-layer "%s"' % self.meta_rpi)
         else:
             self.meta_rpi = None
         if re.search(layer_upd_rpi, result.output) is None:
-            self.meta_upd_rpi = metadir + layer_upd_rpi
+            self.meta_upd_rpi = metadir() + layer_upd_rpi
             runCmd('bitbake-layers add-layer "%s"' % self.meta_upd_rpi)
         else:
             self.meta_upd_rpi = None
