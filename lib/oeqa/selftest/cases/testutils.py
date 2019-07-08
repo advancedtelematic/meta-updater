@@ -69,6 +69,16 @@ def qemu_send_command(port, command, timeout=60):
     return stdout, stderr, s2.returncode
 
 
+def metadir():
+    # Assume the directory layout for finding other layers. We could also
+    # make assumptions by using 'show-layers', but either way, if the
+    # layers we need aren't where we expect them, we are out of luck.
+    path = os.path.abspath(os.path.dirname(__file__))
+    metadir = path + "/../../../../../"
+
+    return metadir
+
+
 def akt_native_run(testInst, cmd, **kwargs):
     # run a command supplied by aktualizr-native and checks that:
     # - the executable exists

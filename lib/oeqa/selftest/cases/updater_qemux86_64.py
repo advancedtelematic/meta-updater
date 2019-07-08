@@ -9,7 +9,8 @@ from uuid import uuid4
 from oeqa.selftest.case import OESelftestTestCase
 from oeqa.utils.commands import runCmd, bitbake, get_bb_var, get_bb_vars
 from testutils import qemu_launch, qemu_send_command, qemu_terminate, \
-    akt_native_run, verifyNotProvisioned, verifyProvisioned, qemu_bake_image, qemu_boot_image
+    metadir, akt_native_run, verifyNotProvisioned, verifyProvisioned, \
+    qemu_bake_image, qemu_boot_image
 
 
 class GeneralTests(OESelftestTestCase):
@@ -46,8 +47,6 @@ class AktualizrToolsTests(OESelftestTestCase):
         akt_native_run(self, 'aktualizr-cert-provider --help')
 
     def test_cert_provider_local_output(self):
-        logger = logging.getLogger("selftest")
-        logger.info('Running bitbake to build aktualizr-device-prov')
         bb_vars = get_bb_vars(['SOTA_PACKED_CREDENTIALS', 'T'], 'aktualizr-native')
         creds = bb_vars['SOTA_PACKED_CREDENTIALS']
         temp_dir = bb_vars['T']
@@ -75,12 +74,7 @@ class SharedCredProvTests(OESelftestTestCase):
         layer = "meta-updater-qemux86-64"
         result = runCmd('bitbake-layers show-layers')
         if re.search(layer, result.output) is None:
-            # Assume the directory layout for finding other layers. We could also
-            # make assumptions by using 'show-layers', but either way, if the
-            # layers we need aren't where we expect them, we are out of luck.
-            path = os.path.abspath(os.path.dirname(__file__))
-            metadir = path + "/../../../../../"
-            self.meta_qemu = metadir + layer
+            self.meta_qemu = metadir() + layer
             runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
         else:
             self.meta_qemu = None
@@ -117,12 +111,7 @@ class ManualControlTests(OESelftestTestCase):
         layer = "meta-updater-qemux86-64"
         result = runCmd('bitbake-layers show-layers')
         if re.search(layer, result.output) is None:
-            # Assume the directory layout for finding other layers. We could also
-            # make assumptions by using 'show-layers', but either way, if the
-            # layers we need aren't where we expect them, we are out of like.
-            path = os.path.abspath(os.path.dirname(__file__))
-            metadir = path + "/../../../../../"
-            self.meta_qemu = metadir + layer
+            self.meta_qemu = metadir() + layer
             runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
         else:
             self.meta_qemu = None
@@ -161,12 +150,7 @@ class DeviceCredProvTests(OESelftestTestCase):
         layer = "meta-updater-qemux86-64"
         result = runCmd('bitbake-layers show-layers')
         if re.search(layer, result.output) is None:
-            # Assume the directory layout for finding other layers. We could also
-            # make assumptions by using 'show-layers', but either way, if the
-            # layers we need aren't where we expect them, we are out of luck.
-            path = os.path.abspath(os.path.dirname(__file__))
-            metadir = path + "/../../../../../"
-            self.meta_qemu = metadir + layer
+            self.meta_qemu = metadir() + layer
             runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
         else:
             self.meta_qemu = None
@@ -217,12 +201,7 @@ class DeviceCredProvHsmTests(OESelftestTestCase):
         layer = "meta-updater-qemux86-64"
         result = runCmd('bitbake-layers show-layers')
         if re.search(layer, result.output) is None:
-            # Assume the directory layout for finding other layers. We could also
-            # make assumptions by using 'show-layers', but either way, if the
-            # layers we need aren't where we expect them, we are out of luck.
-            path = os.path.abspath(os.path.dirname(__file__))
-            metadir = path + "/../../../../../"
-            self.meta_qemu = metadir + layer
+            self.meta_qemu = metadir() + layer
             runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
         else:
             self.meta_qemu = None
@@ -399,12 +378,7 @@ class IpSecondaryTests(OESelftestTestCase):
         layer = "meta-updater-qemux86-64"
         result = runCmd('bitbake-layers show-layers')
         if re.search(layer, result.output) is None:
-            # Assume the directory layout for finding other layers. We could also
-            # make assumptions by using 'show-layers', but either way, if the
-            # layers we need aren't where we expect them, we are out of luck.
-            path = os.path.abspath(os.path.dirname(__file__))
-            metadir = path + "/../../../../../"
-            self.meta_qemu = metadir + layer
+            self.meta_qemu = metadir() + layer
             runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
         else:
             self.meta_qemu = None
@@ -446,12 +420,7 @@ class ResourceControlTests(OESelftestTestCase):
         layer = "meta-updater-qemux86-64"
         result = runCmd('bitbake-layers show-layers')
         if re.search(layer, result.output) is None:
-            # Assume the directory layout for finding other layers. We could also
-            # make assumptions by using 'show-layers', but either way, if the
-            # layers we need aren't where we expect them, we are out of luck.
-            path = os.path.abspath(os.path.dirname(__file__))
-            metadir = path + "/../../../../../"
-            self.meta_qemu = metadir + layer
+            self.meta_qemu = metadir() + layer
             runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
         else:
             self.meta_qemu = None
