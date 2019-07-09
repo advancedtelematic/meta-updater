@@ -61,7 +61,7 @@ def qemu_bake_image(imagename):
     bitbake(imagename)
 
 
-def qemu_send_command(port, command, timeout=60):
+def qemu_send_command(port, command, timeout=120):
     command = ['ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@localhost -p ' +
                str(port) + ' "' + command + '"']
     s2 = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
