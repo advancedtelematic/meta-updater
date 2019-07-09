@@ -19,6 +19,9 @@ class GeneralTests(OESelftestTestCase):
         logger = logging.getLogger("selftest")
         logger.info('Running bitbake to build core-image-minimal')
         self.append_config('SOTA_CLIENT_PROV = "aktualizr-shared-prov"')
+
+        # note: this also tests ostreepush/garagesign/garagecheck which are
+        # omitted from other test cases
         bitbake('core-image-minimal')
         credentials = get_bb_var('SOTA_PACKED_CREDENTIALS')
         # skip the test if the variable SOTA_PACKED_CREDENTIALS is not set
@@ -81,6 +84,7 @@ class SharedCredProvTests(OESelftestTestCase):
             self.meta_qemu = None
         self.append_config('MACHINE = "qemux86-64"')
         self.append_config('SOTA_CLIENT_PROV = " aktualizr-shared-prov "')
+        self.append_config('IMAGE_FSTYPES_remove = "ostreepush garagesign garagecheck"')
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
     def tearDownLocal(self):
@@ -119,6 +123,7 @@ class ManualControlTests(OESelftestTestCase):
         self.append_config('MACHINE = "qemux86-64"')
         self.append_config('SOTA_CLIENT_PROV = " aktualizr-shared-prov "')
         self.append_config('SYSTEMD_AUTO_ENABLE_aktualizr = "disable"')
+        self.append_config('IMAGE_FSTYPES_remove = "ostreepush garagesign garagecheck"')
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
     def tearDownLocal(self):
@@ -158,6 +163,7 @@ class DeviceCredProvTests(OESelftestTestCase):
         self.append_config('MACHINE = "qemux86-64"')
         self.append_config('SOTA_CLIENT_PROV = " aktualizr-device-prov "')
         self.append_config('SOTA_DEPLOY_CREDENTIALS = "0"')
+        self.append_config('IMAGE_FSTYPES_remove = "ostreepush garagesign garagecheck"')
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
         bitbake('build-sysroots -c build_native_sysroot')
 
@@ -211,6 +217,7 @@ class DeviceCredProvHsmTests(OESelftestTestCase):
         self.append_config('SOTA_DEPLOY_CREDENTIALS = "0"')
         self.append_config('SOTA_CLIENT_FEATURES = "hsm"')
         self.append_config('IMAGE_INSTALL_append = " softhsm-testtoken"')
+        self.append_config('IMAGE_FSTYPES_remove = "ostreepush garagesign garagecheck"')
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
         bitbake('build-sysroots -c build_native_sysroot')
 
@@ -384,6 +391,7 @@ class IpSecondaryTests(OESelftestTestCase):
         else:
             self.meta_qemu = None
 
+        self.append_config('IMAGE_FSTYPES_remove = "ostreepush garagesign garagecheck"')
         self.primary = IpSecondaryTests.Primary(self)
         self.secondary = IpSecondaryTests.Secondary(self)
 
@@ -427,6 +435,7 @@ class ResourceControlTests(OESelftestTestCase):
             self.meta_qemu = None
         self.append_config('MACHINE = "qemux86-64"')
         self.append_config('SOTA_CLIENT_PROV = " aktualizr-shared-prov "')
+        self.append_config('IMAGE_FSTYPES_remove = "ostreepush garagesign garagecheck"')
         self.append_config('IMAGE_INSTALL_append += " aktualizr-resource-control "')
         self.append_config('RESOURCE_CPU_WEIGHT_pn-aktualizr = "1000"')
         self.append_config('RESOURCE_MEMORY_HIGH_pn-aktualizr = "50M"')
