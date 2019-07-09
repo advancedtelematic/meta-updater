@@ -21,6 +21,7 @@ class PtestTests(OESelftestTestCase):
         self.append_config('SYSTEMD_AUTO_ENABLE_aktualizr = "disable"')
         self.append_config('PTEST_ENABLED_pn-aktualizr = "1"')
         self.append_config('IMAGE_INSTALL_append += "aktualizr-ptest ptest-runner "')
+        self.append_config('IMAGE_FSTYPES_remove = "ostreepush garagesign garagecheck"')
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
     def tearDownLocal(self):
