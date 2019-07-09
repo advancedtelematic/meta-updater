@@ -2,6 +2,7 @@
 import os
 import logging
 import re
+import subprocess
 import unittest
 from time import sleep
 from uuid import uuid4
@@ -307,8 +308,8 @@ class IpSecondaryTests(OESelftestTestCase):
             self.configure()
             qemu_bake_image(self.imagename)
 
-        def send_command(self, cmd):
-            stdout, stderr, retcode = qemu_send_command(self.qemu.ssh_port, cmd, timeout=60)
+        def send_command(self, cmd, timeout=60):
+            stdout, stderr, retcode = qemu_send_command(self.qemu.ssh_port, cmd, timeout=timeout)
             return str(stdout), str(stderr), retcode
 
         def __enter__(self):
@@ -323,7 +324,7 @@ class IpSecondaryTests(OESelftestTestCase):
         def wait_till_sshable(self):
             # qemu_send_command tries to ssh into the qemu VM and blocks until it gets there or timeout happens
             # so it helps us to block q control flow until the VM is booted and a target binary/daemon is running there
-            self.stdout, self.stderr, self.retcode = self.send_command(self.binaryname + ' --help')
+            self.stdout, self.stderr, self.retcode = self.send_command(self.binaryname + ' --help', timeout=300)
 
         def was_successfully_booted(self):
             return self.retcode == 0
@@ -445,10 +446,13 @@ class ResourceControlTests(OESelftestTestCase):
         ran_ok = False
         for delay in [5, 5, 5, 5]:
             sleep(delay)
-            stdout, stderr, retcode = self.qemu_command('systemctl --no-pager show aktualizr')
-            if retcode == 0 and b'ExecMainStatus=9' in stdout:
-                ran_ok = True
-                break
+            try:
+                stdout, stderr, retcode = self.qemu_command('systemctl --no-pager show aktualizr')
+                if retcode == 0 and b'ExecMainStatus=9' in stdout:
+                    ran_ok = True
+                    break
+            except subprocess.TimeoutExpired:
+                pass
         self.assertTrue(ran_ok, 'Aktualizr was not killed')
 
         self.assertIn(b'CPUWeight=1000', stdout, 'CPUWeight was not set correctly')
