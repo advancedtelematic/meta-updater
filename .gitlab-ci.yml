@@ -1,0 +1,91 @@
+stages:
+  - docker
+  - checkout
+  - test
+
+variables:
+  BITBAKE_IMAGE: ${CI_REGISTRY_IMAGE}:ci-master-bitbake
+  BITBAKE_CHECKOUT_IMAGE: ${CI_REGISTRY_IMAGE}:ci-master-checkout
+
+include:
+  - project: 'olp/edge/ota/connect/client/meta-updater'
+    ref: 'master'
+    file: 'scripts/ci/gitlab/docker.yml'
+  - project: 'olp/edge/ota/connect/client/meta-updater'
+    ref: 'master'
+    file: 'scripts/ci/gitlab/checkout.yml'
+  - project: 'olp/edge/ota/connect/client/meta-updater'
+    ref: 'master'
+    file: 'scripts/ci/gitlab/tests.yml'
+
+Docker setup:
+  extends: .bb_docker_remote
+
+  stage: docker
+  except:
+    - pushes
+
+Checkout:
+  extends: .bb_checkout
+
+  stage: checkout
+  variables:
+    MANIFEST: rocko
+    CURRENT_PROJECT: meta-updater
+  except:
+    - pushes
+
+Build core-image-minimal:
+  extends: .bitbake
+
+  stage: test
+  variables:
+    TEST_BUILD_DIR: 'build-core-image-minimal'
+    BITBAKE_TARGETS: 'core-image-minimal'
+  except:
+    - pushes
+
+Oe-selftest qemux86_64:
+  extends: .oe-selftest
+
+  stage: test
+  variables:
+    TEST_BUILD_DIR: 'build-oe-qemux86_64'
+    OE_SELFTESTS: 'updater_native updater_qemux86_64'
+  except:
+    - pushes
+
+Oe-selftest minnowboard:
+  extends: .oe-selftest
+
+  stage: test
+  variables:
+    TEST_BUILD_DIR: 'build-oe-minnowboard'
+    OE_SELFTESTS: 'updater_minnowboard'
+  except:
+    - pushes
+
+Oe-selftest rpi:
+  extends: .oe-selftest
+
+  stage: test
+  variables:
+    TEST_BUILD_DIR: 'build-oe-rpi'
+    OE_SELFTESTS: 'updater_raspberrypi'
+  except:
+    - pushes
+
+# Not run by default
+
+Ptest qemux86_64:
+  extends: .oe-selftest
+
+  stage: test
+  variables:
+    TEST_BUILD_DIR: 'build-oe-qemux86_64-ptest'
+    OE_SELFTESTS: 'updater_qemux86_64_ptest'
+  except:
+    - pushes
+  only:
+    variables:
+      - $OE_PTEST
