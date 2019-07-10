@@ -372,7 +372,7 @@ class IpSecondaryTests(OESelftestTestCase):
             self._test_ctx.append_config('SOTA_CLIENT_PROV = " aktualizr-shared-prov "')
 
         def is_ecu_registered(self, ecu_id):
-            max_number_of_tries = 20
+            max_number_of_tries = 40
             try_counter = 0
 
             # aktualizr-info is not always able to load ECU serials from DB
