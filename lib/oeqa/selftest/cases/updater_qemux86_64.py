@@ -263,18 +263,17 @@ class DeviceCredProvHsmTests(OESelftestTestCase):
                        .format(creds=creds, port=self.qemu.ssh_port, config=config))
 
         # Verify that HSM is able to initialize.
-        ran_ok = False
         for delay in [5, 5, 5, 5, 10]:
             sleep(delay)
             p11_out, p11_err, p11_ret = self.qemu_command(pkcs11_command)
             hsm_out, hsm_err, hsm_ret = self.qemu_command(softhsm2_command)
-            if p11_ret == 0 and hsm_ret == 0 and hsm_err == b'':
-                ran_ok = True
+            if (p11_ret == 0 and hsm_ret == 0 and hsm_err == b'' and
+                    b'X.509 cert' in p11_out and b'present token' in p11_err):
                 break
-        self.assertTrue(ran_ok, 'pkcs11-tool or softhsm2-tool failed: ' + p11_err.decode() +
-                        p11_out.decode() + hsm_err.decode() + hsm_out.decode())
-        self.assertIn(b'present token', p11_err, 'pkcs11-tool failed: ' + p11_err.decode() + p11_out.decode())
-        self.assertIn(b'X.509 cert', p11_out, 'pkcs11-tool failed: ' + p11_err.decode() + p11_out.decode())
+        else:
+            self.fail('pkcs11-tool or softhsm2-tool failed: ' + p11_err.decode() +
+                      p11_out.decode() + hsm_err.decode() + hsm_out.decode())
+
         self.assertIn(b'Initialized:      yes', hsm_out, 'softhsm2-tool failed: ' +
                       hsm_err.decode() + hsm_out.decode())
         self.assertIn(b'User PIN init.:   yes', hsm_out, 'softhsm2-tool failed: ' +
