@@ -4,7 +4,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda
 
 inherit systemd
 
-RDEPENDS_${PN} = "softhsm libp11 openssl-bin"
+RDEPENDS_${PN} = "softhsm libp11 opensc openssl-bin"
 DEPENDS_append = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', ' systemd', '', d)}"
 
 
