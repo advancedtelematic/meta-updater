@@ -2,7 +2,7 @@ from os.path import exists, join, realpath, abspath
 from os import listdir
 import random
 import socket
-from subprocess import check_output, CalledProcessError
+from subprocess import check_output
 
 EXTENSIONS = {
     'intel-corei7-64': 'wic',
@@ -68,6 +68,10 @@ class QemuCommand(object):
             self.mac_address = random_mac()
         self.serial_port = find_local_port(8990)
         self.ssh_port = find_local_port(2222)
+        if args.mem:
+            self.mem = args.mem
+        else:
+            self.mem = "1G"
         if args.kvm is None:
             # Autodetect KVM using 'kvm-ok'
             try:
@@ -95,7 +99,7 @@ class QemuCommand(object):
             cmdline += ["-drive", "file=%s,if=ide,format=raw,snapshot=on" % self.image]
         cmdline += [
             "-serial", "tcp:127.0.0.1:%d,server,nowait" % self.serial_port,
-            "-m", "1G",
+            "-m", self.mem,
             "-usb",
             "-object", "rng-random,id=rng0,filename=/dev/urandom",
             "-device", "virtio-rng-pci,rng=rng0",
@@ -131,4 +135,3 @@ class QemuCommand(object):
             "-f", "qcow2",
             self.overlay]
         return cmdline
-

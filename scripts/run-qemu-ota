@@ -26,6 +26,7 @@ def main():
                            dest='kvm', action='store_true', default=None)
     kvm_group.add_argument('--no-kvm', help='Disable KVM in QEMU',
                            dest='kvm', action='store_false')
+    parser.add_argument('--mem', default=None, help="Amount of memory the machine boots with")
     parser.add_argument('--no-gui', help='Disable GUI', action='store_true')
     parser.add_argument('--gdb', help='Export gdbserver port 2159 from the image', action='store_true')
     parser.add_argument('--pcap', default=None, help='Dump all network traffic')
