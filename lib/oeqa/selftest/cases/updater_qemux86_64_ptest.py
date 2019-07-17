@@ -41,7 +41,7 @@ class PtestTests(OESelftestTestCase):
         if has_failure:
             print("Full test suite log:")
             stdout, _, _ = self.qemu_command('cat /tmp/aktualizr-ptest.log || cat /tmp/aktualizr-ptest.log.tmp', timeout=None)
-            print(stdout.decode())
+            print(stdout.decode(errors='replace'))
 
         self.assertEqual(retcode, 0)
         self.assertFalse(has_failure)
