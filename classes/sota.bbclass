@@ -62,6 +62,7 @@ SOTA_MACHINE_h3ulcb = "h3ulcb"
 SOTA_MACHINE_intel-corei7-64 ?= "minnowboard"
 SOTA_MACHINE_qemux86-64 ?= "qemux86-64"
 SOTA_MACHINE_am335x-evm ?= "am335x-evm"
+SOTA_MACHINE_am65xx-evm ?= "am65xx-evm"
 
 inherit sota_${SOTA_MACHINE}
 
