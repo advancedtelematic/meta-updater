@@ -1,9 +1,8 @@
-import os
 import re
 
 from oeqa.selftest.case import OESelftestTestCase
 from oeqa.utils.commands import runCmd, get_bb_var
-from testutils import qemu_launch, qemu_send_command, qemu_terminate, verifyProvisioned
+from testutils import metadir, qemu_launch, qemu_send_command, qemu_terminate, verifyProvisioned
 
 
 class MinnowTests(OESelftestTestCase):
@@ -12,18 +11,13 @@ class MinnowTests(OESelftestTestCase):
         layer_intel = "meta-intel"
         layer_minnow = "meta-updater-minnowboard"
         result = runCmd('bitbake-layers show-layers')
-        # Assume the directory layout for finding other layers. We could also
-        # make assumptions by using 'show-layers', but either way, if the
-        # layers we need aren't where we expect them, we are out of luck.
-        path = os.path.abspath(os.path.dirname(__file__))
-        metadir = path + "/../../../../../"
         if re.search(layer_intel, result.output) is None:
-            self.meta_intel = metadir + layer_intel
+            self.meta_intel = metadir() + layer_intel
             runCmd('bitbake-layers add-layer "%s"' % self.meta_intel)
         else:
             self.meta_intel = None
         if re.search(layer_minnow, result.output) is None:
-            self.meta_minnow = metadir + layer_minnow
+            self.meta_minnow = metadir() + layer_minnow
             runCmd('bitbake-layers add-layer "%s"' % self.meta_minnow)
         else:
             self.meta_minnow = None

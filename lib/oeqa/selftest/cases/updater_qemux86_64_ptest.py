@@ -1,10 +1,9 @@
 # pylint: disable=C0111,C0325
-import os
 import re
 
 from oeqa.selftest.case import OESelftestTestCase
 from oeqa.utils.commands import runCmd
-from testutils import qemu_launch, qemu_send_command, qemu_terminate
+from testutils import metadir, qemu_launch, qemu_send_command, qemu_terminate
 
 
 class PtestTests(OESelftestTestCase):
@@ -13,12 +12,7 @@ class PtestTests(OESelftestTestCase):
         layer = "meta-updater-qemux86-64"
         result = runCmd('bitbake-layers show-layers')
         if re.search(layer, result.output) is None:
-            # Assume the directory layout for finding other layers. We could also
-            # make assumptions by using 'show-layers', but either way, if the
-            # layers we need aren't where we expect them, we are out of like.
-            path = os.path.abspath(os.path.dirname(__file__))
-            metadir = path + "/../../../../../"
-            self.meta_qemu = metadir + layer
+            self.meta_qemu = metadir() + layer
             runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
         else:
             self.meta_qemu = None
@@ -26,7 +20,8 @@ class PtestTests(OESelftestTestCase):
         self.append_config('SYSTEMD_AUTO_ENABLE_aktualizr = "disable"')
         self.append_config('PTEST_ENABLED_pn-aktualizr = "1"')
         self.append_config('IMAGE_INSTALL_append += "aktualizr-ptest ptest-runner "')
-        self.qemu, self.s = qemu_launch(machine='qemux86-64')
+        self.append_config('IMAGE_FSTYPES_remove = "ostreepush garagesign garagecheck"')
+        self.qemu, self.s = qemu_launch(machine='qemux86-64', mem="256M")
 
     def tearDownLocal(self):
         qemu_terminate(self.s)
