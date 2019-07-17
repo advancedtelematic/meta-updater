@@ -93,7 +93,7 @@ def verifyNotProvisioned(testInst, machine):
     print('Checking output of aktualizr-info:')
     ran_ok = False
     for delay in [5, 5, 5, 5, 10, 10, 10, 10]:
-        stdout, stderr, retcode = testInst.qemu_command('aktualizr-info')
+        stdout, stderr, retcode = testInst.qemu_command('aktualizr-info --wait-until-provisioned')
         if retcode == 0 and stderr == b'':
             ran_ok = True
             break
@@ -115,7 +115,7 @@ def verifyProvisioned(testInst, machine):
     # Verify that device HAS provisioned.
     ran_ok = False
     for delay in [5, 5, 5, 5, 10, 10, 10, 10]:
-        stdout, stderr, retcode = testInst.qemu_command('aktualizr-info')
+        stdout, stderr, retcode = testInst.qemu_command('aktualizr-info --wait-until-provisioned')
         if retcode == 0 and stderr == b'' and stdout.decode().find('Fetched metadata: yes') >= 0:
             ran_ok = True
             break

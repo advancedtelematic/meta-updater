@@ -150,7 +150,7 @@ class ManualControlTests(OESelftestTestCase):
 
         stdout, stderr, retcode = self.qemu_command('aktualizr once')
 
-        stdout, stderr, retcode = self.qemu_command('aktualizr-info')
+        stdout, stderr, retcode = self.qemu_command('aktualizr-info --wait-until-provisioned')
         self.assertIn(b'Fetched metadata: yes', stdout,
                       'Aktualizr should have run' + stderr.decode() + stdout.decode())
 
