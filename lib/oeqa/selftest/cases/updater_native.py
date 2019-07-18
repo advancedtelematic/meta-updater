@@ -14,6 +14,7 @@ class SotaToolsTests(OESelftestTestCase):
         logger = logging.getLogger("selftest")
         logger.info('Running bitbake to build aktualizr-native tools')
         bitbake('aktualizr-native')
+        bitbake('build-sysroots -c build_native_sysroot')
 
     def test_push_help(self):
         akt_native_run(self, 'garage-push --help')

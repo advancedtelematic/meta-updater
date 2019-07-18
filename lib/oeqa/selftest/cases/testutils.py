@@ -1,4 +1,5 @@
 import os
+import oe.path
 import logging
 import re
 import subprocess
@@ -33,6 +34,7 @@ def qemu_boot_image(imagename, **kwargs):
     args.dir = 'tmp/deploy/images'
     args.efi = kwargs.get('efi', False)
     args.machine = kwargs.get('machine', None)
+    args.mem = kwargs.get('mem', '128M')
     qemu_use_kvm = get_bb_var("QEMU_USE_KVM")
     if qemu_use_kvm and \
             (qemu_use_kvm == 'True' and 'x86' in args.machine or
@@ -60,7 +62,7 @@ def qemu_bake_image(imagename):
     bitbake(imagename)
 
 
-def qemu_send_command(port, command, timeout=60):
+def qemu_send_command(port, command, timeout=120):
     command = ['ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@localhost -p ' +
                str(port) + ' "' + command + '"']
     s2 = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -68,24 +70,30 @@ def qemu_send_command(port, command, timeout=60):
     return stdout, stderr, s2.returncode
 
 
+def metadir():
+    # Assume the directory layout for finding other layers. We could also
+    # make assumptions by using 'show-layers', but either way, if the
+    # layers we need aren't where we expect them, we are out of luck.
+    path = os.path.abspath(os.path.dirname(__file__))
+    metadir = path + "/../../../../../"
+
+    return metadir
+
+
 def akt_native_run(testInst, cmd, **kwargs):
     # run a command supplied by aktualizr-native and checks that:
     # - the executable exists
     # - the command runs without error
-    # NOTE: the base test class must have built aktualizr-native (in
-    # setUpClass, for example)
-    bb_vars = get_bb_vars(['SYSROOT_DESTDIR', 'base_prefix', 'libdir', 'bindir'],
-                          'aktualizr-native')
-    sysroot = bb_vars['SYSROOT_DESTDIR'] + bb_vars['base_prefix']
-    sysrootbin = bb_vars['SYSROOT_DESTDIR'] + bb_vars['bindir']
-    libdir = bb_vars['libdir']
+    #
+    # Requirements in base test class (setUpClass for example):
+    #   bitbake aktualizr-native
+    #   bitbake build-sysroots -c build_native_sysroot
+    #
+    # (technique found in poky/meta/lib/oeqa/selftest/cases/package.py)
+    bb_vars = get_bb_vars(['STAGING_DIR', 'BUILD_ARCH'])
+    sysroot = oe.path.join(bb_vars['STAGING_DIR'], bb_vars['BUILD_ARCH'])
 
-    program, *_ = cmd.split(' ')
-    p = '{}/{}'.format(sysrootbin, program)
-    testInst.assertTrue(os.path.isfile(p), msg="No {} found ({})".format(program, p))
-    env = dict(os.environ)
-    env['LD_LIBRARY_PATH'] = libdir
-    result = runCmd(cmd, env=env, native_sysroot=sysroot, ignore_status=True, **kwargs)
+    result = runCmd(cmd, native_sysroot=sysroot, ignore_status=True, **kwargs)
     testInst.assertEqual(result.status, 0, "Status not equal to 0. output: %s" % result.output)
 
 

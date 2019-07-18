@@ -2,6 +2,7 @@
 import os
 import logging
 import re
+import subprocess
 import unittest
 from time import sleep
 from uuid import uuid4
@@ -9,7 +10,8 @@ from uuid import uuid4
 from oeqa.selftest.case import OESelftestTestCase
 from oeqa.utils.commands import runCmd, bitbake, get_bb_var, get_bb_vars
 from testutils import qemu_launch, qemu_send_command, qemu_terminate, \
-    akt_native_run, verifyNotProvisioned, verifyProvisioned, qemu_bake_image, qemu_boot_image
+    metadir, akt_native_run, verifyNotProvisioned, verifyProvisioned, \
+    qemu_bake_image, qemu_boot_image
 
 
 class GeneralTests(OESelftestTestCase):
@@ -17,6 +19,9 @@ class GeneralTests(OESelftestTestCase):
         logger = logging.getLogger("selftest")
         logger.info('Running bitbake to build core-image-minimal')
         self.append_config('SOTA_CLIENT_PROV = "aktualizr-shared-prov"')
+
+        # note: this also tests ostreepush/garagesign/garagecheck which are
+        # omitted from other test cases
         bitbake('core-image-minimal')
         credentials = get_bb_var('SOTA_PACKED_CREDENTIALS')
         # skip the test if the variable SOTA_PACKED_CREDENTIALS is not set
@@ -39,20 +44,18 @@ class AktualizrToolsTests(OESelftestTestCase):
         super(AktualizrToolsTests, cls).setUpClass()
         logger = logging.getLogger("selftest")
         logger.info('Running bitbake to build aktualizr-native tools')
-        bitbake('aktualizr-native')
+        bitbake('aktualizr-native aktualizr-device-prov')
+        bitbake('build-sysroots -c build_native_sysroot')
 
     def test_cert_provider_help(self):
         akt_native_run(self, 'aktualizr-cert-provider --help')
 
     def test_cert_provider_local_output(self):
-        logger = logging.getLogger("selftest")
-        logger.info('Running bitbake to build aktualizr-device-prov')
-        bitbake('aktualizr-device-prov')
         bb_vars = get_bb_vars(['SOTA_PACKED_CREDENTIALS', 'T'], 'aktualizr-native')
         creds = bb_vars['SOTA_PACKED_CREDENTIALS']
         temp_dir = bb_vars['T']
-        bb_vars_prov = get_bb_vars(['STAGING_DIR_HOST', 'libdir'], 'aktualizr-device-prov')
-        config = bb_vars_prov['STAGING_DIR_HOST'] + bb_vars_prov['libdir'] + '/sota/sota-device-cred.toml'
+        bb_vars_prov = get_bb_vars(['WORKDIR', 'libdir'], 'aktualizr-device-prov')
+        config = bb_vars_prov['WORKDIR'] + '/sysroot-destdir' + bb_vars_prov['libdir'] + '/sota/conf.d/20-sota-device-cred.toml'
 
         akt_native_run(self, 'aktualizr-cert-provider -c {creds} -r -l {temp} -g {config}'
                        .format(creds=creds, temp=temp_dir, config=config))
@@ -75,17 +78,13 @@ class SharedCredProvTests(OESelftestTestCase):
         layer = "meta-updater-qemux86-64"
         result = runCmd('bitbake-layers show-layers')
         if re.search(layer, result.output) is None:
-            # Assume the directory layout for finding other layers. We could also
-            # make assumptions by using 'show-layers', but either way, if the
-            # layers we need aren't where we expect them, we are out of luck.
-            path = os.path.abspath(os.path.dirname(__file__))
-            metadir = path + "/../../../../../"
-            self.meta_qemu = metadir + layer
+            self.meta_qemu = metadir() + layer
             runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
         else:
             self.meta_qemu = None
         self.append_config('MACHINE = "qemux86-64"')
         self.append_config('SOTA_CLIENT_PROV = " aktualizr-shared-prov "')
+        self.append_config('IMAGE_FSTYPES_remove = "ostreepush garagesign garagecheck"')
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
     def tearDownLocal(self):
@@ -117,18 +116,14 @@ class ManualControlTests(OESelftestTestCase):
         layer = "meta-updater-qemux86-64"
         result = runCmd('bitbake-layers show-layers')
         if re.search(layer, result.output) is None:
-            # Assume the directory layout for finding other layers. We could also
-            # make assumptions by using 'show-layers', but either way, if the
-            # layers we need aren't where we expect them, we are out of like.
-            path = os.path.abspath(os.path.dirname(__file__))
-            metadir = path + "/../../../../../"
-            self.meta_qemu = metadir + layer
+            self.meta_qemu = metadir() + layer
             runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
         else:
             self.meta_qemu = None
         self.append_config('MACHINE = "qemux86-64"')
         self.append_config('SOTA_CLIENT_PROV = " aktualizr-shared-prov "')
         self.append_config('SYSTEMD_AUTO_ENABLE_aktualizr = "disable"')
+        self.append_config('IMAGE_FSTYPES_remove = "ostreepush garagesign garagecheck"')
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
     def tearDownLocal(self):
@@ -161,20 +156,16 @@ class DeviceCredProvTests(OESelftestTestCase):
         layer = "meta-updater-qemux86-64"
         result = runCmd('bitbake-layers show-layers')
         if re.search(layer, result.output) is None:
-            # Assume the directory layout for finding other layers. We could also
-            # make assumptions by using 'show-layers', but either way, if the
-            # layers we need aren't where we expect them, we are out of luck.
-            path = os.path.abspath(os.path.dirname(__file__))
-            metadir = path + "/../../../../../"
-            self.meta_qemu = metadir + layer
+            self.meta_qemu = metadir() + layer
             runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
         else:
             self.meta_qemu = None
         self.append_config('MACHINE = "qemux86-64"')
         self.append_config('SOTA_CLIENT_PROV = " aktualizr-device-prov "')
         self.append_config('SOTA_DEPLOY_CREDENTIALS = "0"')
-        runCmd('bitbake -c cleanall aktualizr aktualizr-device-prov')
+        self.append_config('IMAGE_FSTYPES_remove = "ostreepush garagesign garagecheck"')
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
+        bitbake('build-sysroots -c build_native_sysroot')
 
     def tearDownLocal(self):
         qemu_terminate(self.s)
@@ -201,8 +192,8 @@ class DeviceCredProvTests(OESelftestTestCase):
         # Run aktualizr-cert-provider.
         bb_vars = get_bb_vars(['SOTA_PACKED_CREDENTIALS'], 'aktualizr-native')
         creds = bb_vars['SOTA_PACKED_CREDENTIALS']
-        bb_vars_prov = get_bb_vars(['STAGING_DIR_HOST', 'libdir'], 'aktualizr-device-prov')
-        config = bb_vars_prov['STAGING_DIR_HOST'] + bb_vars_prov['libdir'] + '/sota/sota-device-cred.toml'
+        bb_vars_prov = get_bb_vars(['WORKDIR', 'libdir'], 'aktualizr-device-prov')
+        config = bb_vars_prov['WORKDIR'] + '/sysroot-destdir' + bb_vars_prov['libdir'] + '/sota/conf.d/20-sota-device-cred.toml'
 
         print('Provisining at root@localhost:%d' % self.qemu.ssh_port)
         akt_native_run(self, 'aktualizr-cert-provider -c {creds} -t root@localhost -p {port} -s -u -r -g {config}'
@@ -217,12 +208,7 @@ class DeviceCredProvHsmTests(OESelftestTestCase):
         layer = "meta-updater-qemux86-64"
         result = runCmd('bitbake-layers show-layers')
         if re.search(layer, result.output) is None:
-            # Assume the directory layout for finding other layers. We could also
-            # make assumptions by using 'show-layers', but either way, if the
-            # layers we need aren't where we expect them, we are out of luck.
-            path = os.path.abspath(os.path.dirname(__file__))
-            metadir = path + "/../../../../../"
-            self.meta_qemu = metadir + layer
+            self.meta_qemu = metadir() + layer
             runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
         else:
             self.meta_qemu = None
@@ -231,8 +217,9 @@ class DeviceCredProvHsmTests(OESelftestTestCase):
         self.append_config('SOTA_DEPLOY_CREDENTIALS = "0"')
         self.append_config('SOTA_CLIENT_FEATURES = "hsm"')
         self.append_config('IMAGE_INSTALL_append = " softhsm-testtoken"')
-        runCmd('bitbake -c cleanall aktualizr aktualizr-device-prov-hsm')
+        self.append_config('IMAGE_FSTYPES_remove = "ostreepush garagesign garagecheck"')
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
+        bitbake('build-sysroots -c build_native_sysroot')
 
     def tearDownLocal(self):
         qemu_terminate(self.s)
@@ -269,25 +256,24 @@ class DeviceCredProvHsmTests(OESelftestTestCase):
         # Run aktualizr-cert-provider.
         bb_vars = get_bb_vars(['SOTA_PACKED_CREDENTIALS'], 'aktualizr-native')
         creds = bb_vars['SOTA_PACKED_CREDENTIALS']
-        bb_vars_prov = get_bb_vars(['STAGING_DIR_NATIVE', 'libdir'], 'aktualizr-device-prov-hsm')
-        config = bb_vars_prov['STAGING_DIR_NATIVE'] + bb_vars_prov['libdir'] + '/sota/sota-device-cred-hsm.toml'
+        bb_vars_prov = get_bb_vars(['WORKDIR', 'libdir'], 'aktualizr-device-prov-hsm')
+        config = bb_vars_prov['WORKDIR'] + '/sysroot-destdir' + bb_vars_prov['libdir'] + '/sota/conf.d/20-sota-device-cred-hsm.toml'
 
         akt_native_run(self, 'aktualizr-cert-provider -c {creds} -t root@localhost -p {port} -r -s -u -g {config}'
                        .format(creds=creds, port=self.qemu.ssh_port, config=config))
 
         # Verify that HSM is able to initialize.
-        ran_ok = False
         for delay in [5, 5, 5, 5, 10]:
             sleep(delay)
             p11_out, p11_err, p11_ret = self.qemu_command(pkcs11_command)
             hsm_out, hsm_err, hsm_ret = self.qemu_command(softhsm2_command)
-            if p11_ret == 0 and hsm_ret == 0 and hsm_err == b'':
-                ran_ok = True
+            if (p11_ret == 0 and hsm_ret == 0 and hsm_err == b'' and
+                    b'X.509 cert' in p11_out and b'present token' in p11_err):
                 break
-        self.assertTrue(ran_ok, 'pkcs11-tool or softhsm2-tool failed: ' + p11_err.decode() +
-                        p11_out.decode() + hsm_err.decode() + hsm_out.decode())
-        self.assertIn(b'present token', p11_err, 'pkcs11-tool failed: ' + p11_err.decode() + p11_out.decode())
-        self.assertIn(b'X.509 cert', p11_out, 'pkcs11-tool failed: ' + p11_err.decode() + p11_out.decode())
+        else:
+            self.fail('pkcs11-tool or softhsm2-tool failed: ' + p11_err.decode() +
+                      p11_out.decode() + hsm_err.decode() + hsm_out.decode())
+
         self.assertIn(b'Initialized:      yes', hsm_out, 'softhsm2-tool failed: ' +
                       hsm_err.decode() + hsm_out.decode())
         self.assertIn(b'User PIN init.:   yes', hsm_out, 'softhsm2-tool failed: ' +
@@ -328,8 +314,8 @@ class IpSecondaryTests(OESelftestTestCase):
             self.configure()
             qemu_bake_image(self.imagename)
 
-        def send_command(self, cmd):
-            stdout, stderr, retcode = qemu_send_command(self.qemu.ssh_port, cmd, timeout=60)
+        def send_command(self, cmd, timeout=60):
+            stdout, stderr, retcode = qemu_send_command(self.qemu.ssh_port, cmd, timeout=timeout)
             return str(stdout), str(stderr), retcode
 
         def __enter__(self):
@@ -344,7 +330,7 @@ class IpSecondaryTests(OESelftestTestCase):
         def wait_till_sshable(self):
             # qemu_send_command tries to ssh into the qemu VM and blocks until it gets there or timeout happens
             # so it helps us to block q control flow until the VM is booted and a target binary/daemon is running there
-            self.stdout, self.stderr, self.retcode = self.send_command(self.binaryname + ' --help')
+            self.stdout, self.stderr, self.retcode = self.send_command(self.binaryname + ' --help', timeout=300)
 
         def was_successfully_booted(self):
             return self.retcode == 0
@@ -399,16 +385,12 @@ class IpSecondaryTests(OESelftestTestCase):
         layer = "meta-updater-qemux86-64"
         result = runCmd('bitbake-layers show-layers')
         if re.search(layer, result.output) is None:
-            # Assume the directory layout for finding other layers. We could also
-            # make assumptions by using 'show-layers', but either way, if the
-            # layers we need aren't where we expect them, we are out of luck.
-            path = os.path.abspath(os.path.dirname(__file__))
-            metadir = path + "/../../../../../"
-            self.meta_qemu = metadir + layer
+            self.meta_qemu = metadir() + layer
             runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
         else:
             self.meta_qemu = None
 
+        self.append_config('IMAGE_FSTYPES_remove = "ostreepush garagesign garagecheck"')
         self.primary = IpSecondaryTests.Primary(self)
         self.secondary = IpSecondaryTests.Secondary(self)
 
@@ -446,17 +428,13 @@ class ResourceControlTests(OESelftestTestCase):
         layer = "meta-updater-qemux86-64"
         result = runCmd('bitbake-layers show-layers')
         if re.search(layer, result.output) is None:
-            # Assume the directory layout for finding other layers. We could also
-            # make assumptions by using 'show-layers', but either way, if the
-            # layers we need aren't where we expect them, we are out of luck.
-            path = os.path.abspath(os.path.dirname(__file__))
-            metadir = path + "/../../../../../"
-            self.meta_qemu = metadir + layer
+            self.meta_qemu = metadir() + layer
             runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
         else:
             self.meta_qemu = None
         self.append_config('MACHINE = "qemux86-64"')
         self.append_config('SOTA_CLIENT_PROV = " aktualizr-shared-prov "')
+        self.append_config('IMAGE_FSTYPES_remove = "ostreepush garagesign garagecheck"')
         self.append_config('IMAGE_INSTALL_append += " aktualizr-resource-control "')
         self.append_config('RESOURCE_CPU_WEIGHT_pn-aktualizr = "1000"')
         self.append_config('RESOURCE_MEMORY_HIGH_pn-aktualizr = "50M"')
@@ -476,10 +454,13 @@ class ResourceControlTests(OESelftestTestCase):
         ran_ok = False
         for delay in [5, 5, 5, 5]:
             sleep(delay)
-            stdout, stderr, retcode = self.qemu_command('systemctl --no-pager show aktualizr')
-            if retcode == 0 and b'ExecMainStatus=9' in stdout:
-                ran_ok = True
-                break
+            try:
+                stdout, stderr, retcode = self.qemu_command('systemctl --no-pager show aktualizr')
+                if retcode == 0 and b'ExecMainStatus=9' in stdout:
+                    ran_ok = True
+                    break
+            except subprocess.TimeoutExpired:
+                pass
         self.assertTrue(ran_ok, 'Aktualizr was not killed')
 
         self.assertIn(b'CPUWeight=1000', stdout, 'CPUWeight was not set correctly')
