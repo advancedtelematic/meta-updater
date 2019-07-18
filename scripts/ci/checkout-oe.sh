@@ -45,6 +45,7 @@ for pin in $PIN_LIST; do
     IFS=":"
     read -r project rev <<< "$pin"
     xmlstarlet ed --omit-decl -L \
+        -d "/manifest/project[@name=\"$project\"]/@revision" \
         -i "/manifest/project[@name=\"$project\"]/@revision" -t attr -n "revision" -v "$rev" \
         -i "/manifest/project[@name=\"$project\"]" -t attr -n "revision" -v "$rev" \
         "$MANIFEST_FILE"
