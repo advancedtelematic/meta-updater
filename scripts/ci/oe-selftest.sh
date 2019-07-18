@@ -17,5 +17,10 @@ export METADIR
 . "${TEST_REPO_DIR}/meta-updater/scripts/envsetup.sh" "${TEST_MACHINE}" "${TEST_BUILD_DIR}"
 
 set -x
+
+# work poky around bug on sumo and thud
+# see https://git.yoctoproject.org/cgit/cgit.cgi/poky/commit/?id=d3a94e5b9b3c107cf54d5639071cc6609c002f67
+mkdir -p "tmp/log"
+
 oe-selftest -r "$@"
 )
