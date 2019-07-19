@@ -78,15 +78,15 @@ IMAGE_CMD_ostree () {
             if [ "$(ls -A $dir)" ]; then
                 bbwarn "Data in /$dir directory is not preserved by OSTree. Consider moving it under /usr"
             fi
-
-            if [ -n "${SYSTEMD_USED}" ]; then
-                echo "d /var/rootdirs/${dir} 0755 root root -" >>${tmpfiles_conf}
-            else
-                echo "mkdir -p /var/rootdirs/${dir}; chown 755 /var/rootdirs/${dir}" >>${tmpfiles_conf}
-            fi
             rm -rf ${dir}
-            ln -sf var/rootdirs/${dir} ${dir}
         fi
+
+        if [ -n "${SYSTEMD_USED}" ]; then
+            echo "d /var/rootdirs/${dir} 0755 root root -" >>${tmpfiles_conf}
+        else
+            echo "mkdir -p /var/rootdirs/${dir}; chown 755 /var/rootdirs/${dir}" >>${tmpfiles_conf}
+        fi
+        ln -sf var/rootdirs/${dir} ${dir}
     done
 
     if [ -d root ] && [ ! -L root ]; then
