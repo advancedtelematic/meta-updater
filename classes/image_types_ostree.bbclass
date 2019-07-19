@@ -110,9 +110,9 @@ IMAGE_CMD_ostree () {
         fi
 
         if [ -n "${SYSTEMD_USED}" ]; then
-            echo "d /var/roothome 0755 root root -" >>${tmpfiles_conf}
+            echo "d /var/roothome 0700 root root -" >>${tmpfiles_conf}
         else
-            echo "mkdir -p /var/roothome; chown 755 /var/roothome" >>${tmpfiles_conf}
+            echo "mkdir -p /var/roothome; chown 700 /var/roothome" >>${tmpfiles_conf}
         fi
 
         rm -rf root
