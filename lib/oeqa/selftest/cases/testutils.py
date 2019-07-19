@@ -124,12 +124,25 @@ def verifyProvisioned(testInst, machine):
     ran_ok = False
     for delay in [5, 5, 5, 5, 10, 10, 10, 10]:
         stdout, stderr, retcode = testInst.qemu_command('aktualizr-info')
+<<<<<<< HEAD
+        if retcode == 0 and stderr == b'':
+=======
         if retcode == 0 and stderr == b'' and stdout.decode().find('Fetched metadata: yes') >= 0:
+>>>>>>> d4409182d2f31992fd8a26a5bcef8c99832b8089
             ran_ok = True
             break
         sleep(delay)
     testInst.assertTrue(ran_ok, 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
 
+<<<<<<< HEAD
+    ran_ok = False
+    if stdout.decode().find('Fetched metadata: yes') == 0:
+        stdout, stderr, retcode = testInst.qemu_command('aktualizr-info --wait-until-provisioned')
+        if retcode == 0 and stderr == b'' and stdout.decode().find('Fetched metadata: yes') == 0:
+            ran_ok = True        
+        testInst.assertTrue(ran_ok, 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())    
+=======
+>>>>>>> d4409182d2f31992fd8a26a5bcef8c99832b8089
     testInst.assertIn(b'Device ID: ', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
     testInst.assertIn(b'Primary ecu hardware ID: ' + machine.encode(), stdout,
                       'Provisioning failed: ' + stderr.decode() + stdout.decode())
