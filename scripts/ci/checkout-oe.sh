@@ -19,9 +19,11 @@ mkdir -p updater-repo
 
 cd updater-repo
 
-repo init -m "${MANIFEST}.xml" -u "$REMOTE_SOURCE/updater-repo"
+if [ -d .repo/manifests ]; then
+    git -C .repo/manifests reset --hard
+fi
 
-git -C .repo/manifests reset --hard
+repo init -m "${MANIFEST}.xml" -u "$REMOTE_SOURCE/updater-repo"
 
 # patch manifest:
 # - add a new "ats" remote that points to "$REMOTE_SOURCE"
