@@ -77,7 +77,7 @@ Oe-selftest rpi:
   stage: test
   variables:
     TEST_BUILD_DIR: 'build-oe-rpi'
-    OE_SELFTESTS: 'updater_rpi'
+    OE_SELFTESTS: 'updater_raspberrypi'
   except:
     - pushes
   only:

@@ -21,7 +21,7 @@ class PtestTests(OESelftestTestCase):
         self.append_config('PTEST_ENABLED_pn-aktualizr = "1"')
         self.append_config('IMAGE_INSTALL_append += "aktualizr-ptest ptest-runner "')
         self.append_config('IMAGE_FSTYPES_remove = "ostreepush garagesign garagecheck"')
-        self.qemu, self.s = qemu_launch(machine='qemux86-64', mem="256M")
+        self.qemu, self.s = qemu_launch(machine='qemux86-64', mem="768M")
 
     def tearDownLocal(self):
         qemu_terminate(self.s)
@@ -41,7 +41,7 @@ class PtestTests(OESelftestTestCase):
         if has_failure:
             print("Full test suite log:")
             stdout, _, _ = self.qemu_command('cat /tmp/aktualizr-ptest.log || cat /tmp/aktualizr-ptest.log.tmp', timeout=None)
-            print(stdout.decode())
+            print(stdout.decode(errors='replace'))
 
         self.assertEqual(retcode, 0)
         self.assertFalse(has_failure)

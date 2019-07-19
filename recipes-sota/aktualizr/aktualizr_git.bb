@@ -10,7 +10,7 @@ DEPENDS_append = "${@bb.utils.contains('PTEST_ENABLED', '1', ' coreutils-native 
 RDEPENDS_${PN}_class-target = "aktualizr-configs lshw"
 RDEPENDS_${PN}-host-tools = "aktualizr aktualizr-repo aktualizr-cert-provider ${@bb.utils.contains('PACKAGECONFIG', 'sota-tools', 'garage-deploy garage-push', '', d)}"
 
-RDEPENDS_${PN}-ptest += "bash cmake curl python3-misc python3-modules openssl-bin sqlite3 valgrind"
+RDEPENDS_${PN}-ptest += "bash cmake curl net-tools python3-misc python3-modules openssl-bin sqlite3 valgrind"
 
 PV = "1.0+git${SRCPV}"
 PR = "7"
@@ -31,7 +31,7 @@ SRC_URI = " \
 SRC_URI[md5sum] = "e104ccd4f32e52571a5fc0e5042db050"
 SRC_URI[sha256sum] = "c590be1a57523bfe097af82279eda5c97cf40ae47fb27162cf33c469702c8a9b"
 
-SRCREV = "9c592cf9d8dfcd995d47753f2be7bd1a2b56c7da"
+SRCREV = "17c3713fb3085fe5459ac0e8244a2047d55cb7ec"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
