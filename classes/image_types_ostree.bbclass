@@ -119,6 +119,31 @@ IMAGE_CMD_ostree () {
         ln -sf var/roothome root
     fi
 
+    if [ -d usr/local ] && [ ! -L usr/local ]; then
+        if [ "$(ls -A usr/local)" ]; then
+            bbfatal "Data in /usr/local directory is not preserved by OSTree."
+        fi
+        rm -rf usr/local
+    fi
+
+    if [ -n "${SYSTEMD_USED}" ]; then
+        echo "d /var/usrlocal 0755 root root -" >>${tmpfiles_conf}
+    else
+        echo "mkdir -p /var/usrlocal; chown 755 /var/usrlocal" >>${tmpfiles_conf}
+    fi
+
+    dirs="bin etc games include lib man sbin share src"
+
+    for dir in ${dirs}; do
+        if [ -n "${SYSTEMD_USED}" ]; then
+            echo "d /var/usrlocal/${dir} 0755 root root -" >>${tmpfiles_conf}
+        else
+            echo "mkdir -p /var/usrlocal/${dir}; chown 755 /var/usrlocal/${dir}" >>${tmpfiles_conf}
+        fi
+    done
+
+    ln -sf ../var/usrlocal usr/local
+
     checksum=`sha256sum ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} | cut -f 1 -d " "`
 
     cp ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} boot/vmlinuz-${checksum}
