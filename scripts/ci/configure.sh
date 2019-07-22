@@ -69,3 +69,6 @@ SSTATE_DIR = "$SSTATE_DIR"
 DL_DIR = "$DL_DIR"
 EOF
 fi
+
+echo -e ">> Final configuration (site.conf):\n"
+cat "$SITE_CONF"
