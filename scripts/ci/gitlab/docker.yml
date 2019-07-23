@@ -6,10 +6,10 @@
   #   - BITBAKE_CHECKOUT_IMAGE
   #   - BITBKAE_IMAGE_MASTER
   #   - BITBAKE_CHECKOUT_IMAGE_MASTER
-  image: docker:stable
+  image: docker:18
   stage: docker
   services:
-    - docker:dind
+    - docker:18-dind
   before_script:
     - docker login -u gitlab-ci-token -p "$CI_JOB_TOKEN" "$CI_REGISTRY"
   script:
@@ -26,10 +26,10 @@
   # parameters:
   #   - BITBAKE_IMAGE
   #   - BITBAKE_CHECKOUT_IMAGE
-  image: docker:stable
+  image: docker:18
   stage: docker
   services:
-    - docker:dind
+    - docker:18-dind
   before_script:
     - docker login -u gitlab-ci-token -p "$CI_JOB_TOKEN" "$CI_REGISTRY"
   script:
