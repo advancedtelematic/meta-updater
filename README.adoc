@@ -99,6 +99,7 @@ Your images will also need network connectivity to be able to reach an actual OT
 
 == SOTA-related variables in local.conf
 
+* `OSTREE_BRANCHNAME` - OSTree branch name. Defaults to `${SOTA_HARDWARE_ID}`. Particularly useful for grouping similar images.
 * `OSTREE_REPO` - path to your OSTree repository. Defaults to `$\{DEPLOY_DIR_IMAGE}/ostree_repo`
 * `OSTREE_OSNAME` - OS deployment name on your target device. For more information about deployments and osnames see the https://ostree.readthedocs.io/en/latest/manual/deployment/[OSTree documentation]. Defaults to "poky".
 * `OSTREE_COMMIT_BODY` - Message attached to OSTree commit. Empty by default.
