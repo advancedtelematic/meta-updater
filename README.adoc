@@ -193,7 +193,23 @@ RESOURCE_CPU_WEIGHT_pn-aktualizr = "50"
 
 == Development configuration
 
-There are a few settings that can be controlled in `local.conf` to simplify the development process:
+=== Logging
+
+To troubleshoot problems that you might encounter during development, we recommend that you enable persistent `systemd` logging. This setting is enabled by default for newly configured environments (see link:conf/local.conf.sample.append[]). To enable it manually, put this to your `local.conf`:
+
+....
+IMAGE_INSTALL_append += " systemd-journald-persistent"
+....
+
+It may also be helpful to run with debug logging enabled in aktualizr. To do so, add this to your `local.conf`:
+
+....
+IMAGE_INSTALL_append += " aktualizr-log-debug"
+....
+
+=== Custom aktualizr versions
+
+You can override the version of aktualizr included in your image. This requires that the version you wish to run is pushed to the https://github.com/advancedtelematic/aktualizr[aktualizr github repo]. You can then use these settings in your `local.conf` to simplify the development process:
 
 [options="header"]
 |======================
