@@ -15,6 +15,9 @@ LICENSE = "MIT"
 
 IMAGE_FSTYPES = "${INITRAMFS_FSTYPES}"
 
+# Avoid circular dependencies
+EXTRA_IMAGEDEPENDS = ""
+
 inherit core-image
 
 IMAGE_ROOTFS_SIZE = "8192"
