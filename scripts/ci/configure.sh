@@ -9,10 +9,16 @@ TEST_REPO_DIR=${TEST_REPO_DIR:-updater-repo}
 TEST_BITBAKE_COMMON_DIR=${TEST_BITBAKE_COMMON_DIR:-}
 
 TEST_AKTUALIZR_REMOTE=${TEST_AKTUALIZR_REMOTE:-}
+TEST_AKTUALIZR_TAG=${TEST_AKTUALIZR_TAG:-}
 if [ -n "$TEST_AKTUALIZR_REMOTE" ]; then
-    TEST_AKTUALIZR_DIR=${TEST_AKTUALIZR_DIR:-.}
-    TEST_AKTUALIZR_BRANCH=${TEST_AKTUALIZR_BRANCH:-master}
-    TEST_AKTUALIZR_REV=${TEST_AKTUALIZR_REV:-$(GIT_DIR="$TEST_AKTUALIZR_DIR/.git" git rev-parse "$TEST_AKTUALIZR_REMOTE/$TEST_AKTUALIZR_BRANCH")}
+    if [ -n "$TEST_AKTUALIZR_TAG" ]; then
+        TEST_AKTUALIZR_BRANCH=""
+        TEST_AKTUALIZR_REV=""
+    else
+        TEST_AKTUALIZR_DIR=${TEST_AKTUALIZR_DIR:-.}
+        TEST_AKTUALIZR_BRANCH=${TEST_AKTUALIZR_BRANCH:-master}
+        TEST_AKTUALIZR_REV=${TEST_AKTUALIZR_REV:-$(GIT_DIR="$TEST_AKTUALIZR_DIR/.git" git rev-parse "$TEST_AKTUALIZR_REMOTE/$TEST_AKTUALIZR_BRANCH")}
+    fi
 fi
 
 TEST_AKTUALIZR_CREDENTIALS=${TEST_AKTUALIZR_CREDENTIALS:-}
@@ -43,12 +49,23 @@ EOF
 
 if [ -n "$TEST_AKTUALIZR_REMOTE" ]; then
     echo ">> Set aktualizr branch in bitbake's config"
-    cat << EOF >> "$SITE_CONF"
+    if [ -n "$TEST_AKTUALIZR_TAG" ]; then
+        # tag case
+        cat << EOF >> "$SITE_CONF"
+SRCREV_pn-aktualizr = ""
+SRCREV_pn-aktualizr-native = ""
+BRANCH_pn-aktualizr = ";nobranch=1;tag=$TEST_AKTUALIZR_TAG"
+BRANCH_pn-aktualizr-native = "\${BRANCH_pn-aktualizr}"
+EOF
+    else
+        # branch case
+        cat << EOF >> "$SITE_CONF"
 SRCREV_pn-aktualizr = "$TEST_AKTUALIZR_REV"
 SRCREV_pn-aktualizr-native = "\${SRCREV_pn-aktualizr}"
 BRANCH_pn-aktualizr = "$TEST_AKTUALIZR_BRANCH"
 BRANCH_pn-aktualizr-native = "\${BRANCH_pn-aktualizr}"
 EOF
+    fi
 fi
 
 if [[ -n $TEST_AKTUALIZR_CREDENTIALS ]]; then
@@ -70,5 +87,5 @@ DL_DIR = "$DL_DIR"
 EOF
 fi
 
-echo -e ">> Final configuration (site.conf):\n"
+echo -e ">> Final configuration (site.conf):\\n"
 cat "$SITE_CONF"
