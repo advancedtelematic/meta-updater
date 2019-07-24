@@ -10,9 +10,9 @@
   stage: docker
   services:
     - docker:18-dind
-  before_script:
-    - docker login -u gitlab-ci-token -p "$CI_JOB_TOKEN" "$CI_REGISTRY"
   script:
+    - docker login -u gitlab-ci-token -p "$CI_JOB_TOKEN" "$CI_REGISTRY"
+
     - docker pull "$BITBAKE_IMAGE" || docker pull "$BITBKAE_IMAGE_MASTER" || true
     - docker build --pull --cache-from "$BITBKAE_IMAGE_MASTER" --cache-from "$BITBAKE_IMAGE" -f ./scripts/ci/Dockerfile.bitbake -t "$BITBAKE_IMAGE" ./scripts/ci
     - docker push "$BITBAKE_IMAGE"
@@ -30,8 +30,8 @@
   stage: docker
   services:
     - docker:18-dind
-  before_script:
-    - docker login -u gitlab-ci-token -p "$CI_JOB_TOKEN" "$CI_REGISTRY"
   script:
+    - docker login -u gitlab-ci-token -p "$CI_JOB_TOKEN" "$CI_REGISTRY"
+
     - docker pull "$BITBAKE_IMAGE"
     - docker pull "$BITBAKE_CHECKOUT_IMAGE"

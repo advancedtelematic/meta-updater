@@ -24,10 +24,9 @@
     - bitbake
   variables:
     TEST_AKTUALIZR_CREDENTIALS: $CI_PROJECT_DIR/credentials.zip
-  before_script:
+  script:
     - aws s3 cp s3://ota-gitlab-ci/hereotaconnect_prod.zip credentials.zip
     - sudo /usr/local/bin/setup_kvm.sh
-  script:
     - |
       # sg is needed after adding bitbake to the kvm group (see setup_kvm.sh)
       sg kvm << EOS
