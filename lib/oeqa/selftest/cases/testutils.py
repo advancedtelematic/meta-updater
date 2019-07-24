@@ -121,15 +121,21 @@ def verifyNotProvisioned(testInst, machine):
 
 def verifyProvisioned(testInst, machine):
     # Verify that device HAS provisioned.
+    # First loop while waiting for the device to boot.
     ran_ok = False
     for delay in [5, 5, 5, 5, 10, 10, 10, 10]:
         stdout, stderr, retcode = testInst.qemu_command('aktualizr-info')
-        if retcode == 0 and stderr == b'' and stdout.decode().find('Fetched metadata: yes') >= 0:
+        if retcode == 0 and stderr == b'':
             ran_ok = True
             break
         sleep(delay)
     testInst.assertTrue(ran_ok, 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
+    # Then wait for aktualizr to provision.
+    if stdout.decode().find('Fetched metadata: yes') < 0:
+        stdout, stderr, retcode = testInst.qemu_command('aktualizr-info --wait-until-provisioned')
 
+    testInst.assertFalse(retcode, 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
+    testInst.assertEqual(stderr, b'', 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
     testInst.assertIn(b'Device ID: ', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
     testInst.assertIn(b'Primary ecu hardware ID: ' + machine.encode(), stdout,
                       'Provisioning failed: ' + stderr.decode() + stdout.decode())
