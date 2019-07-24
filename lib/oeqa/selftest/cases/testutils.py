@@ -133,7 +133,9 @@ def verifyProvisioned(testInst, machine):
     # Then wait for aktualizr to provision.
     if stdout.decode().find('Fetched metadata: yes') < 0:
         stdout, stderr, retcode = testInst.qemu_command('aktualizr-info --wait-until-provisioned')
-    
+
+    testInst.assertFalse(retcode, 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
+    testInst.assertEqual(stderr, b'', 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
     testInst.assertIn(b'Device ID: ', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
     testInst.assertIn(b'Primary ecu hardware ID: ' + machine.encode(), stdout,
                       'Provisioning failed: ' + stderr.decode() + stdout.decode())
