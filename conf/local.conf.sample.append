@@ -1,0 +1,35 @@
+
+#
+# meta-updater configuration, see README.adoc and aktualizr's
+# documentation for more options and detailed documentation
+#
+
+MACHINE = "##MACHINE##"
+DISTRO = "poky-sota-systemd"
+
+# General SOTA setup
+#SOTA_CLIENT_PROV = "aktualizr-auto-prov"
+#SOTA_PACKED_CREDENTIALS = "/path/to/credentials.zip"
+
+# Uncomment this line to start an ssh server at boot automatically
+#IMAGE_FEATURES += "ssh-server-dropbear"
+
+# Uncomment this line to set the log level of aktualizr to 'debug' (from 'info'
+# by default)
+#IMAGE_INSTALL_append += " aktualizr-log-debug"
+
+# Store systemd logs in persistent storage
+#
+# It greatly helps diagnosing issues on testing devices but should be
+# carefully weighted against file system usage and flash device wear for
+# production systems. Please refer to systemd's docs for more details
+IMAGE_INSTALL_append += " systemd-journald-persistent"
+
+# Set resource limits for aktualizr service
+#
+# Uncomment these lines to change the default parameters.
+#
+#RESOURCE_CPU_WEIGHT_pn-aktualizr = "100"
+#RESOURCE_MEMORY_HIGH_pn-aktualizr = "100M"
+#RESOURCE_MEMORY_MAX_pn-aktualizr = "80%"
+IMAGE_INSTALL_append += " aktualizr-resource-control"
