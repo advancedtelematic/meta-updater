@@ -6,7 +6,7 @@ LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=9741c346eef56131163e13b9db1241b3"
 
 DEPENDS = "boost curl openssl libarchive libsodium sqlite3 asn1c-native"
-DEPENDS_append = "${@bb.utils.contains('PTEST_ENABLED', '1', ' coreutils-native ostree-native aktualizr-native ', '', d)}"
+DEPENDS_append = "${@bb.utils.contains('PTEST_ENABLED', '1', ' coreutils-native net-tools-native ostree-native aktualizr-native ', '', d)}"
 RDEPENDS_${PN}_class-target = "aktualizr-configs lshw"
 RDEPENDS_${PN}-host-tools = "aktualizr aktualizr-repo aktualizr-cert-provider ${@bb.utils.contains('PACKAGECONFIG', 'sota-tools', 'garage-deploy garage-push', '', d)}"
 
@@ -31,7 +31,7 @@ SRC_URI = " \
 SRC_URI[md5sum] = "e104ccd4f32e52571a5fc0e5042db050"
 SRC_URI[sha256sum] = "c590be1a57523bfe097af82279eda5c97cf40ae47fb27162cf33c469702c8a9b"
 
-SRCREV = "fce5854ff10e7efd52d69bbaf68dc2af990d5746"
+SRCREV = "9c592cf9d8dfcd995d47753f2be7bd1a2b56c7da"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -105,16 +105,6 @@ do_install_append () {
 
     if [ -n "${SOTA_HARDWARE_ID}" ]; then
         printf "[provision]\nprimary_ecu_hardware_id = ${SOTA_HARDWARE_ID}\n" > ${D}${libdir}/sota/conf.d/40-hardware-id.toml
-    fi
-
-    if [ -n "${SOTA_SECONDARY_CONFIG_DIR}" ]; then
-        if [ -d "${SOTA_SECONDARY_CONFIG_DIR}" ]; then
-            install -m 0700 -d ${D}${sysconfdir}/sota/ecus
-            install -m 0644 "${SOTA_SECONDARY_CONFIG_DIR}"/* ${D}${sysconfdir}/sota/ecus/
-            printf "[uptane]\nsecondary_configs_dir = /etc/sota/ecus/\n" > ${D}${libdir}/sota/conf.d/30-secondary-configs-dir.toml
-        else
-            bbwarn "SOTA_SECONDARY_CONFIG_DIR is set to an invalid directory (${SOTA_SECONDARY_CONFIG_DIR})"
-        fi
     fi
 
     install -m 0755 -d ${D}${systemd_unitdir}/system
