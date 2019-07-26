@@ -2,6 +2,7 @@
 
 We welcome pull requests from anyone. The master branch is the primary branch for development, and if you wish to add new functionality, it probably belongs there. We attempt to maintain recent previous branches and welcome bug fixes and backports for those. Currently, the actively maintained branches are:
 
+* warrior
 * thud
 * sumo
 * rocko
