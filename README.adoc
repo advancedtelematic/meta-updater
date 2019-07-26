@@ -61,7 +61,7 @@ and get as a result an `ostree_repo` folder in your images directory (`tmp/deplo
 
 * your OSTree repository, with the rootfs committed as an OSTree deployment,
 * an `ota-ext4` bootstrap image, which is an OSTree physical sysroot as a burnable filesystem image, and optionally
-* some machine-dependent live images (e.g. `.wic` for Raspberry Pi or `.porter-sdimg-ota` Renesas Porter board).
+* some machine-dependent live images (e.g. `.wic` for Raspberry Pi or `.porter-sdimg-ota` for Renesas Porter board).
 
 Although `aglsetup.sh` hooks provide reasonable defaults for SOTA-related variables, you may want to tune some of them.
 
@@ -71,11 +71,18 @@ Ubuntu users that encounter an error due to missing `Python.h` should install `l
 
 == Supported boards
 
-Currently supported platforms are
+Currently supported platforms are:
 
-* https://github.com/advancedtelematic/meta-updater-raspberrypi[Raspberry Pi3]
-* https://github.com/advancedtelematic/meta-updater-minnowboard[Minnowboard]
+* https://github.com/advancedtelematic/meta-updater-raspberrypi[Raspberry Pi 2 and 3]
+* https://github.com/advancedtelematic/meta-updater-minnowboard[Intel Minnowboard]
 * https://github.com/advancedtelematic/meta-updater-qemux86-64[Native QEMU emulation]
+* Renesas R-Car H3 and M3
+* https://github.com/advancedtelematic/meta-updater-ti/[TI BeagleBone Black] (rocko only, using TI SDK 05.03)
+* https://github.com/advancedtelematic/meta-updater-ti/[TI AM65x industrial development kit] (rocko only, using TI SDK 05.03)
+
+Additionally, there is community support for https://github.com/ricardosalveti/meta-updater-riscv[RISC-V] boards, in particular the Freedom U540.
+
+We also historically supported the https://github.com/advancedtelematic/meta-updater-porter[Renesas Porter] board.
 
 === Adding support for your board
 
@@ -92,6 +99,7 @@ Your images will also need network connectivity to be able to reach an actual OT
 
 == SOTA-related variables in local.conf
 
+* `OSTREE_BRANCHNAME` - OSTree branch name. Defaults to `${SOTA_HARDWARE_ID}`. Particularly useful for grouping similar images.
 * `OSTREE_REPO` - path to your OSTree repository. Defaults to `$\{DEPLOY_DIR_IMAGE}/ostree_repo`
 * `OSTREE_OSNAME` - OS deployment name on your target device. For more information about deployments and osnames see the https://ostree.readthedocs.io/en/latest/manual/deployment/[OSTree documentation]. Defaults to "poky".
 * `OSTREE_COMMIT_BODY` - Message attached to OSTree commit. Empty by default.
@@ -191,7 +199,23 @@ RESOURCE_CPU_WEIGHT_pn-aktualizr = "50"
 
 == Development configuration
 
-There are a few settings that can be controlled in `local.conf` to simplify the development process:
+=== Logging
+
+To troubleshoot problems that you might encounter during development, we recommend that you enable persistent `systemd` logging. This setting is enabled by default for newly configured environments (see link:conf/local.conf.sample.append[]). To enable it manually, put this to your `local.conf`:
+
+....
+IMAGE_INSTALL_append += " systemd-journald-persistent"
+....
+
+It may also be helpful to run with debug logging enabled in aktualizr. To do so, add this to your `local.conf`:
+
+....
+IMAGE_INSTALL_append += " aktualizr-log-debug"
+....
+
+=== Custom aktualizr versions
+
+You can override the version of aktualizr included in your image. This requires that the version you wish to run is pushed to the https://github.com/advancedtelematic/aktualizr[aktualizr github repo]. You can then use these settings in your `local.conf` to simplify the development process:
 
 [options="header"]
 |======================
