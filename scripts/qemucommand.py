@@ -1,4 +1,4 @@
-from os.path import exists, join, realpath, abspath
+from os.path import exists, isdir, join, realpath, abspath
 from os import listdir
 import random
 import socket
@@ -42,6 +42,8 @@ class QemuCommand(object):
         if args.machine:
             self.machine = args.machine
         else:
+            if not isdir(args.dir):
+                raise ValueError("Directory %s does not exist, please specify a --machine or a valid images directory" % args.dir)
             machines = listdir(args.dir)
             if len(machines) == 1:
                 self.machine = machines[0]
