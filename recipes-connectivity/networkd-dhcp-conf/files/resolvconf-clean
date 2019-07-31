@@ -1,0 +1,14 @@
+#!/bin/sh
+
+set -e
+
+if [ ! -L /etc/resolv.conf ]; then
+    exit 0
+fi
+
+# 'readlink -f' will fail if the symlink doesn't resolve to an existing path
+if readlink /etc/resolv.conf | grep -q connman; then
+    echo "Replacing resolv.conf symlink: $(readlink /etc/resolv.conf) to /etc/resolv-conf.systemd"
+    rm /etc/resolv.conf
+    ln -s /etc/resolv-conf.systemd /etc/resolv.conf
+fi
