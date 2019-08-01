@@ -14,14 +14,17 @@ require credentials.inc
 do_install() {
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         install -m 0700 -d ${D}${localstatedir}/sota
-        cp "${SOTA_PACKED_CREDENTIALS}" ${D}${localstatedir}/sota/sota_provisioning_credentials.zip
-        # Device should not be able to push data to treehub
-        zip -d ${D}${localstatedir}/sota/sota_provisioning_credentials.zip treehub.json
-        # Device has no use for the API Gateway. Remove if present. See:
-        # https://github.com/advancedtelematic/ota-plus-server/pull/1913/
-        if unzip -l ${D}${localstatedir}/sota/sota_provisioning_credentials.zip api_gateway.url > /dev/null; then
-            zip -d ${D}${localstatedir}/sota/sota_provisioning_credentials.zip api_gateway.url 
-        fi
+        # root.json contains the root metadata for bootstrapping the Uptane metadata verification process.
+        # autoprov.url has the URL to the device gateway on the server, which is where we send most of our requests.
+        # autoprov_credentials.p12 contains the shared provisioning credentials.
+        for var in root.json autoprov.url autoprov_credentials.p12; do
+            if unzip -l "${SOTA_PACKED_CREDENTIALS}" $var > /dev/null; then
+                unzip "${SOTA_PACKED_CREDENTIALS}" $var -d ${T}
+                zip -mj -q ${D}${localstatedir}/sota/sota_provisioning_credentials.zip ${T}/$var
+            else
+                bbwarn "$var is missing from credentials.zip"
+            fi
+        done
     fi
 }
 
