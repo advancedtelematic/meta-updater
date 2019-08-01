@@ -1,0 +1,11 @@
+[Unit]
+Description=Clean up bogus symlinked resolv.conf
+Before=network-pre.target
+Wants=network-pre.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/resolvconf-clean
+
+[Install]
+WantedBy=multi-user.target
