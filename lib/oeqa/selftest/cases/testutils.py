@@ -119,7 +119,7 @@ def verifyNotProvisioned(testInst, machine):
                       'Device already provisioned!? ' + stderr.decode() + stdout.decode())
 
 
-def verifyProvisioned(testInst, machine):
+def verifyProvisioned(testInst, machine, hwid=''):
     # Verify that device HAS provisioned.
     # First loop while waiting for the device to boot.
     ran_ok = False
@@ -133,12 +133,15 @@ def verifyProvisioned(testInst, machine):
     # Then wait for aktualizr to provision.
     if stdout.decode().find('Fetched metadata: yes') < 0:
         stdout, stderr, retcode = testInst.qemu_command('aktualizr-info --wait-until-provisioned')
-
-    testInst.assertFalse(retcode, 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
-    testInst.assertEqual(stderr, b'', 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
+        testInst.assertFalse(retcode, 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
+        testInst.assertEqual(stderr, b'', 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
     testInst.assertIn(b'Device ID: ', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
-    testInst.assertIn(b'Primary ecu hardware ID: ' + machine.encode(), stdout,
-                      'Provisioning failed: ' + stderr.decode() + stdout.decode())
+    if hwid == '':
+        testInst.assertIn(b'Primary ecu hardware ID: ' + machine.encode(), stdout,
+                  'Provisioning failed: ' + stderr.decode() + stdout.decode())
+    else:
+        testInst.assertIn(b'Primary ecu hardware ID: ' + hwid.encode(), stdout,
+                  'Provisioning failed: ' + stderr.decode() + stdout.decode())
     testInst.assertIn(b'Fetched metadata: yes', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
     p = re.compile(r'Device ID: ([a-z0-9-]*)\n')
     m = p.search(stdout.decode())
