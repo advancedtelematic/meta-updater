@@ -1,4 +1,4 @@
-= Manual provisoning
+= Manual provisioning
 
 //MC: TOMERGE: Looks mostly like a duplicate of this topic: https://github.com/advancedtelematic/aktualizr/blob/master/docs/ota-client-guide/modules/ROOT/pages/simulate-device-cred-provtest.adoc
 
