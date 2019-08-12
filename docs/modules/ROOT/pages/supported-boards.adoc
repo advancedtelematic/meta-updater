@@ -23,7 +23,7 @@ If your board isn't supported yet, you can add board integration code yourself. 
 
 Take a look at the https://github.com/advancedtelematic/meta-updater-minnowboard[Minnowboard] or https://github.com/advancedtelematic/meta-updater-raspberrypi[Raspberry Pi] integration layers for examples.
 
-If you want our developers to add support for your board, contact us at mailto:otaconnect.support@here.com[] and we can discuss a potential NRE (Non-recurring Engineering) aggreement.
+If you want our developers to add support for your board, contact us at mailto:otaconnect.support@here.com[] and we can discuss a potential NRE (Non-recurring Engineering) agreement.
 
 [NOTE]
 ====
@@ -34,7 +34,7 @@ Your images will also need network connectivity to be able to reach an actual OT
 
 == Minimum hardware requirements for controllers (ECUs)
 
-The aktuallizr binary is a lightweight {cpp} application between 2-5 MB in size. It uses a miniumum about of resources when idle. 
+The aktualizr binary is a lightweight {cpp} application between 2-5 MB in size. It uses a minimum amount of resources when idle. 
 
 The following hardware is required for your primary ECU:
 
