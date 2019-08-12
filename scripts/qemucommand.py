@@ -102,12 +102,8 @@ class QemuCommand(object):
         cmdline += [
             "-serial", "tcp:127.0.0.1:%d,server,nowait" % self.serial_port,
             "-m", self.mem,
-            "-usb",
             "-object", "rng-random,id=rng0,filename=/dev/urandom",
             "-device", "virtio-rng-pci,rng=rng0",
-            "-device", "usb-tablet",
-            "-show-cursor",
-            "-vga", "std",
             "-net", netuser,
             "-net", "nic,macaddr=%s" % self.mac_address
         ]
@@ -119,9 +115,17 @@ class QemuCommand(object):
                 '-device', 'e1000,netdev=vlan1,mac='+random_mac(),
             ]
         if self.gui:
-            cmdline += ["-serial", "stdio"]
+            cmdline += [
+                    "-usb",
+                    "-device", "usb-tablet",
+                    "-show-cursor",
+                    "-vga", "std"
+            ]
         else:
-            cmdline.append('-nographic')
+            cmdline += [
+                    "-nographic",
+                    "-monitor", "null",
+            ]
         if self.kvm:
             cmdline += ['-enable-kvm', '-cpu', 'host']
         else:
