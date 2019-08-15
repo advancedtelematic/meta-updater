@@ -16,11 +16,11 @@ OSTREE_UPDATE_SUMMARY ??= "0"
 SYSTEMD_USED = "${@oe.utils.ifelse(d.getVar('VIRTUAL-RUNTIME_init_manager', True) == 'systemd', 'true', '')}"
 
 IMAGE_CMD_ostree () {
-    if [ -z "$OSTREE_REPO" ]; then
+    if [ -z "${OSTREE_REPO}" ]; then
         bbfatal "OSTREE_REPO should be set in your local.conf"
     fi
 
-    if [ -z "$OSTREE_BRANCHNAME" ]; then
+    if [ -z "${OSTREE_BRANCHNAME}" ]; then
         bbfatal "OSTREE_BRANCHNAME should be set in your local.conf"
     fi
 
