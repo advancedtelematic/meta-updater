@@ -145,16 +145,21 @@ IMAGE_CMD_ostreecommit () {
            --subject="${OSTREE_COMMIT_SUBJECT}" \
            --body="${OSTREE_COMMIT_BODY}"
 
+    # Commit the result in the image basename branch:
+    # To enable simultaneous bitbaking of two images with the same branch name,
+    # create a new branc in the repo using the basename of the image. (This creates an
+    # additional commit). Fixes OTA-2211.
+    ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME})
+    ostree --repo=${OSTREE_REPO} commit \
+           --tree=ref=${ostree_target_hash} \
+           --skip-if-unchanged \
+           --branch=${OSTREE_BRANCHNAME}-${IMAGE_BASENAME} \
+           --subject="${OSTREE_COMMIT_SUBJECT}" \
+           --body="${OSTREE_COMMIT_BODY}"
+
     if [ "${OSTREE_UPDATE_SUMMARY}" = "1" ]; then
         ostree --repo=${OSTREE_REPO} summary -u
     fi
-
-    # To enable simultaneous bitbaking of two images with the same branch name,
-    # create a new ref in the repo using the basename of the image. (This first
-    # requires deleting it if it already exists.) Fixes OTA-2211.
-    ostree --repo=${OSTREE_REPO} refs --delete ${OSTREE_BRANCHNAME}-${IMAGE_BASENAME}
-    ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME})
-    ostree --repo=${OSTREE_REPO} refs --create=${OSTREE_BRANCHNAME}-${IMAGE_BASENAME} ${ostree_target_hash}
 }
 
 IMAGE_TYPEDEP_ostreepush = "ostreecommit"
