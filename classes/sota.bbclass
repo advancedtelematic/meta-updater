@@ -40,11 +40,11 @@ EXTRA_IMAGEDEPENDS_append_sota = " parted-native mtools-native dosfstools-native
 OSTREE_INITRAMFS_FSTYPES ??= "${@oe.utils.ifelse(d.getVar('OSTREE_BOOTLOADER', True) == 'u-boot', 'ext4.gz.u-boot', 'ext4.gz')}"
 
 # Please redefine OSTREE_REPO in order to have a persistent OSTree repo
-export OSTREE_REPO ?= "${DEPLOY_DIR_IMAGE}/ostree_repo"
-export OSTREE_BRANCHNAME ?= "${SOTA_HARDWARE_ID}"
-export OSTREE_OSNAME ?= "poky"
-export OSTREE_BOOTLOADER ??= 'u-boot'
-export OSTREE_BOOT_PARTITION ??= "/boot"
+OSTREE_REPO ?= "${DEPLOY_DIR_IMAGE}/ostree_repo"
+OSTREE_BRANCHNAME ?= "${SOTA_HARDWARE_ID}"
+OSTREE_OSNAME ?= "poky"
+OSTREE_BOOTLOADER ??= 'u-boot'
+OSTREE_BOOT_PARTITION ??= "/boot"
 
 OSTREE_INITRAMFS_IMAGE ?= "initramfs-ostree-image"
 
