@@ -60,6 +60,7 @@ IMAGE_CMD_otaimg () {
 		bbfatal "OSTREE_BRANCHNAME should be set in your local.conf"
 	fi
 
+	export OSTREE_BOOT_PARTITION=${OSTREE_BOOT_PARTITION}
 	PHYS_SYSROOT=`mktemp -d ${WORKDIR}/ota-sysroot-XXXXX`
 
 	ostree admin --sysroot=${PHYS_SYSROOT} init-fs ${PHYS_SYSROOT}
