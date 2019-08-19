@@ -48,18 +48,19 @@ IMAGE_CMD_otaimg () {
 	if ${@bb.utils.contains('IMAGE_FSTYPES', 'otaimg', 'false', 'true', d)}; then
 		return
 	fi
-	if [ -z "$OSTREE_REPO" ]; then
+	if [ -z "${OSTREE_REPO}" ]; then
 		bbfatal "OSTREE_REPO should be set in your local.conf"
 	fi
 
-	if [ -z "$OSTREE_OSNAME" ]; then
+	if [ -z "${OSTREE_OSNAME}" ]; then
 		bbfatal "OSTREE_OSNAME should be set in your local.conf"
 	fi
 
-	if [ -z "$OSTREE_BRANCHNAME" ]; then
+	if [ -z "${OSTREE_BRANCHNAME}" ]; then
 		bbfatal "OSTREE_BRANCHNAME should be set in your local.conf"
 	fi
 
+	export OSTREE_BOOT_PARTITION=${OSTREE_BOOT_PARTITION}
 	PHYS_SYSROOT=`mktemp -d ${WORKDIR}/ota-sysroot-XXXXX`
 
 	ostree admin --sysroot=${PHYS_SYSROOT} init-fs ${PHYS_SYSROOT}

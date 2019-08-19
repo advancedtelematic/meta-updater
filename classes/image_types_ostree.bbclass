@@ -16,11 +16,11 @@ OSTREE_UPDATE_SUMMARY ??= "0"
 SYSTEMD_USED = "${@oe.utils.ifelse(d.getVar('VIRTUAL-RUNTIME_init_manager', True) == 'systemd', 'true', '')}"
 
 IMAGE_CMD_ostree () {
-    if [ -z "$OSTREE_REPO" ]; then
+    if [ -z "${OSTREE_REPO}" ]; then
         bbfatal "OSTREE_REPO should be set in your local.conf"
     fi
 
-    if [ -z "$OSTREE_BRANCHNAME" ]; then
+    if [ -z "${OSTREE_BRANCHNAME}" ]; then
         bbfatal "OSTREE_BRANCHNAME should be set in your local.conf"
     fi
 
@@ -93,15 +93,15 @@ IMAGE_CMD_ostree () {
             if [ "$(ls -A $dir)" ]; then
                 bbwarn "Data in /$dir directory is not preserved by OSTree. Consider moving it under /usr"
             fi
-
-            if [ -n "${SYSTEMD_USED}" ]; then
-                echo "d /var/rootdirs/${dir} 0755 root root -" >>${tmpfiles_conf}
-            else
-                echo "mkdir -p /var/rootdirs/${dir}; chown 755 /var/rootdirs/${dir}" >>${tmpfiles_conf}
-            fi
             rm -rf ${dir}
-            ln -sf var/rootdirs/${dir} ${dir}
         fi
+
+        if [ -n "${SYSTEMD_USED}" ]; then
+            echo "d /var/rootdirs/${dir} 0755 root root -" >>${tmpfiles_conf}
+        else
+            echo "mkdir -p /var/rootdirs/${dir}; chown 755 /var/rootdirs/${dir}" >>${tmpfiles_conf}
+        fi
+        ln -sf var/rootdirs/${dir} ${dir}
     done
 
     if [ -d root ] && [ ! -L root ]; then
@@ -110,20 +110,39 @@ IMAGE_CMD_ostree () {
         fi
 
         if [ -n "${SYSTEMD_USED}" ]; then
-            echo "d /var/roothome 0755 root root -" >>${tmpfiles_conf}
+            echo "d /var/roothome 0700 root root -" >>${tmpfiles_conf}
         else
-            echo "mkdir -p /var/roothome; chown 755 /var/roothome" >>${tmpfiles_conf}
+            echo "mkdir -p /var/roothome; chown 700 /var/roothome" >>${tmpfiles_conf}
         fi
 
         rm -rf root
         ln -sf var/roothome root
     fi
 
-    # Creating boot directories is required for "ostree admin deploy"
+    if [ -d usr/local ] && [ ! -L usr/local ]; then
+        if [ "$(ls -A usr/local)" ]; then
+            bbfatal "Data in /usr/local directory is not preserved by OSTree."
+        fi
+        rm -rf usr/local
+    fi
 
-    mkdir -p boot/loader.0
-    mkdir -p boot/loader.1
-    ln -sf boot/loader.0 boot/loader
+    if [ -n "${SYSTEMD_USED}" ]; then
+        echo "d /var/usrlocal 0755 root root -" >>${tmpfiles_conf}
+    else
+        echo "mkdir -p /var/usrlocal; chown 755 /var/usrlocal" >>${tmpfiles_conf}
+    fi
+
+    dirs="bin etc games include lib man sbin share src"
+
+    for dir in ${dirs}; do
+        if [ -n "${SYSTEMD_USED}" ]; then
+            echo "d /var/usrlocal/${dir} 0755 root root -" >>${tmpfiles_conf}
+        else
+            echo "mkdir -p /var/usrlocal/${dir}; chown 755 /var/usrlocal/${dir}" >>${tmpfiles_conf}
+        fi
+    done
+
+    ln -sf ../var/usrlocal usr/local
 
     checksum=`sha256sum ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} | cut -f 1 -d " "`
 
@@ -241,6 +260,12 @@ IMAGE_CMD_garagesign () {
                                     ${target_url} \
                                     --sha256 ${ostree_target_hash} \
                                     --hardwareids ${SOTA_HARDWARE_ID}
+            if [ -n "${GARAGE_CUSTOMIZE_TARGET}" ]; then
+                bbplain "Running command(${GARAGE_CUSTOMIZE_TARGET}) to customize target"
+                ${GARAGE_CUSTOMIZE_TARGET} \
+                    ${GARAGE_SIGN_REPO}/tufrepo/roles/unsigned/targets.json \
+                    ${GARAGE_TARGET_NAME}-${target_version}
+            fi
             garage-sign targets sign --repo tufrepo \
                                      --home-dir ${GARAGE_SIGN_REPO} \
                                      --key-name=targets
