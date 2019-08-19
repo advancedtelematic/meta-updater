@@ -8,14 +8,14 @@ LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=9741c346eef56131163e13b9db1241b3"
 DEPENDS = "boost curl openssl libarchive libsodium sqlite3 asn1c-native"
 DEPENDS_append = "${@bb.utils.contains('PTEST_ENABLED', '1', ' coreutils-native net-tools-native ostree-native aktualizr-native ', '', d)}"
 RDEPENDS_${PN}_class-target = "aktualizr-configs lshw"
-RDEPENDS_${PN}-host-tools = "aktualizr aktualizr-repo aktualizr-cert-provider ${@bb.utils.contains('PACKAGECONFIG', 'sota-tools', 'garage-deploy garage-push', '', d)}"
+RDEPENDS_${PN}-host-tools = "aktualizr aktualizr-cert-provider ${@bb.utils.contains('PACKAGECONFIG', 'sota-tools', 'garage-deploy garage-push', '', d)}"
 
 RDEPENDS_${PN}-ptest += "bash cmake curl net-tools python3-core python3-misc python3-modules openssl-bin sqlite3 valgrind"
 
 PV = "1.0+git${SRCPV}"
 PR = "7"
 
-GARAGE_SIGN_PV = "0.7.0-25-ge74a964"
+GARAGE_SIGN_PV = "0.7.0-33-g214dfb1"
 
 SRC_URI = " \
   gitsm://github.com/advancedtelematic/aktualizr;branch=${BRANCH} \
@@ -28,10 +28,10 @@ SRC_URI = " \
   "
 
 # for garage-sign archive
-SRC_URI[md5sum] = "9601dd891abac754400852cf367e86a2"
-SRC_URI[sha256sum] = "1ebe2c9655b1fcc8d597dbda10c8a413eca12e5351582d916d0b088a84c33cd2"
+SRC_URI[md5sum] = "66ffe8dcd61d4c15646e1c4b7dde7401"
+SRC_URI[sha256sum] = "7a7193ddf7e1a33ea60fbb20f98318a8bd78c325dab391d8c4ebd644a738abdc"
 
-SRCREV = "03778511cc937d07bf53a8092f8b268e65f5d9a6"
+SRCREV = "3bb9fe91b4c614a79373beadc721272fcf7acce2"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
