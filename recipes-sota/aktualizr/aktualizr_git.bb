@@ -15,7 +15,7 @@ RDEPENDS_${PN}-ptest += "bash cmake curl python3-misc python3-modules openssl-bi
 PV = "1.0+git${SRCPV}"
 PR = "7"
 
-GARAGE_SIGN_PV = "0.7.0-19-g89ec974"
+GARAGE_SIGN_PV = "0.7.0-25-ge74a964"
 
 SRC_URI = " \
   gitsm://github.com/advancedtelematic/aktualizr;branch=${BRANCH} \
@@ -28,8 +28,8 @@ SRC_URI = " \
   "
 
 # for garage-sign archive
-SRC_URI[md5sum] = "3ed27c1142860cd9b4a2594067312b8b"
-SRC_URI[sha256sum] = "e54eef3863118f373c3ebd9e2877f9de5bab4950ed157a15fb4f4ec575bc2ece"
+SRC_URI[md5sum] = "9601dd891abac754400852cf367e86a2"
+SRC_URI[sha256sum] = "1ebe2c9655b1fcc8d597dbda10c8a413eca12e5351582d916d0b088a84c33cd2"
 
 SRCREV = "03778511cc937d07bf53a8092f8b268e65f5d9a6"
 BRANCH ?= "master"

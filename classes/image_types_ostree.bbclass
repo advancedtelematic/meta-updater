@@ -237,10 +237,18 @@ IMAGE_CMD_garagesign () {
         # Push may fail due to race condition when multiple build machines try to push simultaneously
         #   in which case targets.json should be pulled again and the whole procedure repeated
         push_success=0
-	target_url=""
-	if [ -n "${GARAGE_TARGET_URL}" ]; then
-		target_url='--url ${GARAGE_TARGET_URL}'
-	fi
+        target_url=""
+        if [ -n "${GARAGE_TARGET_URL}" ]; then
+            target_url="--url ${GARAGE_TARGET_URL}"
+        fi
+        target_expiry=""
+        if [ -n "${GARAGE_TARGET_EXPIRES}" ] && [ -n "${GARAGE_TARGET_EXPIRE_AFTER}" ]; then
+            bbfatal "Both GARAGE_TARGET_EXPIRES and GARAGE_TARGET_EXPIRE_AFTER are set. Only one can be set at a time."
+        elif [ -n "${GARAGE_TARGET_EXPIRES}" ]; then
+            target_expiry="--expires ${GARAGE_TARGET_EXPIRES}"
+        elif [ -n "${GARAGE_TARGET_EXPIRE_AFTER}" ]; then
+            target_expiry="--expire-after ${GARAGE_TARGET_EXPIRE_AFTER}"
+        fi
 
         for push_retries in $( seq 3 ); do
             garage-sign targets pull --repo tufrepo \
@@ -262,6 +270,7 @@ IMAGE_CMD_garagesign () {
             fi
             garage-sign targets sign --repo tufrepo \
                                      --home-dir ${GARAGE_SIGN_REPO} \
+                                     ${target_expiry} \
                                      --key-name=targets
             errcode=0
             garage-sign targets push --repo tufrepo \
