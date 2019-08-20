@@ -45,6 +45,7 @@ do_image_ota[cleandirs] = "${OTA_SYSROOT}"
 do_image_ota[depends] = "${@'grub:do_populate_sysroot' if d.getVar('OSTREE_BOOTLOADER') == 'grub' else ''} \
                          ${@'virtual/bootloader:do_deploy' if d.getVar('OSTREE_BOOTLOADER') == 'u-boot' else ''}"
 IMAGE_CMD_ota () {
+	export OSTREE_BOOT_PARTITION=${OSTREE_BOOT_PARTITION}
 	ostree admin --sysroot=${OTA_SYSROOT} init-fs ${OTA_SYSROOT}
 	ostree admin --sysroot=${OTA_SYSROOT} os-init ${OSTREE_OSNAME}
 	mkdir -p ${OTA_SYSROOT}/boot/loader.0

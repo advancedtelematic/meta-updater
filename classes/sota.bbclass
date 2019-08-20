@@ -38,11 +38,11 @@ EXTRA_IMAGEDEPENDS_append_sota = " parted-native mtools-native dosfstools-native
 INITRAMFS_FSTYPES ?= "${@oe.utils.ifelse(d.getVar('OSTREE_BOOTLOADER') == 'u-boot', 'cpio.gz.u-boot', 'cpio.gz')}"
 
 # Please redefine OSTREE_REPO in order to have a persistent OSTree repo
-export OSTREE_REPO ?= "${DEPLOY_DIR_IMAGE}/ostree_repo"
-export OSTREE_BRANCHNAME ?= "${SOTA_HARDWARE_ID}"
-export OSTREE_OSNAME ?= "poky"
-export OSTREE_BOOTLOADER ??= 'u-boot'
-export OSTREE_BOOT_PARTITION ??= "/boot"
+OSTREE_REPO ?= "${DEPLOY_DIR_IMAGE}/ostree_repo"
+OSTREE_BRANCHNAME ?= "${SOTA_HARDWARE_ID}"
+OSTREE_OSNAME ?= "poky"
+OSTREE_BOOTLOADER ??= 'u-boot'
+OSTREE_BOOT_PARTITION ??= "/boot"
 
 INITRAMFS_IMAGE ?= "initramfs-ostree-image"
 
@@ -51,6 +51,7 @@ GARAGE_SIGN_KEYNAME ?= "garage-key"
 GARAGE_TARGET_NAME ?= "${OSTREE_BRANCHNAME}"
 GARAGE_TARGET_VERSION ?= ""
 GARAGE_TARGET_URL ?= ""
+GARAGE_CUSTOMIZE_TARGET ?= ""
 
 SOTA_MACHINE ??="none"
 SOTA_MACHINE_rpi ?= "raspberrypi"

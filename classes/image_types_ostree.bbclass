@@ -78,15 +78,15 @@ IMAGE_CMD_ostree () {
             if [ "$(ls -A $dir)" ]; then
                 bbwarn "Data in /$dir directory is not preserved by OSTree. Consider moving it under /usr"
             fi
-
-            if [ -n "${SYSTEMD_USED}" ]; then
-                echo "d /var/rootdirs/${dir} 0755 root root -" >>${tmpfiles_conf}
-            else
-                echo "mkdir -p /var/rootdirs/${dir}; chown 755 /var/rootdirs/${dir}" >>${tmpfiles_conf}
-            fi
             rm -rf ${dir}
-            ln -sf var/rootdirs/${dir} ${dir}
         fi
+
+        if [ -n "${SYSTEMD_USED}" ]; then
+            echo "d /var/rootdirs/${dir} 0755 root root -" >>${tmpfiles_conf}
+        else
+            echo "mkdir -p /var/rootdirs/${dir}; chown 755 /var/rootdirs/${dir}" >>${tmpfiles_conf}
+        fi
+        ln -sf var/rootdirs/${dir} ${dir}
     done
 
     if [ -d root ] && [ ! -L root ]; then
@@ -95,14 +95,39 @@ IMAGE_CMD_ostree () {
         fi
 
         if [ -n "${SYSTEMD_USED}" ]; then
-            echo "d /var/roothome 0755 root root -" >>${tmpfiles_conf}
+            echo "d /var/roothome 0700 root root -" >>${tmpfiles_conf}
         else
-            echo "mkdir -p /var/roothome; chown 755 /var/roothome" >>${tmpfiles_conf}
+            echo "mkdir -p /var/roothome; chown 700 /var/roothome" >>${tmpfiles_conf}
         fi
 
         rm -rf root
         ln -sf var/roothome root
     fi
+
+    if [ -d usr/local ] && [ ! -L usr/local ]; then
+        if [ "$(ls -A usr/local)" ]; then
+            bbfatal "Data in /usr/local directory is not preserved by OSTree."
+        fi
+        rm -rf usr/local
+    fi
+
+    if [ -n "${SYSTEMD_USED}" ]; then
+        echo "d /var/usrlocal 0755 root root -" >>${tmpfiles_conf}
+    else
+        echo "mkdir -p /var/usrlocal; chown 755 /var/usrlocal" >>${tmpfiles_conf}
+    fi
+
+    dirs="bin etc games include lib man sbin share src"
+
+    for dir in ${dirs}; do
+        if [ -n "${SYSTEMD_USED}" ]; then
+            echo "d /var/usrlocal/${dir} 0755 root root -" >>${tmpfiles_conf}
+        else
+            echo "mkdir -p /var/usrlocal/${dir}; chown 755 /var/usrlocal/${dir}" >>${tmpfiles_conf}
+        fi
+    done
+
+    ln -sf ../var/usrlocal usr/local
 
     if [ "${KERNEL_IMAGETYPE}" = "fitImage" ]; then
         # this is a hack for ostree not to override init= in kernel cmdline -
@@ -229,6 +254,12 @@ IMAGE_CMD_garagesign () {
                                     ${target_url} \
                                     --sha256 ${ostree_target_hash} \
                                     --hardwareids ${SOTA_HARDWARE_ID}
+            if [ -n "${GARAGE_CUSTOMIZE_TARGET}" ]; then
+                bbplain "Running command(${GARAGE_CUSTOMIZE_TARGET}) to customize target"
+                ${GARAGE_CUSTOMIZE_TARGET} \
+                    ${GARAGE_SIGN_REPO}/tufrepo/roles/unsigned/targets.json \
+                    ${GARAGE_TARGET_NAME}-${target_version}
+            fi
             garage-sign targets sign --repo tufrepo \
                                      --home-dir ${GARAGE_SIGN_REPO} \
                                      --key-name=targets
