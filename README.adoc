@@ -200,6 +200,12 @@ IMAGE_INSTALL_append += " aktualizr-resource-control "
 RESOURCE_CPU_WEIGHT_pn-aktualizr = "50"
 ....
 
+=== garage-sign configuration
+
+The https://github.com/advancedtelematic/ota-tuf/tree/master/cli[garage-sign] tool can be configured with variables described in the <<sota-related-variables-in-localconf,SOTA-related variables in local.conf>> section.
+
+Of particular importance is controlling the expiration of the Targets metadata signed with garage-sign. This is described in detail in the https://docs.ota.here.com/ota-client/dev/metadata-expiry.html[OTA Connect documentation]. To set a manual expiration date, you can use either of the variables `GARAGE_TARGET_EXPIRES` or `GARAGE_TARGET_EXPIRE_AFTER`. Both cannot be supplied simultaneously. If neither are provided, a default of one month will be used.
+
 == Development configuration
 
 === Logging
