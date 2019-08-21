@@ -1,0 +1,46 @@
+= Development configuration
+:meta-updater-github-url: https://github.com/advancedtelematic/meta-updater/tree/master
+
+//MC: The dev guide already has a recommended config topic: https://github.com/advancedtelematic/aktualizr/blob/master/docs/ota-client-guide/modules/ROOT/pages/recommended-clientconfig.adoc
+// This content pretty much serves the same purpose except 'local.conf' instead of 'sota_conf.toml' Clean this up and use an :include: ref reuse in that topic?
+
+== Logging
+
+To troubleshoot problems that you might encounter during development, we recommend that you enable persistent `systemd` logging. This setting is enabled by default for newly configured environments (see link:{meta-updater-github-url}/conf/local.conf.sample.append[]). To enable it manually, put this to your `local.conf`:
+
+....
+IMAGE_INSTALL_append += " systemd-journald-persistent"
+....
+
+It may also be helpful to run with debug logging enabled in aktualizr. To do so, add this to your `local.conf`:
+
+....
+IMAGE_INSTALL_append += " aktualizr-log-debug"
+....
+
+== Custom aktualizr versions
+
+You can override the version of aktualizr included in your image. This requires that the version you wish to run is pushed to the https://github.com/advancedtelematic/aktualizr[aktualizr github repo]. You can then use these settings in your `local.conf` to simplify the development process:
+
+[options="header"]
+|======================
+| Option                              | Effect
+| `require classes/sota_bleeding.inc` | Build the latest head (by default, using the master branch) of Aktualizr
+| `BRANCH_pn-aktualizr = "mybranch"`
+
+`BRANCH_pn-aktualizr-native = "mybranch"` | Build `mybranch` of Aktualizr. Note that both of these need to be set. This is normally used in conjunction with `require classes/sota_bleeding.inc`
+| `SRCREV_pn-aktualizr = "1004efa3f86cef90c012b34620992b5762b741e3"`
+
+`SRCREV_pn-aktualizr-native = "1004efa3f86cef90c012b34620992b5762b741e3"` | Build the specified revision of Aktualizr. Note that both of these need to be set. This can be used in conjunction with `BRANCH_pn-aktualizr` and `BRANCH_pn-aktualizr-native` but will conflict with `require classes/sota_bleeding.inc`
+| `TOOLCHAIN_HOST_TASK_append = " nativesdk-cmake "` | Use with `bitbake -c populate_sdk core-image-minimal` to build an SDK. See the https://github.com/advancedtelematic/aktualizr#developing-against-an-openembedded-system[aktualizr repo] for more information.
+|======================
+
+== Overriding target version
+*Warning: overriding target version is a dangerous operation, make sure you understand this section completely before doing it.*
+
+Every time you build an image with `SOTA_PACKED_CREDENTIALS` set, a new entry in your Uptane metadata is created and you can see it in the OTA Garage UI if you're using one. Normally this version will be equal to OSTree hash of your root file system. If you want it to be different though you can override is using one of two methods:
+
+1. Set `GARAGE_TARGET_VERSION` variable in your `local.conf`.
+2. Write a recipe or a bbclass to write the desired version to `${STAGING_DATADIR_NATIVE}/target_version`. An example of such bbclass can be found in `classes/target_version_example.bbclass`.
+
+Please note that [target name, target version] pairs are expected to be unique in the system. If you build a new target with the same target version as a previously built one, the old package will be overwritten on the update server. It can have unpredictable effect on devices that have this version installed, and it is not guaranteed that information will be reported correctly for such devices or that you will be able to update them (we're doing our best though). The easiest way to avoid problems is to make sure that your overriding version is as unique as an OSTree commit hash.

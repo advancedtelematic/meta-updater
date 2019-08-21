@@ -1,8 +1,11 @@
 = meta-updater
 :toc: macro
 :toc-title:
+:meta-updater-github-url: https://github.com/advancedtelematic/meta-updater/blob/master/
 
-This layer enables over-the-air updates (OTA) with https://github.com/ostreedev/ostree[OSTree] and https://github.com/advancedtelematic/aktualizr[Aktualizr].
+ifndef::env-github[:meta-updater-github-url:]
+
+Meta-updater is a link:https://www.yoctoproject.org/software-overview/layers/[Yocto layer] that enables over-the-air updates (OTA) with https://github.com/ostreedev/ostree[OSTree] and https://github.com/advancedtelematic/aktualizr[Aktualizr].
 
 https://github.com/ostreedev/ostree[OSTree] is a tool for atomic full file system upgrades with rollback capability. OSTree has several advantages over traditional dual-bank systems, but the most important one is that it minimizes network bandwidth and data storage footprint by sharing files with the same contents across file system deployments.
 
@@ -10,300 +13,37 @@ https://github.com/advancedtelematic/aktualizr[Aktualizr] (and https://github.co
 
 [discrete]
 == Table of Contents
-
-toc::[]
-
-== Build
-
-=== Quickstart
-
-If you don't already have a Yocto project that you want to add OTA to, you can use the https://docs.atsgarage.com/quickstarts/raspberry-pi.html[HERE OTA Connect Quickstart] project to rapidly get up and running on a Raspberry Pi. It takes a standard https://www.yoctoproject.org/tools-resources/projects/poky[poky] distribution, and adds OTA and OSTree capabilities.
-
-=== Dependencies
-
-In addition to the link:https://www.yoctoproject.org/docs/current/ref-manual/ref-manual.html#required-packages-for-the-build-host[standard Yocto dependencies], meta-updater generally requires a few additional dependencies, depending on your use case and target platform. To install these additional packages on Debian/Ubuntu, run this:
-
-....
-sudo apt install cpu-checker default-jre parted
-....
-
-To build for https://github.com/advancedtelematic/meta-updater-minnowboard[Minnowboard] with GRUB, you will also need to install https://github.com/tianocore/tianocore.github.io/wiki/OVMF[TianoCore's ovmf] package on your host system. On Debian/Ubuntu, you can do so with this command:
-
-....
-sudo apt install ovmf
-....
-
-=== Adding meta-updater capabilities to your build
-
-If you already have a Yocto-based project and you want to add atomic filesystem updates to it, you just need to do three things:
-
-1.  Clone the `meta-updater` layer and add it to your https://www.yoctoproject.org/docs/current/ref-manual/ref-manual.html#structure-build-conf-bblayers.conf[bblayers.conf].
-2.  Clone BSP integration layer (`meta-updater-$\{PLATFORM}`, e.g. https://github.com/advancedtelematic/meta-updater-raspberrypi[meta-updater-raspberrypi]) and add it to your `conf/bblayers.conf`. If your board isn't supported yet, you could write a BSP integration for it yourself. See the <<Adding support for your board>> section for the details.
-3.  Set up your https://www.yoctoproject.org/docs/current/ref-manual/ref-manual.html#var-DISTRO[distro]. If you are using "poky", the default distro in Yocto, you can change it in your `conf/local.conf` to "poky-sota". Alternatively, if you are using your own or third party distro configuration, you can add `INHERIT += " sota"` to it, thus combining capabilities of your distro with meta-updater features.
-
-You can then build your image as usual, with bitbake. After building the root file system, bitbake will then create an https://ostree.readthedocs.io/en/latest/manual/adapting-existing/[OSTree-enabled version] of it, commit it to your local OSTree repo and (optionally) push it to a remote server. Additionally, a live disk image will be created (normally named `$\{IMAGE_NAME}.-sdimg-ota` e.g. `core-image-raspberrypi3.rpi-sdimg-ota`). You can control this behaviour through <<sota-related-variables-in-localconf,variables in your local.conf>>.
-
-=== Build in AGL
-
-With AGL you can just add agl-sota feature while configuring your build environment:
-
-....
-source meta-agl/scripts/aglsetup.sh -m porter agl-demo agl-appfw-smack agl-devel agl-sota
-....
-
-You can then run:
-
-....
-bitbake agl-demo-platform
-....
-
-and get as a result an `ostree_repo` folder in your images directory (`tmp/deploy/images/$\{MACHINE}/ostree_repo`). It will contain:
-
-* your OSTree repository, with the rootfs committed as an OSTree deployment,
-* an `ota-ext4` bootstrap image, which is an OSTree physical sysroot as a burnable filesystem image, and optionally
-* some machine-dependent live images (e.g. `.wic` for Raspberry Pi or `.porter-sdimg-ota` for Renesas Porter board).
-
-Although `aglsetup.sh` hooks provide reasonable defaults for SOTA-related variables, you may want to tune some of them.
-
-=== Build problems
-
-Ubuntu users that encounter an error due to missing `Python.h` should install `libpython2.7-dev` on their host machine.
-
-== Supported boards
-
-Currently supported platforms are:
-
-* https://github.com/advancedtelematic/meta-updater-raspberrypi[Raspberry Pi 2 and 3]
-* https://github.com/advancedtelematic/meta-updater-minnowboard[Intel Minnowboard]
-* https://github.com/advancedtelematic/meta-updater-qemux86-64[Native QEMU emulation]
-* Renesas R-Car H3 and M3
-* https://github.com/advancedtelematic/meta-updater-ti/[TI BeagleBone Black] (rocko only, using TI SDK 05.03)
-* https://github.com/advancedtelematic/meta-updater-ti/[TI AM65x industrial development kit] (rocko only, using TI SDK 05.03)
-
-Additionally, there is community support for https://github.com/ricardosalveti/meta-updater-riscv[RISC-V] boards, in particular the Freedom U540.
-
-We also historically supported the https://github.com/advancedtelematic/meta-updater-porter[Renesas Porter] board.
-
-=== Adding support for your board
-
-If your board isn't supported yet, you can add board integration code yourself. The main purpose of this code is to provide a bootloader that will be able to use https://ostree.readthedocs.io/en/latest/manual/atomic-upgrades/[OSTree's boot directory]. In the meta-updater integration layers we have written so far, the basic steps are:
-
-1.  Make the board boot into http://www.denx.de/wiki/U-Boot[U-Boot]
-2.  Make U-boot import variables from /boot/loader/uEnv.txt and load the kernel with initramfs and kernel command line arguments according to what is set in this file.
-
-You may take a look into https://github.com/advancedtelematic/meta-updater-minnowboard[Minnowboard] or https://github.com/advancedtelematic/meta-updater-raspberrypi[Raspberry Pi] integration layers for examples.
-
-Although we have focused on U-Boot and GRUB so far, other bootloaders can be configured to work with OSTree as well.
-
-Your images will also need network connectivity to be able to reach an actual OTA backend. Our 'poky-sota' distribution does not mandate or install a default network manager but our supported platforms use the `virtual/network-configuration` recipe, which can be used as a starting example.
-
-== SOTA-related variables in local.conf
-
-* `OSTREE_BRANCHNAME` - OSTree branch name. Defaults to `${SOTA_HARDWARE_ID}`. Particularly useful for grouping similar images.
-* `OSTREE_REPO` - path to your OSTree repository. Defaults to `$\{DEPLOY_DIR_IMAGE}/ostree_repo`
-* `OSTREE_OSNAME` - OS deployment name on your target device. For more information about deployments and osnames see the https://ostree.readthedocs.io/en/latest/manual/deployment/[OSTree documentation]. Defaults to "poky".
-* `OSTREE_COMMIT_BODY` - Message attached to OSTree commit. Empty by default.
-* `OSTREE_COMMIT_SUBJECT` - Commit subject used by OSTree. Defaults to `Commit-id: ${IMAGE_NAME}`
-* `OSTREE_UPDATE_SUMMARY` - Set this to '1' to update summary of OSTree repository on each commit. '0' by default.
-* `OSTREE_DEPLOY_DEVICETREE` - Set this to '1' to include devicetree(s) to boot
-* `GARAGE_SIGN_AUTOVERSION` - Set this to '1' to automatically fetch the last version of the garage tools installed by the aktualizr-native. Otherwise use the fixed version specified in the recipe.
-* `GARAGE_TARGET_URL` - sets the `--url` parameter of `garage-sign targets add`, which sets a custom URL for the Image repository targets.
-* `GARAGE_TARGET_EXPIRES` - sets the `--expires` parameter of `garage-sign targets sign`. Format is a UTC instant such as '2018-01-01T00:01:00Z'.
-* `GARAGE_TARGET_EXPIRE_AFTER` - sets the `--expire-after` parameter of `garage-sign targets sign`. Format is in years, months, and days (each optional, but in that order), such as '1Y3M5D'.
-* `INITRAMFS_IMAGE` - initramfs/initrd image that is used as a proxy while booting into OSTree deployment. Do not change this setting unless you are sure that your initramfs can serve as such a proxy.
-* `SOTA_PACKED_CREDENTIALS` - when set, your ostree commit will be pushed to a remote repo as a bitbake step. This should be the path to a zipped credentials file in https://github.com/advancedtelematic/aktualizr/blob/master/docs/credentials.adoc[the format accepted by garage-push].
-* `SOTA_DEPLOY_CREDENTIALS` - when set to '1' (default value), deploys credentials to the built image. Override it in `local.conf` to built a generic image that can be provisioned manually after the build.
-* `SOTA_CLIENT_PROV` - which provisioning method to use. Valid options are `aktualizr-shared-prov`, `aktualizr-device-prov`, and `aktualizr-device-prov-hsm`. For more information on these provisioning methods, see the https://docs.ota.here.com/client-config/client-provisioning-methods.html[OTA Connect documentation]. The default is `aktualizr-shared-prov`. This can also be set to an empty string to avoid using a provisioning recipe.
-* `SOTA_CLIENT_FEATURES` - extensions to aktualizr. The only valid options are `hsm` (to build with HSM support) and `secondary-network` (to set up a simulated 'in-vehicle' network with support for a primary node with a DHCP server and a secondary node with a DHCP client).
-* `SOTA_SECONDARY_CONFIG` - a file containing JSON configuration for secondaries. It will be installed into `/etc/sota/ecus` on the device and automatically provided to aktualizr. See link:https://github.com/advancedtelematic/aktualizr/blob/master/docs/posix-secondaries-bitbaking.adoc[here] for more details.
-* `SOTA_HARDWARE_ID` - a custom hardware ID that will be written to the aktualizr config. Defaults to MACHINE if not set.
-* `SOTA_MAIN_DTB` - base device tree to use with the kernel. Used together with FIT images. You can change it, and the device tree will also be changed after the update.
-* `SOTA_DT_OVERLAYS` - whitespace-separated list of used device tree overlays for FIT image. This list is OSTree-updateable as well.
-* `SOTA_EXTRA_CONF_FRAGS` - extra https://lxr.missinglinkelectronics.com/uboot/doc/uImage.FIT/overlay-fdt-boot.txt[configuration fragments] for FIT image.
-* `RESOURCE_xxx_pn-aktualizr` - controls maximum resource usage of the aktualizr service, when `aktualizr-resource-control` is installed on the image. See <<aktualizr service resource control>> for details.
-* `SOTA_POLLING_SEC` - sets polling interval for aktualizr to check for updates if aktualizr-polling-interval is included in the image.
-
-== Usage
-
-=== OSTree
-
-OSTree used to include a simple HTTP server as part of the ostree binary, but this has been removed in more recent versions. However, OSTree repositories are self-contained directories, and can be trivially served over the network using any HTTP server. For example, you could use Python's SimpleHTTPServer:
-
-....
-cd tmp/deploy/images/qemux86-64/ostree_repo
-python -m SimpleHTTPServer <port> # port defaults to 8000
-....
-
-You can then run ostree from inside your device by adding your repo:
-
-....
-# This behaves like adding a Git remote; you can name it anything
-ostree remote add --no-gpg-verify my-remote http://<your-ip>:<port>
-
-# If OSTREE_BRANCHNAME is set in local.conf, that will be the name of the
-# branch. If not set, it defaults to the value of MACHINE (e.g. qemux86-64).
-ostree pull my-remote <branch>
-
-# poky is the OS name as set in OSTREE_OSNAME
-ostree admin deploy --os=poky my-remote:<branch>
-....
-
-After restarting, you will boot into the newly deployed OS image.
-
-For example, on the raspberry pi you can try this sequence:
-
-....
-# add remote
-ostree remote add --no-gpg-verify agl-snapshot https://download.automotivelinux.org/AGL/snapshots/master/latest/raspberrypi3/deploy/images/raspberrypi3/ostree_repo/ agl-ota
-
-# pull
-ostree pull agl-snapshot agl-ota
-
-# deploy
-ostree admin deploy --os=agl agl-snapshot:agl-ota
-....
-
-=== garage-push
-
-The https://github.com/advancedtelematic/aktualizr[aktualizr repo] contains a tool, garage-push, which lets you push the changes in OSTree repository generated by bitbake process. It communicates with an http server capable of querying files with HEAD requests and uploading them with POST requests. In particular, this can be used with https://connect.ota.here.com/[HERE OTA Connect]. garage-push is used as follows:
-
-....
-garage-push --repo=/path/to/ostree-repo --ref=mybranch --credentials=/path/to/credentials.zip
-....
-
-You can set `SOTA_PACKED_CREDENTIALS` in your `local.conf` to automatically synchronize your build results with a remote server. Credentials are stored in an archive as described in the https://github.com/advancedtelematic/aktualizr/blob/master/docs/credentials.adoc[aktualizr documentation].
-
-=== aktualizr configuration
-
-https://github.com/advancedtelematic/aktualizr[Aktualizr] supports a variety of https://github.com/advancedtelematic/aktualizr/blob/master/docs/configuration.adoc[configuration options via a configuration file and the command line]. There are two primary ways to control aktualizr's configuration from meta-updater.
-
-First, you can set `SOTA_CLIENT_PROV` to control which provisioning recipe is used. Each recipe installs an appropriate `sota.toml` file from aktualizr according to the provisioning needs. See the <<sota-related-variables-in-localconf,SOTA-related variables in local.conf>> section for more information.
-
-Second, you can write recipes to install additional config files with customized options. A few recipes already exist to address common needs and provide an example:
-
-* link:recipes-sota/config/aktualizr-auto-reboot.bb[aktualizr-auto-reboot.bb] configures aktualizr to automatically reboot after new updates are installed in order to apply the updates immediately. This is only relevant for package managers (such as OSTree) that require a reboot to complete the installation process. If this is not enabled, you will need to reboot the system through other means.
-* link:recipes-sota/config/aktualizr-disable-send-ip.bb[aktualizr-disable-send-ip.bb] disables the reporting of networking information to the server. This is enabled by default and supported by https://connect.ota.here.com/[HERE OTA Connect]. However, if you are using a different server that does not support this feature, you may want to disable it in aktualizr.
-* link:recipes-sota/config/aktualizr-log-debug.bb[aktualizr-log-debug.bb] sets the log level of aktualizr to 0 (trace). The default is 2 (info). This recipe is intended for development and debugging purposes.
-
-To use these recipes, you will need to add them to your image with a line such as `IMAGE_INSTALL_append = " aktualizr-log-debug "` in your `local.conf`.
-
-=== aktualizr service resource control
-
-With systemd based images, it is possible to set resource policies for the aktualizr service. The main use case is to provide a safeguard against resource exhaustion during an unforeseen failure scenario.
-
-To enable it, install `aktualizr-resource-control` on the target image and optionally override the default resource limits set in link:recipes-sota/aktualizr/aktualizr_git.bb[aktualizr_git.bb], from your `local.conf`.
-
-For example:
-
-....
-IMAGE_INSTALL_append += " aktualizr-resource-control "
-RESOURCE_CPU_WEIGHT_pn-aktualizr = "50"
-....
-
-=== garage-sign configuration
-
-The https://github.com/advancedtelematic/ota-tuf/tree/master/cli[garage-sign] tool can be configured with variables described in the <<sota-related-variables-in-localconf,SOTA-related variables in local.conf>> section.
-
-Of particular importance is controlling the expiration of the Targets metadata signed with garage-sign. This is described in detail in the https://docs.ota.here.com/ota-client/dev/metadata-expiry.html[OTA Connect documentation]. To set a manual expiration date, you can use either of the variables `GARAGE_TARGET_EXPIRES` or `GARAGE_TARGET_EXPIRE_AFTER`. Both cannot be supplied simultaneously. If neither are provided, a default of one month will be used.
-
-== Development configuration
-
-=== Logging
-
-To troubleshoot problems that you might encounter during development, we recommend that you enable persistent `systemd` logging. This setting is enabled by default for newly configured environments (see link:conf/local.conf.sample.append[]). To enable it manually, put this to your `local.conf`:
-
-....
-IMAGE_INSTALL_append += " systemd-journald-persistent"
-....
-
-It may also be helpful to run with debug logging enabled in aktualizr. To do so, add this to your `local.conf`:
-
-....
-IMAGE_INSTALL_append += " aktualizr-log-debug"
-....
-
-=== Custom aktualizr versions
-
-You can override the version of aktualizr included in your image. This requires that the version you wish to run is pushed to the https://github.com/advancedtelematic/aktualizr[aktualizr github repo]. You can then use these settings in your `local.conf` to simplify the development process:
-
-[options="header"]
-|======================
-| Option                              | Effect
-| `require classes/sota_bleeding.inc` | Build the latest head (by default, using the master branch) of Aktualizr
-| `BRANCH_pn-aktualizr = "mybranch"`
-
-`BRANCH_pn-aktualizr-native = "mybranch"` | Build `mybranch` of Aktualizr. Note that both of these need to be set. This is normally used in conjunction with `require classes/sota_bleeding.inc`
-| `SRCREV_pn-aktualizr = "1004efa3f86cef90c012b34620992b5762b741e3"`
-
-`SRCREV_pn-aktualizr-native = "1004efa3f86cef90c012b34620992b5762b741e3"` | Build the specified revision of Aktualizr. Note that both of these need to be set. This can be used in conjunction with `BRANCH_pn-aktualizr` and `BRANCH_pn-aktualizr-native` but will conflict with `require classes/sota_bleeding.inc`
-| `TOOLCHAIN_HOST_TASK_append = " nativesdk-cmake "` | Use with `bitbake -c populate_sdk core-image-minimal` to build an SDK. See the https://github.com/advancedtelematic/aktualizr#developing-against-an-openembedded-system[aktualizr repo] for more information.
-|======================
-
-=== Overriding target version
-*Warning: overriding target version is a dangerous operation, make sure you understand this section completely before doing it.*
-
-Every time you build an image with `SOTA_PACKED_CREDENTIALS` set, a new entry in your Uptane metadata is created and you can see it in the OTA Garage UI if you're using one. Normally this version will be equal to OSTree hash of your root file system. If you want it to be different though you can override is using one of two methods:
-
-1. Set `GARAGE_TARGET_VERSION` variable in your `local.conf`.
-2. Write a recipe or a bbclass to write the desired version to `${STAGING_DATADIR_NATIVE}/target_version`. An example of such bbclass can be found in `classes/target_version_example.bbclass`.
-
-Please note that [target name, target version] pairs are expected to be unique in the system. If you build a new target with the same target version as a previously built one, the old package will be overwritten on the update server. It can have unpredictable effect on devices that have this version installed, and it is not guaranteed that information will be reported correctly for such devices or that you will be able to update them (we're doing our best though). The easiest way to avoid problems is to make sure that your overriding version is as unique as an OSTree commit hash.
-
-== QA with oe-selftest
-
-This layer relies on the test framework oe-selftest for quality assurance. Currently, you will need to run this in a build directory with `MACHINE` set to `qemux86-64`. Follow the steps below to run the tests:
-
-1. Append the line below to `conf/local.conf` to disable the warning about supported operating systems:
+* xref:{meta-updater-github-url}docs/modules/ROOT/pages/build.adoc[Build]
 +
-```
-SANITY_TESTED_DISTROS = ""
-```
-
-2. If your image does not already include an ssh daemon such as dropbear or openssh, add this line to `conf/local.conf` as well:
+Learn how to use this layer to build a basic disk image and add it to your own Yocto project.
 +
-```
-IMAGE_INSTALL_append = " dropbear "
-```
-
-3. Some tests require that `SOTA_PACKED_CREDENTIALS` is set in your `conf/local.conf`. See the <<sota-related-variables-in-localconf,SOTA-related variables in local.conf>> section.
-
-4. To be able to build an image for the GRUB tests, you will need to install the ovmf package as described in the <<Dependencies,dependencies>>.
-
-5. Run oe-selftest:
+* xref:{meta-updater-github-url}docs/modules/ROOT/pages/supported-boards.adoc[Supported boards]
 +
-```
-oe-selftest -r updater_native updater_qemux86_64 updater_minnowboard updater_raspberrypi updater_qemux86_64_ptest
-```
-
-For more information about oe-selftest, including details about how to run individual test modules or classes, please refer to the https://wiki.yoctoproject.org/wiki/Oe-selftest[Yocto Project wiki].
-
-== Aktualizr test suite with ptest
-
-The meta-updater layer includes support for running parts of the aktualizr test suite on deployed devices through link:https://wiki.yoctoproject.org/wiki/Ptest[Yocto's ptest functionality]. Since it adds significant build time cost, it is currently disabled by default. To enable it, add the following to your `conf/local.conf`:
-
-```
-PTEST_ENABLED_pn-aktualizr = "1"
-IMAGE_INSTALL_append += " aktualizr-ptest ptest-runner "
-```
-
-Be aware that it will add several hundreds of MB to the generated file system.
-
-The aktualizr tests will now be part of the deployed ptest suite, which can be run by calling `ptest-runner`. Alternatively, the required files and run script can be found in `/usr/lib/aktualizr/ptest`.
-
-== Manual provisoning
-
-As described in <<sota-related-variables-in-localconf,SOTA-related variables in local.conf>> section you can set `SOTA_DEPLOY_CREDENTIALS` to `0` to prevent deploying credentials to the built `wic` image. In this case you get a generic image that you can use e.g. on a production line to flash a series of devices. The cost of this approach is that this image is half-baked and should be provisioned before it can connect to the backend.
-
-Provisioning procedure depends on your provisioning recipe, i.e. the value of `SOTA_CLIENT_PROV` (equal to `aktualizr-shared-prov` by default):
-
-* For `aktualizr-shared-prov` put your `credentials.zip` to `/var/sota/sota_provisioning_credentials.zip` on the filesystem of a running device. If you have the filesystem of our device mounted to your build machine, prefix all paths with `/ostree/deploy/poky` as in `/ostree/deploy/poky/var/sota/sota_provisioning_credentials.zip`.
-* For `aktualizr-device-prov`
-** put URL to the backend server (together with protocol prefix and port number) at `/var/sota/gateway.url`. If you're using HERE OTA Connect, you can find the URL in the `autoprov.url` file in your credentials archive.
-** put client certificate, private key and root CA certificate (for the *server*, not for the *device*) at `/var/sota/import/client.pem`, `/var/sota/import/pkey.pem` and `/var/sota/import/root.crt` respectively.
-* For  `aktualizr-device-prov-hsm`
-** put URL to the server backend (together with protocol prefix and port number) at `/var/sota/gateway.url`. If you're using HERE OTA Connect, you can find the URL in the `autoprov.url` file in your credentials archive.
-** put root CA certificate (for the *server*, not for the *device*) at `/var/sota/import/root.crt`.
-** put client certificate and private key to slots 1 and 2 of the PKCS#11-compatible device.
+Find out if your board is supported and learn about the minimum hardware requirements.
++
+* xref:{meta-updater-github-url}docs/modules/ROOT/pages/sota-variables.adoc[SOTA-related variables in local.conf]
++
+Learn how to configure OTA-related functionality when building disk images.
++
+* xref:{meta-updater-github-url}docs/modules/ROOT/pages/meta-updater-usage.adoc[Usage]
++
+Learn about the `garage-push` and `garage-sign` utilities, aktualizr configuration and service resource control, and OSTree.
++
+* xref:{meta-updater-github-url}docs/modules/ROOT/pages/dev-config.adoc[Development configuration]
++
+Learn how to configure logging, install custom versions of aktualizr, and override the version indicator for sofware updates.
++
+* xref:{meta-updater-github-url}docs/modules/ROOT/pages/meta-updater-testing.adoc#_qa_with_oe_selftest[QA with oe-selftest]
++
+Learn how to use the `oe-selftest` framework for quality assurance.
++
+* xref:{meta-updater-github-url}docs/modules/ROOT/pages/meta-updater-testing.adoc#_aktualizr_test_suite_with_ptest[Aktualizr test suite with ptest]
++
+Learn how to enable Yocto's package test functionality and run parts of the aktualizr test suite.
++
+* xref:{meta-updater-github-url}docs/modules/ROOT/pages/provisioning-methods.adoc[Provisoning methods]
++
+Learn how to enable different methods for provisioning devices.
 
 == License
 
