@@ -85,6 +85,7 @@ class SharedCredProvTests(OESelftestTestCase):
         self.append_config('MACHINE = "qemux86-64"')
         self.append_config('SOTA_CLIENT_PROV = " aktualizr-shared-prov "')
         self.append_config('IMAGE_FSTYPES_remove = "ostreepush garagesign garagecheck"')
+        self.append_config('SOTA_HARDWARE_ID = "plain_reibekuchen_314"')
         self.qemu, self.s = qemu_launch(machine='qemux86-64')
 
     def tearDownLocal(self):
@@ -107,7 +108,8 @@ class SharedCredProvTests(OESelftestTestCase):
         self.assertEqual(value, machine,
                          'MACHINE does not match hostname: ' + machine + ', ' + value)
 
-        verifyProvisioned(self, machine)
+        hwid = get_bb_var('SOTA_HARDWARE_ID')
+        verifyProvisioned(self, machine, hwid)
 
 
 class ManualControlTests(OESelftestTestCase):
