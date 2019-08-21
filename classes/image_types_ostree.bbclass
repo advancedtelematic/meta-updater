@@ -248,6 +248,8 @@ IMAGE_CMD_garagesign () {
             target_expiry="--expires ${GARAGE_TARGET_EXPIRES}"
         elif [ -n "${GARAGE_TARGET_EXPIRE_AFTER}" ]; then
             target_expiry="--expire-after ${GARAGE_TARGET_EXPIRE_AFTER}"
+        else
+            target_expiry="--expire-after 1M"
         fi
 
         for push_retries in $( seq 3 ); do
