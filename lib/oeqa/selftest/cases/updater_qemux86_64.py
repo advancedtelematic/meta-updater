@@ -360,17 +360,7 @@ class IpSecondaryTests(OESelftestTestCase):
             self._test_ctx.append_config('SOTA_CLIENT_PROV = " aktualizr-shared-prov "')
 
         def is_ecu_registered(self, ecu_id):
-            max_number_of_tries = 120
-            try_counter = 0
-
-            # aktualizr-info is not always able to load ECU serials from DB
-            # so, let's run it a few times until it actually succeeds
-            while try_counter < max_number_of_tries:
-                device_status = self.get_info()
-                try_counter += 1
-                if device_status.find("load ECU serials") == -1:
-                    break
-                sleep(1)
+            device_status = self.get_info()
 
             if not ((device_status.find(ecu_id[0]) != -1) and (device_status.find(ecu_id[1]) != -1)):
                 return False
@@ -379,7 +369,7 @@ class IpSecondaryTests(OESelftestTestCase):
             return not_reg_start == -1 or (device_status.find(ecu_id[1], not_reg_start) == -1)
 
         def get_info(self):
-            stdout, stderr, retcode = self.send_command('aktualizr-info')
+            stdout, stderr, retcode = self.send_command('aktualizr-info --wait-until-provisioned', timeout=620)
             self._test_ctx.assertEqual(retcode, 0, 'Unable to run aktualizr-info: {}'.format(stderr))
             return stdout
 
