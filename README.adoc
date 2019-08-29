@@ -1,11 +1,11 @@
 = meta-updater
 :toc: macro
 :toc-title:
-:meta-updater-github-url: https://github.com/advancedtelematic/meta-updater/blob/master/
+:meta-updater-github-url: https://github.com/advancedtelematic/meta-updater/tree/master/
 
 ifndef::env-github[:meta-updater-github-url:]
 
-Meta-updater is a link:https://www.yoctoproject.org/software-overview/layers/[Yocto layer] that enables over-the-air updates (OTA) with https://github.com/ostreedev/ostree[OSTree] and https://github.com/advancedtelematic/aktualizr[Aktualizr].
+Meta-updater is a link:https://www.yoctoproject.org/software-overview/layers/[Yocto layer] that enables over-the-air updates (OTA) with https://github.com/ostreedev/ostree[OSTree] and https://github.com/advancedtelematic/aktualizr[Aktualizr] -- the default client for link:https://www.here.com/products/automotive/ota-technology[HERE OTA Connect].
 
 https://github.com/ostreedev/ostree[OSTree] is a tool for atomic full file system upgrades with rollback capability. OSTree has several advantages over traditional dual-bank systems, but the most important one is that it minimizes network bandwidth and data storage footprint by sharing files with the same contents across file system deployments.
 
@@ -13,6 +13,9 @@ https://github.com/advancedtelematic/aktualizr[Aktualizr] (and https://github.co
 
 [discrete]
 == Table of Contents
+
+The following documentation focuses on tasks that involve the meta-updater layer. If you want to get an idea of the overall developer workflow in OTA Connect, see the link:https://docs.ota.here.com/ota-client/dev/index.html[OTA Connect Developer Guide].
+
 * xref:{meta-updater-github-url}docs/modules/ROOT/pages/build.adoc[Build]
 +
 Learn how to use this layer to build a basic disk image and add it to your own Yocto project.
