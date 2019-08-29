@@ -15,12 +15,6 @@
 | `OSTREE_DEPLOY_DEVICETREE`|Set this to '1' to include devicetree(s) to boot
 | `GARAGE_SIGN_AUTOVERSION`|Set this to '1' to automatically fetch the last version of the garage tools installed by the aktualizr-native. Otherwise use the fixed version specified in the recipe.
 | `GARAGE_TARGET_URL` | Sets the `--url` parameter of `garage-sign targets add`, which sets a custom URL for the Image repository targets.
-ifndef::env-github[]
-[NOTE]
-====
-Currently, this only works when using the master branch of meta-updater.
-====
-endif::[]
 | `GARAGE_TARGET_EXPIRES` | Sets the `--expires` parameter of `garage-sign targets sign`. Format is a UTC instant such as '2018-01-01T00:01:00Z'.
 ifndef::env-github[]
 [NOTE]
