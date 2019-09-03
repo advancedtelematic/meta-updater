@@ -4,11 +4,11 @@ We welcome pull requests from anyone. The master branch is the primary branch fo
 
 * warrior
 * thud
-* sumo
-* rocko
 
 Previously, some older branches were also regularly supported, and while they should still be stable, they have not been updated or actively maintained for a while. These branches include:
 
+* sumo
+* rocko
 * pyro
 * morty
 
