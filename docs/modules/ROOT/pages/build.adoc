@@ -1,0 +1,62 @@
+= Build
+:meta-updater-github-url: https://github.com/advancedtelematic/meta-updater/tree/master
+
+== Quickstart
+
+If you don't already have a Yocto project that you want to add OTA to, you can use the xref:dev@getstarted::raspberry-pi.adoc[HERE OTA Connect Quickstart] project to rapidly get up and running on a Raspberry Pi. It takes a standard https://www.yoctoproject.org/tools-resources/projects/poky[poky] distribution, and adds OTA and OSTree capabilities.
+
+== Dependencies
+
+//MC: TOMERGE: These "dependencies" mostly just duplicates the prerequisite sections: https://main.gitlab.in.here.com/olp/edge/ota/documentation/ota-connect-docs/blob/master/docs/getstarted/modules/ROOT/pages/raspberry-pi.adoc
+
+In addition to the link:https://www.yoctoproject.org/docs/current/ref-manual/ref-manual.html#required-packages-for-the-build-host[standard Yocto dependencies], meta-updater generally requires a few additional dependencies, depending on your use case and target platform. To install these additional packages on Debian/Ubuntu, run this:
+
+....
+sudo apt install cpu-checker default-jre parted
+....
+
+To build for https://github.com/advancedtelematic/meta-updater-minnowboard[Minnowboard] with GRUB, you will also need to install https://github.com/tianocore/tianocore.github.io/wiki/OVMF[TianoCore's ovmf] package on your host system. On Debian/Ubuntu, you can do so with this command:
+
+....
+sudo apt install ovmf
+....
+
+== Adding meta-updater capabilities to your build
+
+// MC: TOMERGE: This content mosty duplicates https://github.com/advancedtelematic/aktualizr/blob/master/docs/ota-client-guide/modules/ROOT/pages/add-ota-functonality-existing-yocto-project.adoc
+
+If you already have a Yocto-based project and you want to add atomic filesystem updates to it, you just need to do three things:
+
+1.  Clone the `meta-updater` layer and add it to your https://www.yoctoproject.org/docs/current/ref-manual/ref-manual.html#structure-build-conf-bblayers.conf[bblayers.conf].
+2.  Clone BSP integration layer (`meta-updater-$\{PLATFORM}`, e.g. https://github.com/advancedtelematic/meta-updater-raspberrypi[meta-updater-raspberrypi]) and add it to your `conf/bblayers.conf`. If your board isn't supported yet, you could write a BSP integration for it yourself. See the <<Adding support for your board>> section for the details.
+3.  Set up your https://www.yoctoproject.org/docs/current/ref-manual/ref-manual.html#var-DISTRO[distro]. If you are using "poky", the default distro in Yocto, you can change it in your `conf/local.conf` to "poky-sota". Alternatively, if you are using your own or third party distro configuration, you can add `INHERIT += " sota"` to it, thus combining capabilities of your distro with meta-updater features.
+
+You can then build your image as usual, with bitbake. After building the root file system, bitbake will then create an https://ostree.readthedocs.io/en/latest/manual/adapting-existing/[OSTree-enabled version] of it, commit it to your local OSTree repo and (optionally) push it to a remote server. Additionally, a live disk image will be created (normally named `$\{IMAGE_NAME}.-sdimg-ota` e.g. `core-image-raspberrypi3.rpi-sdimg-ota`). You can control this behaviour through <<sota-related-variables-in-localconf,variables in your local.conf>>.
+
+== Build in AGL
+
+// MC: TOMERGE: This content duplicates https://main.gitlab.in.here.com/olp/edge/ota/documentation/ota-connect-docs/blob/master/docs/getstarted/modules/ROOT/pages/automotive-grade-linux.adoc (except that it is a lot sparser)
+
+With AGL you can just add agl-sota feature while configuring your build environment:
+
+....
+source meta-agl/scripts/aglsetup.sh -m porter agl-demo agl-appfw-smack agl-devel agl-sota
+....
+
+You can then run:
+
+....
+bitbake agl-demo-platform
+....
+
+and get as a result an `ostree_repo` folder in your images directory (`tmp/deploy/images/$\{MACHINE}/ostree_repo`). It will contain:
+
+* your OSTree repository, with the rootfs committed as an OSTree deployment,
+* an `ota-ext4` bootstrap image, which is an OSTree physical sysroot as a burnable filesystem image, and optionally
+* some machine-dependent live images (e.g. `.wic` for Raspberry Pi or `.porter-sdimg-ota` for Renesas Porter board).
+
+Although `aglsetup.sh` hooks provide reasonable defaults for SOTA-related variables, you may want to tune some of them.
+
+== Build problems
+
+Ubuntu users that encounter an error due to missing `Python.h` should install `libpython2.7-dev` on their host machine.
