@@ -1,16 +1,6 @@
 = Contributing
 
-We welcome pull requests from anyone. The master branch is the primary branch for development, and if you wish to add new functionality, it probably belongs there. We attempt to maintain recent previous branches and welcome bug fixes and backports for those. Currently, the actively maintained branches are:
-
-* warrior
-* thud
-
-Previously, some older branches were also regularly supported, and while they should still be stable, they have not been updated or actively maintained for a while. These branches include:
-
-* sumo
-* rocko
-* pyro
-* morty
+We welcome pull requests from anyone. The master branch is the primary branch for development, and if you wish to add new functionality, it probably belongs there. We attempt to maintain recent release branches and welcome bug fixes and backports for those. Please see the link:docs/modules/ROOT/pages/yocto-release-branches.adoc[release branches] documentation for the current list of support branches.
 
 If you are developing with meta-updater, it may be helpful to read the README and other documentation for link:README.adoc[this repo], https://github.com/advancedtelematic/aktualizr[aktualizr], and the https://github.com/advancedtelematic/updater-repo/[updater-repo], particularly the sections about development and debugging.
 
