@@ -1,9 +1,7 @@
 = meta-updater
 :toc: macro
 :toc-title:
-:meta-updater-github-url: https://github.com/advancedtelematic/meta-updater/tree/master/
-
-ifndef::env-github[:meta-updater-github-url:]
+:aktualizr-docsroot: https://github.com/advancedtelematic/aktualizr/tree/master/docs/ota-client-guide/modules/ROOT/pages/
 
 Meta-updater is a link:https://www.yoctoproject.org/software-overview/layers/[Yocto layer] that enables over-the-air updates (OTA) with https://github.com/ostreedev/ostree[OSTree] and https://github.com/advancedtelematic/aktualizr[Aktualizr] -- the default client for link:https://www.here.com/products/automotive/ota-technology[HERE OTA Connect].
 
@@ -15,36 +13,40 @@ https://github.com/advancedtelematic/aktualizr[Aktualizr] (and https://github.co
 == Table of Contents
 
 The following documentation focuses on tasks that involve the meta-updater layer. If you want to get an idea of the overall developer workflow in OTA Connect, see the link:https://docs.ota.here.com/ota-client/dev/index.html[OTA Connect Developer Guide].
+[NOTE]
+====
+The following links point to files in the aktualizr repository where the source of the developer guide is stored.
+====
 
-* xref:{meta-updater-github-url}docs/modules/ROOT/pages/build.adoc[Build]
+* xref:{aktualizr-docsroot}meta-updater-build.adoc[Build]
 +
 Learn how to use this layer to build a basic disk image and add it to your own Yocto project.
 +
-* xref:{meta-updater-github-url}docs/modules/ROOT/pages/supported-boards.adoc[Supported boards]
+* xref:{aktualizr-docsroot}supported-boards.adoc[Supported boards]
 +
 Find out if your board is supported and learn about the minimum hardware requirements.
 +
-* xref:{meta-updater-github-url}docs/modules/ROOT/pages/sota-variables.adoc[SOTA-related variables in local.conf]
+* xref:{aktualizr-docsroot}sota-variables.adoc[SOTA-related variables in local.conf]
 +
 Learn how to configure OTA-related functionality when building disk images.
 +
-* xref:{meta-updater-github-url}docs/modules/ROOT/pages/meta-updater-usage.adoc[Usage]
+* xref:{aktualizr-docsroot}meta-updater-usage.adoc[Usage]
 +
 Learn about the `garage-push` and `garage-sign` utilities, aktualizr configuration and service resource control, and OSTree.
 +
-* xref:{meta-updater-github-url}docs/modules/ROOT/pages/dev-config.adoc[Development configuration]
+* xref:{aktualizr-docsroot}meta-updater-dev-config.adoc[Development configuration]
 +
 Learn how to configure logging, install custom versions of aktualizr, and override the version indicator for sofware updates.
 +
-* xref:{meta-updater-github-url}docs/modules/ROOT/pages/meta-updater-testing.adoc#_qa_with_oe_selftest[QA with oe-selftest]
+* xref:{aktualizr-docsroot}meta-updater-testing.adoc#_qa_with_oe_selftest[QA with oe-selftest]
 +
 Learn how to use the `oe-selftest` framework for quality assurance.
 +
-* xref:{meta-updater-github-url}docs/modules/ROOT/pages/meta-updater-testing.adoc#_aktualizr_test_suite_with_ptest[Aktualizr test suite with ptest]
+* xref:{aktualizr-docsroot}meta-updater-testing.adoc#_aktualizr_test_suite_with_ptest[Aktualizr test suite with ptest]
 +
 Learn how to enable Yocto's package test functionality and run parts of the aktualizr test suite.
 +
-* xref:{meta-updater-github-url}docs/modules/ROOT/pages/provisioning-methods.adoc[Provisoning methods]
+* xref:{aktualizr-docsroot}meta-updater-provisioning-methods.adoc[Provisoning methods]
 +
 Learn how to enable different methods for provisioning devices.
 
