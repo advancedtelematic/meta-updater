@@ -1,7 +1,7 @@
 = Contributing
 :aktualizr-docsroot: https://github.com/advancedtelematic/aktualizr/tree/master/docs/ota-client-guide/modules/ROOT/pages/
 
-We welcome pull requests from anyone. The master branch is the primary branch for development, and if you wish to add new functionality, it probably belongs there. We attempt to maintain recent release branches and welcome bug fixes and backports for those. Please see the xref:{aktualizr-docsroot}yocto-release-branches.adoc[release branches] documentation for the current list of support branches.
+We welcome pull requests from anyone. The master branch is the primary branch for development, and if you wish to add new functionality, it probably belongs there. We attempt to maintain recent release branches and welcome bug fixes and backports for those. Please see the xref:{aktualizr-docsroot}yocto-release-branches.adoc[release branches] documentation for the current list of supported branches.
 
 If you are developing with meta-updater, it may be helpful to read the README and other documentation for xref:README.adoc[this repo], https://github.com/advancedtelematic/aktualizr[aktualizr], and the link:https://github.com/advancedtelematic/updater-repo/[updater-repo], particularly the sections about development and debugging.
 
