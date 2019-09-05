@@ -9,6 +9,24 @@ https://github.com/ostreedev/ostree[OSTree] is a tool for atomic full file syste
 
 https://github.com/advancedtelematic/aktualizr[Aktualizr] (and https://github.com/advancedtelematic/rvi_sota_client[RVI SOTA client]) add authentication and provisioning capabilities to OTA and are integrated with OSTree. You can connect with these open-source applications or sign up for a free account at https://connect.ota.here.com/[HERE OTA Connect] to get started.
 
+== Quickstart
+
+If you don't already have a Yocto project that you want to add OTA to, you can use the xref:dev@getstarted::raspberry-pi.adoc[HERE OTA Connect Quickstart] project to rapidly get up and running on a Raspberry Pi. It takes a standard https://www.yoctoproject.org/tools-resources/projects/poky[poky] distribution, and adds OTA and OSTree capabilities.
+
+== Dependencies
+
+In addition to the link:https://www.yoctoproject.org/docs/current/ref-manual/ref-manual.html#required-packages-for-the-build-host[standard Yocto dependencies], meta-updater generally requires a few additional dependencies, depending on your use case and target platform. To install these additional packages on Debian/Ubuntu, run this:
+
+....
+sudo apt install cpu-checker default-jre parted
+....
+
+To build for https://github.com/advancedtelematic/meta-updater-minnowboard[Minnowboard] with GRUB, you will also need to install https://github.com/tianocore/tianocore.github.io/wiki/OVMF[TianoCore's ovmf] package on your host system. On Debian/Ubuntu, you can do so with this command:
+
+....
+sudo apt install ovmf
+....
+
 [discrete]
 == Table of Contents
 
