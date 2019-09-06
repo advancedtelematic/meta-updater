@@ -53,7 +53,7 @@ def main():
 
     cmdline = qemu_command.command_line()
     if args.overlay and not exists(args.overlay):
-        print("Image file %s does not yet exist, creating." % args.overlay)
+        print("Overlay file %s does not yet exist, creating." % args.overlay)
         img_cmdline = qemu_command.img_command_line()
         if args.dry_run:
             print(" ".join(img_cmdline))
