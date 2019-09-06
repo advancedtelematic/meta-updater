@@ -44,7 +44,7 @@ Learn how to use this layer to build a basic disk image and add it to your own Y
 +
 Find out if your board is supported and learn about the minimum hardware requirements.
 +
-* xref:{aktualizr-docsroot}sota-variables.adoc[SOTA-related variables in local.conf]
+* xref:{aktualizr-docsroot}build-configuration.adoc[SOTA-related variables in local.conf]
 +
 Learn how to configure OTA-related functionality when building disk images.
 +
