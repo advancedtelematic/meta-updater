@@ -2,7 +2,7 @@
 
 from argparse import ArgumentParser
 from subprocess import Popen
-from os.path import exists
+from os.path import exists, dirname
 import sys
 from qemucommand import QemuCommand
 
@@ -39,6 +39,16 @@ def main():
                              'This can be used to test Uptane Primary/Secondary communication.')
     parser.add_argument('-n', '--dry-run', help='Print qemu command line rather then run it', action='store_true')
     args = parser.parse_args()
+
+    if args.overlay and not exists(args.overlay) and dirname(args.overlay) and not dirname(args.overlay) == '.':
+        print('Error: please provide a file name in the current working directory. ' +
+                'Overlays do not work properly with other directories.')
+        sys.exit(1)
+    if args.overlay and exists(args.overlay) and args.imagename != parser.get_default('imagename'):
+        # qemu-img amend -o <filename> might work, but it has not yet been done
+        # successfully.
+        print('Warning: cannot change backing image of overlay after it has been created.')
+
     try:
         qemu_command = QemuCommand(args)
     except ValueError as e:
