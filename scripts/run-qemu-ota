@@ -55,12 +55,6 @@ def main():
         print(e.message)
         sys.exit(1)
 
-    print("Launching %s with mac address %s" % (args.imagename, qemu_command.mac_address))
-    print("To connect via SSH:")
-    print(" ssh -o StrictHostKeyChecking=no root@localhost -p %d" % qemu_command.ssh_port)
-    print("To connect to the serial console:")
-    print(" nc localhost %d" % qemu_command.serial_port)
-
     cmdline = qemu_command.command_line()
     if args.overlay and not exists(args.overlay):
         print("Overlay file %s does not yet exist, creating." % args.overlay)
@@ -69,6 +63,12 @@ def main():
             print(" ".join(img_cmdline))
         else:
             Popen(img_cmdline).wait()
+
+    print("Launching %s with mac address %s" % (args.imagename, qemu_command.mac_address))
+    print("To connect via SSH:")
+    print(" ssh -o StrictHostKeyChecking=no root@localhost -p %d" % qemu_command.ssh_port)
+    print("To connect to the serial console:")
+    print(" nc localhost %d" % qemu_command.serial_port)
 
     if args.dry_run:
         print(" ".join(cmdline))
