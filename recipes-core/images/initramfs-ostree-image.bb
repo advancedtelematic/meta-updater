@@ -29,4 +29,4 @@ IMAGE_OVERHEAD_FACTOR = "1.0"
 
 BAD_RECOMMENDATIONS += "busybox-syslog"
 
-
+IMAGE_PREPROCESS_COMMAND_remove = "buildinfo_manifest;"
