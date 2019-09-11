@@ -2,6 +2,7 @@ from os.path import exists, isdir, join, realpath, abspath
 from os import listdir
 import random
 import socket
+from shutil import copyfile
 from subprocess import check_output
 
 EXTENSIONS = {
@@ -39,6 +40,8 @@ def random_mac():
 
 class QemuCommand(object):
     def __init__(self, args):
+        self.dry_run = args.dry_run
+        self.overlay = args.overlay
         if args.machine:
             self.machine = args.machine
         else:
@@ -49,21 +52,53 @@ class QemuCommand(object):
                 self.machine = machines[0]
             else:
                 raise ValueError("Could not autodetect machine type. More than one entry in %s. Maybe --machine qemux86-64?" % args.dir)
+
+        # If using an overlay with U-Boot, copy the rom when we create the
+        # overlay so that we can keep it around just in case.
         if args.efi:
             self.bios = 'OVMF.fd'
         else:
-            uboot = abspath(join(args.dir, self.machine, 'u-boot-qemux86-64.rom'))
-            if not exists(uboot):
-                raise ValueError("U-Boot image %s does not exist" % uboot)
-            self.bios = uboot
+            uboot_path = abspath(join(args.dir, self.machine, 'u-boot-qemux86-64.rom'))
+            if self.overlay:
+                new_uboot_path = self.overlay + '.u-boot.rom'
+                if not exists(self.overlay):
+                    if not exists(uboot_path):
+                        raise ValueError("U-Boot image %s does not exist" % uboot_path)
+                    if not exists(new_uboot_path):
+                        if self.dry_run:
+                            print("cp %s %s" % (uboot_path, new_uboot_path))
+                        else:
+                            copyfile(uboot_path, new_uboot_path)
+                uboot_path = new_uboot_path
+            if not exists(uboot_path) and not (self.dry_run and not exists(self.overlay)):
+                raise ValueError("U-Boot image %s does not exist" % uboot_path)
+            self.bios = uboot_path
+
+        # If using an overlay, we need to keep the "backing" image around, as
+        # bitbake will often clean it up, and the overlay silently depends on
+        # the hardcoded path. The easiest solution is to keep the file and use
+        # a relative path to it.
         if exists(args.imagename):
-            image = args.imagename
+            image = realpath(args.imagename)
         else:
             ext = EXTENSIONS.get(self.machine, 'wic')
             image = join(args.dir, self.machine, '%s-%s.%s' % (args.imagename, self.machine, ext))
-        self.image = realpath(image)
-        if not exists(self.image):
+        if self.overlay:
+            new_image_path = self.overlay + '.img'
+            if not exists(self.overlay):
+                if not exists(image):
+                    raise ValueError("OS image %s does not exist" % image)
+                if not exists(new_image_path):
+                    if self.dry_run:
+                        print("cp %s %s" % (image, new_image_path))
+                    else:
+                        copyfile(image, new_image_path)
+            self.image = new_image_path
+        else:
+            self.image = realpath(image)
+        if not exists(self.image) and not (self.dry_run and not exists(self.overlay)):
             raise ValueError("OS image %s does not exist" % self.image)
+
         if args.mac:
             self.mac_address = args.mac
         else:
@@ -86,7 +121,6 @@ class QemuCommand(object):
         self.gui = not args.no_gui
         self.gdb = args.gdb
         self.pcap = args.pcap
-        self.overlay = args.overlay
         self.secondary_network = args.secondary_network
 
     def command_line(self):
