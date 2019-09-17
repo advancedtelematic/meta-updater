@@ -2,11 +2,13 @@
 :toc: macro
 :toc-title:
 
-This layer enables over-the-air updates (OTA) with https://github.com/ostreedev/ostree[OSTree] and https://github.com/advancedtelematic/aktualizr[Aktualizr].
+Meta-updater is a link:https://www.yoctoproject.org/software-overview/layers/[Yocto layer] that enables over-the-air updates (OTA) with https://github.com/ostreedev/ostree[OSTree] and https://github.com/advancedtelematic/aktualizr[Aktualizr] -- the default client for link:https://www.here.com/products/automotive/ota-technology[HERE OTA Connect].
 
 https://github.com/ostreedev/ostree[OSTree] is a tool for atomic full file system upgrades with rollback capability. OSTree has several advantages over traditional dual-bank systems, but the most important one is that it minimizes network bandwidth and data storage footprint by sharing files with the same contents across file system deployments.
 
 https://github.com/advancedtelematic/aktualizr[Aktualizr] (and https://github.com/advancedtelematic/rvi_sota_client[RVI SOTA client]) add authentication and provisioning capabilities to OTA and are integrated with OSTree. You can connect with the open-source https://github.com/advancedtelematic/rvi_sota_server[RVI SOTA server] or sign up for a free account at https://app.atsgarage.com[ATS Garage] to get started.
+
+For the most up-to-date documentation for HERE OTA Connect, meta-updater, and aktualizr, please visit our link:https://docs.ota.here.com/[documentation portal].
 
 [discrete]
 == Table of Contents
@@ -17,7 +19,7 @@ toc::[]
 
 === Quickstart
 
-If you don't already have a Yocto project that you want to add OTA to, you can use the https://docs.atsgarage.com/quickstarts/raspberry-pi.html[ATS Garage Quickstart] project to rapidly get up and running on a Raspberry Pi. It takes a standard https://www.yoctoproject.org/tools-resources/projects/poky[poky] distribution, and adds OTA and OSTree capabilities.
+If you don't already have a Yocto project that you want to add OTA to, you can use the https://docs.ota.here.com/getstarted/dev/raspberry-pi.html[HERE OTA Connect Quickstart] project to rapidly get up and running on a Raspberry Pi. It takes a standard https://www.yoctoproject.org/tools-resources/projects/poky[poky] distribution, and adds OTA and OSTree capabilities.
 
 === Adding meta-updater capabilities to your build
 
