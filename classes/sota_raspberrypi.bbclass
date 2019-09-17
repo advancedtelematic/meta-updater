@@ -16,7 +16,7 @@ DEV_MATCH_DIRECTIVE_pn-networkd-dhcp-conf = "Driver=smsc95xx lan78xx"
 IMAGE_INSTALL_append_sota = " virtual/network-configuration "
 
 PREFERRED_PROVIDER_virtual/bootloader_sota ?= "u-boot"
-UBOOT_ENTRYPOINT_sota ?= "0x00008000"
+UBOOT_ENTRYPOINT_sota ?= "0x00080000"
 
 IMAGE_FSTYPES_remove_sota = "rpi-sdimg"
 OSTREE_BOOTLOADER ?= "u-boot"
