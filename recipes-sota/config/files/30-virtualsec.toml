@@ -1,0 +1,3 @@
+[uptane]
+secondary_config_file = "/usr/lib/sota/virtualsec.json"
+
