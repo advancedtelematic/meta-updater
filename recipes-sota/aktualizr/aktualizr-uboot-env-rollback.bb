@@ -6,14 +6,13 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7
 
 inherit allarch
 
-DEPENDS = "aktualizr-native"
-RDEPENDS_${PN} = "aktualizr"
+DEPENDS = "aktualizr"
 
 SRC_URI = ""
 
 do_install() {
     install -m 0700 -d ${D}${libdir}/sota/conf.d
-    install -m 0644 ${STAGING_DIR_NATIVE}${libdir}/sota/sota-uboot-env.toml ${D}${libdir}/sota/conf.d/30-rollback.toml
+    install -m 0644 ${STAGING_DIR_HOST}${libdir}/sota/sota-uboot-env.toml ${D}${libdir}/sota/conf.d/30-rollback.toml
 }
 
 FILES_${PN} = " \
