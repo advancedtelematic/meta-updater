@@ -1,0 +1,14 @@
+{
+    "virtual": [
+        {
+            "partial_verifying": "false",
+            "ecu_hardware_id": "external-config",
+            "full_client_dir": "/var/sota/external-config",
+            "ecu_private_key": "sec.private",
+            "ecu_public_key": "sec.public",
+            "firmware_path": "/var/sota/external-config/config.txt",
+            "target_name_path": "/var/sota/external-config/target_name",
+            "metadata_path": "/var/sota/external-config/metadata"
+        }
+    ]
+}
