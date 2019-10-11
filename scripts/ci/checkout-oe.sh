@@ -64,7 +64,9 @@ fi
 
 repo manifest
 
-repo forall -c 'git reset --hard ; git clean -fdx'
+# Try to clean up the repos in case they are messed up, but this returns an
+# error code if the repos don't exist, which the subsequent repo sync will fix.
+repo forall -c 'git reset --hard ; git clean -fdx' || true
 
 repo sync -d --force-sync
 
