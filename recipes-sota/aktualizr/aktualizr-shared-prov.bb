@@ -7,14 +7,14 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7
 
 inherit allarch
 
-DEPENDS = "aktualizr-native zip-native"
+# We need to get the config files from the aktualizr-host-tools package built by
+# the aktualizr (target) recipe.
+DEPENDS = "aktualizr"
 RDEPENDS_${PN}_append = "${@' aktualizr-shared-prov-creds' if d.getVar('SOTA_DEPLOY_CREDENTIALS') == '1' else ''}"
 PV = "1.0"
 PR = "6"
 
 SRC_URI = ""
-
-require credentials.inc
 
 do_install() {
     if [ -n "${SOTA_AUTOPROVISION_CREDENTIALS}" ]; then
@@ -31,7 +31,7 @@ do_install() {
     fi
 
     install -m 0700 -d ${D}${libdir}/sota/conf.d
-    install -m 0644 ${STAGING_DIR_NATIVE}${libdir}/sota/sota-shared-cred.toml \
+    install -m 0644 ${STAGING_DIR_HOST}${libdir}/sota/sota-shared-cred.toml \
         ${D}${libdir}/sota/conf.d/20-sota-shared-cred.toml
 }
 

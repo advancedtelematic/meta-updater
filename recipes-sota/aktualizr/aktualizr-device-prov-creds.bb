@@ -6,11 +6,13 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7
 
 inherit allarch
 
-# WARNING: it is NOT a production solution. The secure way to provision devices
+# WARNING: This is NOT an ideal solution. The secure way to provision devices
 # is to create certificate request directly on the device (either with HSM/TPM
 # or with software) and then sign it with a CA stored on a disconnected machine.
 
-DEPENDS = "aktualizr aktualizr-native"
+# We need to get the config files from the aktualizr-host-tools package built by
+# the aktualizr (target) recipe.
+DEPENDS = "aktualizr aktualizr-native openssl-native"
 ALLOW_EMPTY_${PN} = "1"
 
 SRC_URI = " \
