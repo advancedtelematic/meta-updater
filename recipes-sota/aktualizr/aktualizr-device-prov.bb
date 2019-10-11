@@ -7,13 +7,13 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7
 
 inherit allarch
 
-DEPENDS = "aktualizr aktualizr-native openssl-native"
+# We need to get the config files from the aktualizr-host-tools package built by
+# the aktualizr (target) recipe.
+DEPENDS = "aktualizr"
 RDEPENDS_${PN}_append = "${@' aktualizr-device-prov-creds' if d.getVar('SOTA_DEPLOY_CREDENTIALS') == '1' else ''}"
 
 PV = "1.0"
 PR = "1"
-
-require credentials.inc
 
 do_install() {
     install -m 0700 -d ${D}${libdir}/sota/conf.d
