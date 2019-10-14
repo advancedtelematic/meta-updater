@@ -12,8 +12,12 @@ inherit allarch
 DEPENDS = "aktualizr"
 RDEPENDS_${PN}_append = "${@' aktualizr-device-prov-creds' if d.getVar('SOTA_DEPLOY_CREDENTIALS') == '1' else ''}"
 
+# If the config file from aktualizr used here is changed, you will need to bump
+# the version here because of SIGGEN_EXCLUDE_SAFE_RECIPE_DEPS!
 PV = "1.0"
 PR = "1"
+
+SRC_URI = ""
 
 do_install() {
     install -m 0700 -d ${D}${libdir}/sota/conf.d
