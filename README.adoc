@@ -7,7 +7,7 @@ Meta-updater is a link:https://www.yoctoproject.org/software-overview/layers/[Yo
 
 https://github.com/ostreedev/ostree[OSTree] is a tool for atomic full file system upgrades with rollback capability. OSTree has several advantages over traditional dual-bank systems, but the most important one is that it minimizes network bandwidth and data storage footprint by sharing files with the same contents across file system deployments.
 
-https://github.com/advancedtelematic/aktualizr[Aktualizr] (and https://github.com/advancedtelematic/rvi_sota_client[RVI SOTA client]) add authentication and provisioning capabilities to OTA and are integrated with OSTree. You can connect with these open-source applications or sign up for a free account at https://connect.ota.here.com/[HERE OTA Connect] to get started.
+https://github.com/advancedtelematic/aktualizr[Aktualizr] implements https://uptane.github.io/uptane-standard/uptane-standard.html[Uptane], supports device authentication and provisioning, and is integrated with OSTree. You can connect aktualizr to your own server solution or sign up for a free account at https://connect.ota.here.com/[HERE OTA Connect] to get started.
 
 == Quickstart
 
@@ -36,37 +36,41 @@ The following documentation focuses on tasks that involve the meta-updater layer
 The following links point to files in the aktualizr repository where the source of the developer guide is stored.
 ====
 
-* xref:{aktualizr-docsroot}meta-updater-build.adoc[Build]
-+
-Learn how to use this layer to build a basic disk image and add it to your own Yocto project.
-+
 * xref:{aktualizr-docsroot}supported-boards.adoc[Supported boards]
 +
 Find out if your board is supported and learn about the minimum hardware requirements.
 +
+* xref:{aktualizr-docsroot}build-agl.adoc[Build an Automotive Grade Linux image]
++
+Learn how to use this layer as part of AGL.
++
+* xref:{aktualizr-docsroot}add-ota-functonality-existing-yocto-project.adoc[Add OTA functionality to an existing Yocto project]
++
+Learn how to add this layer to your own Yocto project.
++
 * xref:{aktualizr-docsroot}build-configuration.adoc[SOTA-related variables in local.conf]
 +
-Learn how to configure OTA-related functionality when building disk images.
+Learn how to configure OTA-related functionality when building images, including how to install custom versions of aktualizr.
 +
-* xref:{aktualizr-docsroot}meta-updater-usage.adoc[Usage]
+* xref:{aktualizr-docsroot}recommended-clientconfig.adoc[Recommended configuration]
 +
-Learn about the `garage-push` and `garage-sign` utilities, aktualizr configuration and service resource control, and OSTree.
+Learn how to optimize your build for development or production.
 +
-* xref:{aktualizr-docsroot}meta-updater-dev-config.adoc[Development configuration]
+* xref:{aktualizr-docsroot}client-provisioning-methods.adoc[Provisoning methods]
 +
-Learn how to configure logging, install custom versions of aktualizr, and override the version indicator for sofware updates.
+Learn more about the methods for provisioning devices. For more detail, you may also want to read about how to xref:{aktualizr-docsroot}enable-device-cred-provisioning.adoc[enable device credential provisioning] or how to xref:{aktualizr-docsroot}simulate-device-cred-provtest.adoc[simulate it for testing].
 +
-* xref:{aktualizr-docsroot}meta-updater-testing.adoc#_qa_with_oe_selftest[QA with oe-selftest]
+* xref:{aktualizr-docsroot}meta-updater-usage.adoc[Advanced usage]
 +
-Learn how to use the `oe-selftest` framework for quality assurance.
+Learn about the `garage-push` and `garage-sign` utilities, aktualizr configuration recipes, and service resource control.
 +
-* xref:{aktualizr-docsroot}meta-updater-testing.adoc#_aktualizr_test_suite_with_ptest[Aktualizr test suite with ptest]
+* xref:{aktualizr-docsroot}meta-updater-testing.adoc[Testing with oe-selftest and ptest]
 +
-Learn how to enable Yocto's package test functionality and run parts of the aktualizr test suite.
+Learn how to use the `oe-selftest` framework for quality assurance and how to run the aktualizr test suite via ptest.
 +
-* xref:{aktualizr-docsroot}meta-updater-provisioning-methods.adoc[Provisoning methods]
+* xref:{aktualizr-docsroot}troubleshooting.adoc[Troubleshooting]
 +
-Learn how to enable different methods for provisioning devices.
+Get help on common problems.
 
 == License
 
