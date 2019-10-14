@@ -2,8 +2,6 @@ DESCRIPTION = "Sample network configuration for an Uptane Secondary"
 LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7f619bab123dad"
 
-inherit allarch
-
 # TODO: It configures the 'user' interface in NAT mode and provides an access to public Inet via it
 # which is not desired for Secondary. It cannot be just removed since we get SSH access to Secondary
 # VM via this interface. So, the task is to configure the interface in such way that it does provide access
