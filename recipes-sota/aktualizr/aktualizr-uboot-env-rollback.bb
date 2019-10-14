@@ -8,6 +8,11 @@ inherit allarch
 
 DEPENDS = "aktualizr"
 
+# If the config file from aktualizr used here is changed, you will need to bump
+# the version here because of SIGGEN_EXCLUDE_SAFE_RECIPE_DEPS!
+PV = "1.0"
+PR = "1"
+
 SRC_URI = ""
 
 do_install() {
