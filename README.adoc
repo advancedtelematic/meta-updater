@@ -2,6 +2,7 @@
 :toc: macro
 :toc-title:
 :aktualizr-docsroot: https://github.com/advancedtelematic/aktualizr/tree/master/docs/ota-client-guide/modules/ROOT/pages/
+:getstarted-docsroot: https://docs.ota.here.com/getstarted/dev/
 
 Meta-updater is a link:https://www.yoctoproject.org/software-overview/layers/[Yocto layer] that enables over-the-air updates (OTA) with https://github.com/ostreedev/ostree[OSTree] and https://github.com/advancedtelematic/aktualizr[Aktualizr] -- the default client for link:https://www.here.com/products/automotive/ota-technology[HERE OTA Connect].
 
@@ -11,7 +12,7 @@ https://github.com/advancedtelematic/aktualizr[Aktualizr] implements https://upt
 
 == Quickstart
 
-If you don't already have a Yocto project that you want to add OTA to, you can use the xref:dev@getstarted::raspberry-pi.adoc[HERE OTA Connect Quickstart] project to rapidly get up and running on a Raspberry Pi. It takes a standard https://www.yoctoproject.org/tools-resources/projects/poky[poky] distribution, and adds OTA and OSTree capabilities.
+If you don't already have a Yocto project that you want to add OTA to, you can use the xref:{getstarted-docsroot}get-started.html[HERE OTA Connect Quickstart] project to rapidly get up and running on a xref:{getstarted-docsroot}raspberry-pi.html[Raspberry Pi] or with xref:{getstarted-docsroot}qemuvirtualbox.html[QEMU]. It takes a standard https://www.yoctoproject.org/tools-resources/projects/poky[poky] distribution, and adds OTA and OSTree capabilities.
 
 == Dependencies
 
