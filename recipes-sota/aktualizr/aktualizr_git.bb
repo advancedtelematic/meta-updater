@@ -7,7 +7,7 @@ LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=815ca599c9df247a0c7f619bab123dad"
 
 DEPENDS = "boost curl openssl libarchive libsodium sqlite3 asn1c-native"
 DEPENDS_append = "${@bb.utils.contains('PTEST_ENABLED', '1', ' coreutils-native net-tools-native ostree-native aktualizr-native ', '', d)}"
-RDEPENDS_${PN}_class-target = "aktualizr-configs lshw"
+RDEPENDS_${PN}_class-target = "aktualizr-configs aktualizr-hwid lshw"
 RDEPENDS_${PN}-host-tools = "aktualizr aktualizr-cert-provider ${@bb.utils.contains('PACKAGECONFIG', 'sota-tools', 'garage-deploy garage-push', '', d)}"
 
 RDEPENDS_${PN}-ptest += "bash cmake curl net-tools python3-core python3-misc python3-modules openssl-bin sqlite3 valgrind"
@@ -104,10 +104,6 @@ do_install_append () {
     install -m 0644 ${WORKDIR}/aktualizr-secondary.service ${D}${systemd_unitdir}/system/aktualizr-secondary.service
     install -m 0700 -d ${D}${libdir}/sota/conf.d
     install -m 0700 -d ${D}${sysconfdir}/sota/conf.d
-
-    if [ -n "${SOTA_HARDWARE_ID}" ]; then
-        printf "[provision]\nprimary_ecu_hardware_id = ${SOTA_HARDWARE_ID}\n" > ${D}${libdir}/sota/conf.d/40-hardware-id.toml
-    fi
 
     install -m 0755 -d ${D}${systemd_unitdir}/system
     aktualizr_service=${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'serialcan', '${WORKDIR}/aktualizr-serialcan.service', '${WORKDIR}/aktualizr.service', d)}
