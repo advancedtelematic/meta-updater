@@ -1,7 +1,7 @@
 = meta-updater
 :toc: macro
 :toc-title:
-:aktualizr-docsroot: https://github.com/advancedtelematic/aktualizr/tree/master/docs/ota-client-guide/modules/ROOT/pages/
+:devguide-docsroot: https://docs.ota.here.com/ota-client/latest/
 :getstarted-docsroot: https://docs.ota.here.com/getstarted/dev/
 
 Meta-updater is a link:https://www.yoctoproject.org/software-overview/layers/[Yocto layer] that enables over-the-air updates (OTA) with https://github.com/ostreedev/ostree[OSTree] and https://github.com/advancedtelematic/aktualizr[Aktualizr] -- the default client for link:https://www.here.com/products/automotive/ota-technology[HERE OTA Connect].
@@ -31,45 +31,41 @@ sudo apt install ovmf
 [discrete]
 == Table of Contents
 
-The following documentation focuses on tasks that involve the meta-updater layer. If you want to get an idea of the overall developer workflow in OTA Connect, see the link:https://docs.ota.here.com/ota-client/dev/index.html[OTA Connect Developer Guide].
-[NOTE]
-====
-The following links point to files in the aktualizr repository where the source of the developer guide is stored.
-====
+The following documentation focuses on tasks that involve the meta-updater layer. If you want to get an idea of the overall developer workflow in OTA Connect, see the link:{devguide-docsroot}index.html[OTA Connect Developer Guide].
 
-* xref:{aktualizr-docsroot}supported-boards.adoc[Supported boards]
+* xref:{devguide-docsroot}supported-boards.html[Supported boards]
 +
 Find out if your board is supported and learn about the minimum hardware requirements.
 +
-* xref:{aktualizr-docsroot}build-agl.adoc[Build an Automotive Grade Linux image]
+* xref:{devguide-docsroot}build-agl.html[Build an Automotive Grade Linux image]
 +
 Learn how to use this layer as part of AGL.
 +
-* xref:{aktualizr-docsroot}add-ota-functonality-existing-yocto-project.adoc[Add OTA functionality to an existing Yocto project]
+* xref:{devguide-docsroot}add-ota-functonality-existing-yocto-project.html[Add OTA functionality to an existing Yocto project]
 +
 Learn how to add this layer to your own Yocto project.
 +
-* xref:{aktualizr-docsroot}build-configuration.adoc[SOTA-related variables in local.conf]
+* xref:{devguide-docsroot}build-configuration.html[SOTA-related variables in local.conf]
 +
 Learn how to configure OTA-related functionality when building images, including how to install custom versions of aktualizr.
 +
-* xref:{aktualizr-docsroot}recommended-clientconfig.adoc[Recommended configuration]
+* xref:{devguide-docsroot}recommended-clientconfig.html[Recommended configuration]
 +
 Learn how to optimize your build for development or production.
 +
-* xref:{aktualizr-docsroot}client-provisioning-methods.adoc[Provisoning methods]
+* xref:{devguide-docsroot}client-provisioning-methods.html[Provisoning methods]
 +
-Learn more about the methods for provisioning devices. For more detail, you may also want to read about how to xref:{aktualizr-docsroot}enable-device-cred-provisioning.adoc[enable device credential provisioning] or how to xref:{aktualizr-docsroot}simulate-device-cred-provtest.adoc[simulate it for testing].
+Learn more about the methods for provisioning devices. For more detail, you may also want to read about how to xref:{devguide-docsroot}enable-device-cred-provisioning.html[enable device credential provisioning] or how to xref:{devguide-docsroot}simulate-device-cred-provtest.html[simulate it for testing].
 +
-* xref:{aktualizr-docsroot}meta-updater-usage.adoc[Advanced usage]
+* xref:{devguide-docsroot}meta-updater-usage.html[Advanced usage]
 +
 Learn about the `garage-push` and `garage-sign` utilities, aktualizr configuration recipes, and service resource control.
 +
-* xref:{aktualizr-docsroot}meta-updater-testing.adoc[Testing with oe-selftest and ptest]
+* xref:{devguide-docsroot}meta-updater-testing.html[Testing with oe-selftest and ptest]
 +
 Learn how to use the `oe-selftest` framework for quality assurance and how to run the aktualizr test suite via ptest.
 +
-* xref:{aktualizr-docsroot}troubleshooting.adoc[Troubleshooting]
+* xref:{devguide-docsroot}troubleshooting.html[Troubleshooting]
 +
 Get help on common problems.
 
