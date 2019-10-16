@@ -4,6 +4,9 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7
 
 require shared-conf.inc
 
+# Because of the dependency on MACHINE.
+PACKAGE_ARCH = "${MACHINE_ARCH}"
+
 SECONDARY_SERIAL_ID ?= ""
 SOTA_HARDWARE_ID ?= "${MACHINE}-sndry"
 SECONDARY_HARDWARE_ID ?= "${SOTA_HARDWARE_ID}"

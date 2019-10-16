@@ -2,6 +2,9 @@ SRC_URI_append = "\
     file://26-${CONF_TYPE}-client.network \
     "
 
+# Because of the dependency on MACHINE.
+PACKAGE_ARCH = "${MACHINE_ARCH}"
+
 SECONDARY_INTERFACE ?= "${@ 'eth0' if d.getVar('MACHINE') == 'raspberrypi3' else 'enp0s5'}"
 
 do_install_append() {
