@@ -18,18 +18,17 @@ PR = "7"
 GARAGE_SIGN_PV = "0.7.0-33-g214dfb1"
 
 SRC_URI = " \
-  gitsm://github.com/advancedtelematic/aktualizr;branch=${BRANCH} \
+  gitsm://github.com/advancedtelematic/aktualizr;branch=${BRANCH};name=aktualizr \
   file://run-ptest \
   file://aktualizr.service \
   file://aktualizr-secondary.service \
   file://aktualizr-serialcan.service \
   file://10-resource-control.conf \
-  ${@ d.expand("https://ats-tuf-cli-releases.s3-eu-central-1.amazonaws.com/cli-${GARAGE_SIGN_PV}.tgz;unpack=0") if d.getVar('GARAGE_SIGN_AUTOVERSION') != '1' else ''} \
+  ${@ d.expand("https://ats-tuf-cli-releases.s3-eu-central-1.amazonaws.com/cli-${GARAGE_SIGN_PV}.tgz;unpack=0;name=garagesign") if d.getVar('GARAGE_SIGN_AUTOVERSION') != '1' else ''} \
   "
 
-# for garage-sign archive
-SRC_URI[md5sum] = "66ffe8dcd61d4c15646e1c4b7dde7401"
-SRC_URI[sha256sum] = "7a7193ddf7e1a33ea60fbb20f98318a8bd78c325dab391d8c4ebd644a738abdc"
+SRC_URI[garagesign.md5sum] = "66ffe8dcd61d4c15646e1c4b7dde7401"
+SRC_URI[garagesign.sha256sum] = "7a7193ddf7e1a33ea60fbb20f98318a8bd78c325dab391d8c4ebd644a738abdc"
 
 SRCREV = "d13ff1ceeca2694b982287740aca8f58edad514d"
 BRANCH ?= "master"
