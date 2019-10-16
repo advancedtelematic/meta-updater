@@ -3,7 +3,7 @@ DESCRIPTION = "SOTA Client application written in C++"
 HOMEPAGE = "https://github.com/advancedtelematic/aktualizr"
 SECTION = "base"
 LICENSE = "MPL-2.0"
-LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=9741c346eef56131163e13b9db1241b3"
+LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=815ca599c9df247a0c7f619bab123dad"
 
 DEPENDS = "boost curl openssl libarchive libsodium sqlite3 asn1c-native"
 DEPENDS_append = "${@bb.utils.contains('PTEST_ENABLED', '1', ' coreutils-native net-tools-native ostree-native aktualizr-native ', '', d)}"
@@ -30,7 +30,7 @@ SRC_URI = " \
 SRC_URI[garagesign.md5sum] = "66ffe8dcd61d4c15646e1c4b7dde7401"
 SRC_URI[garagesign.sha256sum] = "7a7193ddf7e1a33ea60fbb20f98318a8bd78c325dab391d8c4ebd644a738abdc"
 
-SRCREV = "d13ff1ceeca2694b982287740aca8f58edad514d"
+SRCREV = "1592d4ab63d8851aca3440529701425612fbe903"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -45,7 +45,7 @@ SYSTEMD_PACKAGES = "${PN} ${PN}-secondary"
 SYSTEMD_SERVICE_${PN} = "aktualizr.service"
 SYSTEMD_SERVICE_${PN}-secondary = "aktualizr-secondary.service"
 
-EXTRA_OECMAKE = "-DCMAKE_BUILD_TYPE=Release -DAKTUALIZR_VERSION=${PV} ${@bb.utils.contains('PTEST_ENABLED', '1', '-DTESTSUITE_VALGRIND=on', '', d)}"
+EXTRA_OECMAKE = "-DCMAKE_BUILD_TYPE=Release ${@bb.utils.contains('PTEST_ENABLED', '1', '-DTESTSUITE_VALGRIND=on', '', d)}"
 
 GARAGE_SIGN_OPS = "${@ d.expand('-DGARAGE_SIGN_ARCHIVE=${WORKDIR}/cli-${GARAGE_SIGN_PV}.tgz') if d.getVar('GARAGE_SIGN_AUTOVERSION') != '1' else ''}"
 
@@ -69,8 +69,12 @@ RESOURCE_CPU_WEIGHT = "100"
 RESOURCE_MEMORY_HIGH = "100M"
 RESOURCE_MEMORY_MAX = "80%"
 
-do_compile_ptest() {
-    cmake_runcmake_build --target build_tests "${PARALLEL_MAKE}"
+do_configure_prepend() {
+    # CMake has trouble finding yocto's git when cross-compiling, let's do this step manually
+    cd ${S}
+    if [ ! -f VERSION ]; then
+        ./scripts/get_version.sh > VERSION
+    fi
 }
 
 do_install_ptest() {
