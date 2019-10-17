@@ -13,7 +13,6 @@ ${parentdir}/find_dependencies.py aktualizr
 ${parentdir}/find_dependencies.py aktualizr-shared-prov
 ${parentdir}/find_dependencies.py aktualizr-shared-prov-creds
 ${parentdir}/find_dependencies.py aktualizr-device-prov
-${parentdir}/find_dependencies.py aktualizr-device-prov-creds
 ${parentdir}/find_dependencies.py aktualizr-device-prov-hsm
 ${parentdir}/find_dependencies.py aktualizr-auto-reboot
 ${parentdir}/find_dependencies.py aktualizr-disable-send-ip
