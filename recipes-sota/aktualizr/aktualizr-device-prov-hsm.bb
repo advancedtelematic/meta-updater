@@ -7,14 +7,16 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7
 
 inherit allarch
 
-DEPENDS = "aktualizr aktualizr-native"
-RDEPENDS_${PN}_append = "${@' aktualizr-device-prov-creds softhsm-testtoken' if d.getVar('SOTA_DEPLOY_CREDENTIALS') == '1' else ''}"
+# We need to get the config files from the aktualizr-host-tools package built by
+# the aktualizr (target) recipe.
+DEPENDS = "aktualizr"
 
-SRC_URI = ""
+# If the config file from aktualizr used here is changed, you will need to bump
+# the version here because of SIGGEN_EXCLUDE_SAFE_RECIPE_DEPS!
 PV = "1.0"
 PR = "6"
 
-require credentials.inc
+SRC_URI = ""
 
 do_install() {
     install -m 0700 -d ${D}${libdir}/sota/conf.d

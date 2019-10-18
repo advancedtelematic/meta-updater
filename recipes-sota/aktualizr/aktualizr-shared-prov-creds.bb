@@ -6,8 +6,15 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7
 
 inherit allarch
 
-DEPENDS = "aktualizr-native zip-native"
+DEPENDS = "zip-native"
 ALLOW_EMPTY_${PN} = "1"
+
+# If the config file from aktualizr used here is changed, you will need to bump
+# the version here because of SIGGEN_EXCLUDE_SAFE_RECIPE_DEPS!
+PV = "1.0"
+PR = "1"
+
+SRC_URI = ""
 
 require credentials.inc
 
