@@ -21,7 +21,7 @@ python () {
         d.setVar("SOTA_CLIENT_PROV", "aktualizr-device-prov-hsm")
 }
 
-IMAGE_INSTALL_append_sota = " ostree os-release ${SOTA_CLIENT} ${SOTA_CLIENT_PROV}"
+IMAGE_INSTALL_append_sota = " ostree os-release ${SOTA_CLIENT} ${SOTA_CLIENT_PROV} ostree-booted"
 IMAGE_CLASSES += " image_types_ostree image_types_ota"
 
 IMAGE_FSTYPES += "${@bb.utils.contains('DISTRO_FEATURES', 'sota', 'ostreepush garagesign garagecheck ota-ext4 wic', ' ', d)}"
