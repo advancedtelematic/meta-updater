@@ -1,0 +1,14 @@
+# short-description: Create SD card OTA image for NXP LS1043ARDB
+# long-description:
+# Create an OTA-enabled image that can be written onto a SD card using dd
+# for use with NXP LS1043ARDB SoC.
+# For data layout see Layerscape SDK User Guide, Chapter 4.2, tables 14 and 16.
+#
+part BL2 --source rawcopy2 --sourceparams="file=atf/bl2_sd.pbl" --ondisk mmcblk --no-table --align 4
+part BL3 --source rawcopy2 --sourceparams="file=atf/fip_uboot.bin" --ondisk mmcblk --no-table --align 1024
+part fman-ucode --source rawcopy2 --sourceparams="file=fsl_fman_ucode_ls1043_r1.1_108_4_9.bin" --ondisk mmcblk --no-table --align 9216
+part qe-ucode --source rawcopy2 --sourceparams="file=boot/fsl_qe_ucode_1021_10_A.bin" --ondisk mmcblk --no-table --align 9472
+part uboot-scr --source bootimg-partition --ondisk mmcblk --fstype=msdos --fixed-size=100M --align 65540
+part / --source otaimage --ondisk mmcblk --fstype=ext4 --label root --align 167940
+
+bootloader --ptable msdos
