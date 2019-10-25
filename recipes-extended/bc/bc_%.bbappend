@@ -1,0 +1,1 @@
+ALTERNATIVE_${PN} += "bc"
