@@ -77,6 +77,10 @@ do_configure_prepend() {
     fi
 }
 
+do_compile_ptest() {
+    cmake_runcmake_build --target build_tests "${PARALLEL_MAKE}"
+}
+
 do_install_ptest() {
     # copy the complete source directory (contains build)
     cp -r ${B}/ ${D}/${PTEST_PATH}/build
