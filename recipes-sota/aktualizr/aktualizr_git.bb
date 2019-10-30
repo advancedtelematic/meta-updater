@@ -3,11 +3,11 @@ DESCRIPTION = "SOTA Client application written in C++"
 HOMEPAGE = "https://github.com/advancedtelematic/aktualizr"
 SECTION = "base"
 LICENSE = "MPL-2.0"
-LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=9741c346eef56131163e13b9db1241b3"
+LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=815ca599c9df247a0c7f619bab123dad"
 
 DEPENDS = "boost curl openssl libarchive libsodium sqlite3 asn1c-native"
 DEPENDS_append = "${@bb.utils.contains('PTEST_ENABLED', '1', ' coreutils-native net-tools-native ostree-native aktualizr-native ', '', d)}"
-RDEPENDS_${PN}_class-target = "aktualizr-configs lshw"
+RDEPENDS_${PN}_class-target = "aktualizr-configs aktualizr-hwid lshw"
 RDEPENDS_${PN}-host-tools = "aktualizr aktualizr-cert-provider ${@bb.utils.contains('PACKAGECONFIG', 'sota-tools', 'garage-deploy garage-push', '', d)}"
 
 RDEPENDS_${PN}-ptest += "bash cmake curl python3-misc python3-modules openssl-bin sqlite3 valgrind"
@@ -15,23 +15,22 @@ RDEPENDS_${PN}-ptest += "bash cmake curl python3-misc python3-modules openssl-bi
 PV = "1.0+git${SRCPV}"
 PR = "7"
 
-GARAGE_SIGN_PV = "0.7.0-33-g214dfb1"
+GARAGE_SIGN_PV = "0.7.0-49-g5ffd420"
 
 SRC_URI = " \
-  gitsm://github.com/advancedtelematic/aktualizr;branch=${BRANCH} \
+  gitsm://github.com/advancedtelematic/aktualizr;branch=${BRANCH};name=aktualizr \
   file://run-ptest \
   file://aktualizr.service \
   file://aktualizr-secondary.service \
   file://aktualizr-serialcan.service \
   file://10-resource-control.conf \
-  ${@ d.expand("https://ats-tuf-cli-releases.s3-eu-central-1.amazonaws.com/cli-${GARAGE_SIGN_PV}.tgz;unpack=0") if d.getVar('GARAGE_SIGN_AUTOVERSION') != '1' else ''} \
+  ${@ d.expand("https://ats-tuf-cli-releases.s3-eu-central-1.amazonaws.com/cli-${GARAGE_SIGN_PV}.tgz;unpack=0;name=garagesign") if d.getVar('GARAGE_SIGN_AUTOVERSION') != '1' else ''} \
   "
 
-# for garage-sign archive
-SRC_URI[md5sum] = "66ffe8dcd61d4c15646e1c4b7dde7401"
-SRC_URI[sha256sum] = "7a7193ddf7e1a33ea60fbb20f98318a8bd78c325dab391d8c4ebd644a738abdc"
+SRC_URI[garagesign.md5sum] = "de0877ecb693fd48ec11052e51b0ff1a"
+SRC_URI[garagesign.sha256sum] = "cf25759574c9c1206835daeaf6fc345f6db7b5ccdb95fb828c86d7451f78f0aa"
 
-SRCREV = "3bb9fe91b4c614a79373beadc721272fcf7acce2"
+SRCREV = "fa59e33208d3b1dc690a30ce8339b3b4162f8022"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -46,11 +45,11 @@ SYSTEMD_PACKAGES = "${PN} ${PN}-secondary"
 SYSTEMD_SERVICE_${PN} = "aktualizr.service"
 SYSTEMD_SERVICE_${PN}-secondary = "aktualizr-secondary.service"
 
-EXTRA_OECMAKE = "-DCMAKE_BUILD_TYPE=Release -DAKTUALIZR_VERSION=${PV} ${@bb.utils.contains('PTEST_ENABLED', '1', '-DTESTSUITE_VALGRIND=on', '', d)}"
+EXTRA_OECMAKE = "-DCMAKE_BUILD_TYPE=Release ${@bb.utils.contains('PTEST_ENABLED', '1', '-DTESTSUITE_VALGRIND=on', '', d)}"
 
 GARAGE_SIGN_OPS = "${@ d.expand('-DGARAGE_SIGN_ARCHIVE=${WORKDIR}/cli-${GARAGE_SIGN_PV}.tgz') if d.getVar('GARAGE_SIGN_AUTOVERSION') != '1' else ''}"
 
-PACKAGECONFIG ?= "ostree ${@bb.utils.filter('DISTRO_FEATURES', 'systemd', d)} ${@bb.utils.filter('SOTA_CLIENT_FEATURES', 'hsm serialcan ubootenv', d)}"
+PACKAGECONFIG ?= "ostree ${@bb.utils.filter('SOTA_CLIENT_FEATURES', 'hsm serialcan ubootenv', d)}"
 PACKAGECONFIG_class-native = "sota-tools"
 PACKAGECONFIG[warning-as-error] = "-DWARNING_AS_ERROR=ON,-DWARNING_AS_ERROR=OFF,"
 PACKAGECONFIG[ostree] = "-DBUILD_OSTREE=ON,-DBUILD_OSTREE=OFF,ostree,"
@@ -69,6 +68,14 @@ RESOURCE_CPU_WEIGHT = "100"
 # will be slowed down when it reaches 'high', killed when it reaches 'max'
 RESOURCE_MEMORY_HIGH = "100M"
 RESOURCE_MEMORY_MAX = "80%"
+
+do_configure_prepend() {
+    # CMake has trouble finding yocto's git when cross-compiling, let's do this step manually
+    cd ${S}
+    if [ ! -f VERSION ]; then
+        ./scripts/get_version.sh > VERSION
+    fi
+}
 
 do_compile_ptest() {
     cmake_runcmake_build --target build_tests "${PARALLEL_MAKE}"
@@ -101,10 +108,6 @@ do_install_append () {
     install -m 0644 ${WORKDIR}/aktualizr-secondary.service ${D}${systemd_unitdir}/system/aktualizr-secondary.service
     install -m 0700 -d ${D}${libdir}/sota/conf.d
     install -m 0700 -d ${D}${sysconfdir}/sota/conf.d
-
-    if [ -n "${SOTA_HARDWARE_ID}" ]; then
-        printf "[provision]\nprimary_ecu_hardware_id = ${SOTA_HARDWARE_ID}\n" > ${D}${libdir}/sota/conf.d/40-hardware-id.toml
-    fi
 
     install -m 0755 -d ${D}${systemd_unitdir}/system
     aktualizr_service=${@bb.utils.contains('SOTA_CLIENT_FEATURES', 'serialcan', '${WORKDIR}/aktualizr-serialcan.service', '${WORKDIR}/aktualizr.service', d)}

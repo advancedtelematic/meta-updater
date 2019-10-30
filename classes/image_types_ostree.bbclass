@@ -168,7 +168,8 @@ IMAGE_CMD_ostreecommit () {
            --skip-if-unchanged \
            --branch=${OSTREE_BRANCHNAME} \
            --subject="${OSTREE_COMMIT_SUBJECT}" \
-           --body="${OSTREE_COMMIT_BODY}"
+           --body="${OSTREE_COMMIT_BODY}" \
+           --bind-ref="${OSTREE_BRANCHNAME}-${IMAGE_BASENAME}"
 
     if [ "${OSTREE_UPDATE_SUMMARY}" = "1" ]; then
         ostree --repo=${OSTREE_REPO} summary -u
