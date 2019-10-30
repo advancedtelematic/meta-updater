@@ -14,7 +14,6 @@ IMAGE_INSTALL_remove = " \
                         aktualizr-shared-prov \
                         aktualizr-shared-prov-creds \
                         aktualizr-device-prov \
-                        aktualizr-device-prov-creds \
                         aktualizr-device-prov-hsm \
                         aktualizr-uboot-env-rollback \
                         virtual/network-configuration \
