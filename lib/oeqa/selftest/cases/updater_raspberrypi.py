@@ -29,26 +29,10 @@ class RpiTests(OESelftestTestCase):
         else:
             self.meta_upd_rpi = None
 
-        # This is trickier that I would've thought. The fundamental problem is
-        # that the qemu layer changes the u-boot file extension to .rom, but
-        # raspberrypi still expects .bin. To prevent this, the qemu layer must
-        # be temporarily removed if it is present. It has to be removed by name
-        # without the complete path, but to add it back when we are done, we
-        # need the full path.
-        p = re.compile(r'meta-updater-qemux86-64\s*(\S*meta-updater-qemux86-64)\s')
-        m = p.search(result.output)
-        if m and m.lastindex > 0:
-            self.meta_qemu = m.group(1)
-            runCmd('bitbake-layers remove-layer meta-updater-qemux86-64')
-        else:
-            self.meta_qemu = None
-
         self.append_config('MACHINE = "raspberrypi3"')
         self.append_config('SOTA_CLIENT_PROV = " aktualizr-shared-prov "')
 
     def tearDownLocal(self):
-        if self.meta_qemu:
-            runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu, ignore_status=True)
         if self.meta_upd_rpi:
             runCmd('bitbake-layers remove-layer "%s"' % self.meta_upd_rpi, ignore_status=True)
         if self.meta_rpi:
