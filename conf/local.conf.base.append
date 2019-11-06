@@ -1,11 +1,10 @@
-
 #
 # meta-updater configuration, see README.adoc and aktualizr's
 # documentation for more options and detailed documentation
 #
 
 MACHINE = "##MACHINE##"
-DISTRO = "poky-sota"
+DISTRO = "##DISTRO##"
 
 # General SOTA setup
 #SOTA_CLIENT_PROV = "aktualizr-shared-prov"
