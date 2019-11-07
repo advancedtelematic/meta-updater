@@ -13,11 +13,11 @@ BUILD_OSTREE_TARBALL ??= "1"
 SYSTEMD_USED = "${@oe.utils.ifelse(d.getVar('VIRTUAL-RUNTIME_init_manager') == 'systemd', 'true', '')}"
 
 IMAGE_CMD_TAR = "tar --xattrs --xattrs-include=*"
-CONVERSION_CMD_tar = "touch ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type}; ${IMAGE_CMD_TAR} --numeric-owner -cf ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type}.tar -C ${OTA_IMAGE_ROOTFS} . || [ $? -eq 1 ]"
+CONVERSION_CMD_tar = "touch ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type}; ${IMAGE_CMD_TAR} --numeric-owner -cf ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type}.tar -C ${TAR_IMAGE_ROOTFS} . || [ $? -eq 1 ]"
 CONVERSIONTYPES_append = " tar"
 
 REQUIRED_DISTRO_FEATURES = "usrmerge"
-OTA_IMAGE_ROOTFS_task-image-ostree = "${OSTREE_ROOTFS}"
+TAR_IMAGE_ROOTFS_task-image-ostree = "${OSTREE_ROOTFS}"
 do_image_ostree[dirs] = "${OSTREE_ROOTFS}"
 do_image_ostree[cleandirs] = "${OSTREE_ROOTFS}"
 do_image_ostree[depends] = "coreutils-native:do_populate_sysroot virtual/kernel:do_deploy ${INITRAMFS_IMAGE}:do_image_complete"
