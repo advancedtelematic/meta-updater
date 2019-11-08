@@ -186,13 +186,19 @@ IMAGE_CMD_ostreecommit () {
 IMAGE_TYPEDEP_ostreepush = "ostreecommit"
 do_image_ostreepush[depends] += "aktualizr-native:do_populate_sysroot ca-certificates-native:do_populate_sysroot"
 IMAGE_CMD_ostreepush () {
-    # Print warnings if credetials are not set or if the file has not been found.
+    # send a copy of the repo manifest to backend if available
+    local SEND_MANIFEST=""
+    if [ -f ${IMAGE_ROOTFS}${sysconfdir}/manifest.xml ]; then
+        SEND_MANIFEST="--repo-manifest ${IMAGE_ROOTFS}${sysconfdir}/manifest.xml"
+    fi
+
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         if [ -e ${SOTA_PACKED_CREDENTIALS} ]; then
             garage-push -vv --repo=${OSTREE_REPO} \
                         --ref=${OSTREE_BRANCHNAME} \
                         --credentials=${SOTA_PACKED_CREDENTIALS} \
-                        --cacert=${STAGING_ETCDIR_NATIVE}/ssl/certs/ca-certificates.crt
+                        --cacert=${STAGING_ETCDIR_NATIVE}/ssl/certs/ca-certificates.crt \
+                        $SEND_MANIFEST
         else
             bbwarn "SOTA_PACKED_CREDENTIALS file does not exist."
         fi
