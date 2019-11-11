@@ -188,7 +188,8 @@ do_image_ostreepush[depends] += "aktualizr-native:do_populate_sysroot ca-certifi
 IMAGE_CMD_ostreepush () {
     # send a copy of the repo manifest to backend if available
     local SEND_MANIFEST=""
-    if [ -f ${IMAGE_ROOTFS}${sysconfdir}/manifest.xml ]; then
+    # check if garage-push supports the --repo-manifest option before trying
+    if $(garage-push --help | grep -q '^\s*--repo-manifest') && [ -f ${IMAGE_ROOTFS}${sysconfdir}/manifest.xml ]; then
         SEND_MANIFEST="--repo-manifest ${IMAGE_ROOTFS}${sysconfdir}/manifest.xml"
     fi
 
