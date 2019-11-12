@@ -44,9 +44,9 @@ IMAGE_BOOT_FILES_sota = "bcm2835-bootfiles/* \
                          "
 
 # OSTree puts its own boot.scr to bcm2835-bootfiles
-# raspberrypi4 needs dtb in /boot partition so that they can be read by the
-# firmware
-IMAGE_BOOT_FILES_append_sota_raspberrypi4 = "${@make_dtb_boot_files(d)}"
+# rpi4 and recent rpi3 firmwares needs dtb in /boot partition
+# so that they can be read by the firmware
+IMAGE_BOOT_FILES_append_sota = "${@make_dtb_boot_files(d)}"
 
 # Just the overlays that will be used should be listed
 KERNEL_DEVICETREE_raspberrypi2_sota ?= " bcm2709-rpi-2-b.dtb "
