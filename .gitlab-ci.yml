@@ -46,6 +46,21 @@ Build core-image-minimal:
   except:
     - pushes
 
+Build core-image-minimal (rpi):
+  extends: .bitbake
+
+  stage: test
+  variables:
+    TEST_BUILD_DIR: 'build-core-image-minimal-rpi'
+    BITBAKE_TARGETS: 'core-image-minimal'
+    TEST_MACHINE: 'raspberrypi3'
+  artifacts:
+    name: "core-image-minimal-rpi_$CI_COMMIT_REF_SLUG"
+    paths:
+      - $TEST_BUILD_DIR/tmp/deploy/images/*/core-image-minimal*
+  except:
+    - pushes
+
 Oe-selftest qemux86_64:
   extends: .oe-selftest
 
