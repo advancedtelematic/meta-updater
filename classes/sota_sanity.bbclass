@@ -10,6 +10,32 @@ def sota_check_required_variables(status, d):
         if not d.getVar(var):
             status.addresult("%s should be set in your local.conf.\n" % var)
 
+def sota_check_variables_validity(status, d):
+    var = d.getVar("OSTREE_BRANCHNAME")
+    if var != "":
+        for ch in var:
+            if not (ch >= 'a' and ch <= 'z' or ch >= 'A' and ch <= 'Z' or ch >= '0' and ch <= '9' or ch = '_' or ch == '-'):
+                status.addresult("OSTREE_BRANCHNAME Should only contain characters from the character set [a-zA-Z0-9_-].\n")
+                break
+    var = d.getVar("{SOTA_HARDWARE_ID")
+    if var != "":
+        for ch in var:
+            if not (ch >= 'a' and ch <= 'z' or ch >= 'A' and ch <= 'Z' or ch >= '0' and ch <= '9' or ch = '_' or ch == '-'):
+                status.addresult("SOTA_HARDWARE_ID Should only contain characters from the character set [a-zA-Z0-9_-].\n")
+                break
+    var = d.getVar("SOTA_CLIENT_FEATURES")
+    if var != "hsm" and var != "secondary-network" and var != "":
+        status.addresult("SOTA_CLIENT_FEATURES should be set to hsm or secondary-network.\n")
+    var = d.getVar("OSTREE_UPDATE_SUMMARY")
+    if var != "0" and var != "1" and var != "":
+        status.addresult("OSTREE_UPDATE_SUMMARY should be set to 0 or 1.\n")
+    var = d.getVar("OSTREE_DEPLOY_DEVICETREE")
+    if var != "0" and var != "1" and var != "":
+        status.addresult("OSTREE_DEPLOY_DEVICETREE should be set to 0 or 1.\n")
+    var = GARAGE_SIGN_AUTOVERSION
+    if var != "0" and var != "1" and var != "":
+        status.addresult("GARAGE_SIGN_AUTOVERSION should be set to 0 or 1.\n")
+
 def sota_raise_sanity_error(msg, d):
     if d.getVar("SANITY_USE_EVENTS") == "1":
         bb.event.fire(bb.event.SanityCheckFailed(msg), d)
@@ -52,3 +78,19 @@ python sota_check_sanity_eventhandler() {
 
     return
 }
+
+# Translate old provisioning recipe names into the new versions.
+python () {
+    prov = d.getVar("SOTA_CLIENT_PROV")
+    if prov == "aktualizr-auto-prov":
+        bb.warn('aktualizr-auto-prov is deprecated. Please use aktualizr-shared-prov instead.')
+        d.setVar("SOTA_CLIENT_PROV", "aktualizr-shared-prov")
+    elif prov == "aktualizr-ca-implicit-prov":
+        bb.warn('aktualizr-ca-implicit-prov is deprecated. Please use aktualizr-device-prov instead.')
+        d.setVar("SOTA_CLIENT_PROV", "aktualizr-device-prov")
+    elif prov == "aktualizr-hsm-prov":
+        bb.warn('aktualizr-hsm-prov is deprecated. Please use aktualizr-device-prov-hsm instead.')
+        d.setVar("SOTA_CLIENT_PROV", "aktualizr-device-prov-hsm")
+}
+
+
