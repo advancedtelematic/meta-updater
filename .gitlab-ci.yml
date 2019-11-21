@@ -4,21 +4,24 @@ stages:
   - test
 
 variables:
-  BITBAKE_IMAGE: ${CI_REGISTRY_IMAGE}:ci-${CI_COMMIT_REF_SLUG}-bitbake
-  BITBAKE_CHECKOUT_IMAGE: ${CI_REGISTRY_IMAGE}:ci-${CI_COMMIT_REF_SLUG}-checkout
+  BITBAKE_IMAGE: ${CI_REGISTRY_IMAGE}:ci-master-bitbake
+  BITBAKE_CHECKOUT_IMAGE: ${CI_REGISTRY_IMAGE}:ci-master-checkout
 
 include:
-  - local: "scripts/ci/gitlab/docker.yml"
-  - local: "scripts/ci/gitlab/checkout.yml"
-  - local: "scripts/ci/gitlab/tests.yml"
+  - project: 'olp/edge/ota/connect/client/meta-updater'
+    ref: 'master'
+    file: 'scripts/ci/gitlab/docker.yml'
+  - project: 'olp/edge/ota/connect/client/meta-updater'
+    ref: 'master'
+    file: 'scripts/ci/gitlab/checkout.yml'
+  - project: 'olp/edge/ota/connect/client/meta-updater'
+    ref: 'master'
+    file: 'scripts/ci/gitlab/tests.yml'
 
 Docker setup:
-  extends: .bb_docker_local
+  extends: .bb_docker_remote
 
   stage: docker
-  variables:
-    BITBKAE_IMAGE_MASTER: ${CI_REGISTRY_IMAGE}:ci-master-bitbake
-    BITBAKE_CHECKOUT_IMAGE_MASTER: ${CI_REGISTRY_IMAGE}:ci-master-checkout
   except:
     - pushes
 
@@ -27,7 +30,7 @@ Checkout:
 
   stage: checkout
   variables:
-    MANIFEST: master
+    MANIFEST: zeus
     CURRENT_PROJECT: meta-updater
   except:
     - pushes
@@ -71,8 +74,6 @@ Oe-selftest qemux86_64:
   except:
     - pushes
 
-# Not run by default, triggered on nightlies
-
 Oe-selftest minnowboard:
   extends: .oe-selftest
 
@@ -82,9 +83,6 @@ Oe-selftest minnowboard:
     OE_SELFTESTS: 'updater_minnowboard'
   except:
     - pushes
-  only:
-    variables:
-      - $OE_MINNOWBOARD
 
 Oe-selftest rpi:
   extends: .oe-selftest
