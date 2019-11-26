@@ -465,4 +465,40 @@ class ResourceControlTests(OESelftestTestCase):
         stdout, stderr, retcode = self.qemu_command('systemctl --no-pager show --property=ExecMainStatus aktualizr')
         self.assertIn(b'ExecMainStatus=0', stdout, 'Aktualizr did not restart')
 
+
+class NonSystemdTests(OESelftestTestCase):
+    def setUpLocal(self):
+        layer = "meta-updater-qemux86-64"
+        result = runCmd('bitbake-layers show-layers')
+        if re.search(layer, result.output) is None:
+            self.meta_qemu = metadir() + layer
+            runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
+        else:
+            self.meta_qemu = None
+        self.append_config('MACHINE = "qemux86-64"')
+        self.append_config('SOTA_CLIENT_PROV = " aktualizr-shared-prov "')
+        self.append_config('IMAGE_FSTYPES_remove = "ostreepush garagesign garagecheck"')
+        self.append_config('DISTRO = "poky-sota"')
+        self.append_config('IMAGE_INSTALL_remove += " aktualizr-resource-control"')
+        self.qemu, self.s = qemu_launch(machine='qemux86-64')
+
+    def tearDownLocal(self):
+        qemu_terminate(self.s)
+        if self.meta_qemu:
+            runCmd('bitbake-layers remove-layer "%s"' % self.meta_qemu, ignore_status=True)
+
+    def qemu_command(self, command):
+        return qemu_send_command(self.qemu.ssh_port, command)
+
+    def test_provisioning(self):
+        print('Checking if systemd is not installed...')
+        stdout, stderr, retcode = self.qemu_command('systemctl')
+        self.assertTrue(retcode != 0, 'systemd is installed while it is not supposed to: ' + str(stdout))
+
+        stdout, stderr, retcode = self.qemu_command('aktualizr --run-mode once')
+        self.assertEqual(retcode, 0, 'Failed to run aktualizr: ' + str(stdout) + str(stderr))
+
+        machine = get_bb_var('MACHINE', 'core-image-minimal')
+        verifyProvisioned(self, machine)
+
 # vim:set ts=4 sw=4 sts=4 expandtab:

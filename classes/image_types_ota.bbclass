@@ -38,7 +38,7 @@ calculate_size () {
 }
 
 OTA_SYSROOT = "${WORKDIR}/ota-sysroot"
-OTA_IMAGE_ROOTFS_task-image-ota = "${OTA_SYSROOT}"
+TAR_IMAGE_ROOTFS_task-image-ota = "${OTA_SYSROOT}"
 IMAGE_TYPEDEP_ota = "ostreecommit"
 do_image_ota[dirs] = "${OTA_SYSROOT}"
 do_image_ota[cleandirs] = "${OTA_SYSROOT}"
