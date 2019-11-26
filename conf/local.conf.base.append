@@ -1,0 +1,18 @@
+#
+# meta-updater configuration, see README.adoc and aktualizr's
+# documentation for more options and detailed documentation
+#
+
+MACHINE = "##MACHINE##"
+DISTRO = "##DISTRO##"
+
+# General SOTA setup
+#SOTA_CLIENT_PROV = "aktualizr-shared-prov"
+#SOTA_PACKED_CREDENTIALS = "/path/to/credentials.zip"
+
+# Uncomment this line to start an ssh server at boot automatically
+#IMAGE_FEATURES += "ssh-server-dropbear"
+
+# Uncomment this line to set the log level of aktualizr to 'debug' (from 'info'
+# by default)
+#IMAGE_INSTALL_append += " aktualizr-log-debug"

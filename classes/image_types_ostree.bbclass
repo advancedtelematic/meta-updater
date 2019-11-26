@@ -13,11 +13,11 @@ BUILD_OSTREE_TARBALL ??= "1"
 SYSTEMD_USED = "${@oe.utils.ifelse(d.getVar('VIRTUAL-RUNTIME_init_manager') == 'systemd', 'true', '')}"
 
 IMAGE_CMD_TAR = "tar --xattrs --xattrs-include=*"
-CONVERSION_CMD_tar = "touch ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type}; ${IMAGE_CMD_TAR} --numeric-owner -cf ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type}.tar -C ${OTA_IMAGE_ROOTFS} . || [ $? -eq 1 ]"
+CONVERSION_CMD_tar = "touch ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type}; ${IMAGE_CMD_TAR} --numeric-owner -cf ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type}.tar -C ${TAR_IMAGE_ROOTFS} . || [ $? -eq 1 ]"
 CONVERSIONTYPES_append = " tar"
 
 REQUIRED_DISTRO_FEATURES = "usrmerge"
-OTA_IMAGE_ROOTFS_task-image-ostree = "${OSTREE_ROOTFS}"
+TAR_IMAGE_ROOTFS_task-image-ostree = "${OSTREE_ROOTFS}"
 do_image_ostree[dirs] = "${OSTREE_ROOTFS}"
 do_image_ostree[cleandirs] = "${OSTREE_ROOTFS}"
 do_image_ostree[depends] = "coreutils-native:do_populate_sysroot virtual/kernel:do_deploy ${INITRAMFS_IMAGE}:do_image_complete"
@@ -186,13 +186,20 @@ IMAGE_CMD_ostreecommit () {
 IMAGE_TYPEDEP_ostreepush = "ostreecommit"
 do_image_ostreepush[depends] += "aktualizr-native:do_populate_sysroot ca-certificates-native:do_populate_sysroot"
 IMAGE_CMD_ostreepush () {
-    # Print warnings if credetials are not set or if the file has not been found.
+    # send a copy of the repo manifest to backend if available
+    local SEND_MANIFEST=""
+    # check if garage-push supports the --repo-manifest option before trying
+    if $(garage-push --help | grep -q '^\s*--repo-manifest') && [ -f ${IMAGE_ROOTFS}${sysconfdir}/manifest.xml ]; then
+        SEND_MANIFEST="--repo-manifest ${IMAGE_ROOTFS}${sysconfdir}/manifest.xml"
+    fi
+
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         if [ -e ${SOTA_PACKED_CREDENTIALS} ]; then
             garage-push -vv --repo=${OSTREE_REPO} \
                         --ref=${OSTREE_BRANCHNAME} \
                         --credentials=${SOTA_PACKED_CREDENTIALS} \
-                        --cacert=${STAGING_ETCDIR_NATIVE}/ssl/certs/ca-certificates.crt
+                        --cacert=${STAGING_ETCDIR_NATIVE}/ssl/certs/ca-certificates.crt \
+                        $SEND_MANIFEST
         else
             bbwarn "SOTA_PACKED_CREDENTIALS file does not exist."
         fi

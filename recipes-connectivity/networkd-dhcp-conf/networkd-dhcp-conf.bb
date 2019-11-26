@@ -15,7 +15,7 @@ SRC_URI = " \
   "
 PR = "r1"
 
-RDEPENDS_${PN} = "systemd"
+REQUIRED_DISTRO_FEATURES_${PN} = "systemd"
 RCONFLICTS_${PN} = "connman"
 
 S = "${WORKDIR}"
