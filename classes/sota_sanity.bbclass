@@ -27,12 +27,16 @@ def sota_check_variables_validity(status, d):
         prov = d.getVar("SOTA_CLIENT_PROV").strip()
         if prov not in ("aktualizr-shared-prov", "aktualizr-device-prov", "aktualizr-device-prov-hsm", ""):
             status.addresult("Valid options for SOTA_CLIENT_PROV are aktualizr-shared-prov, aktualizr-device-prov and aktualizr-device-prov-hsm.\n")
+            if prov == "aktualizr-auto-prov":
+                bb.warn('aktualizr-auto-prov is deprecated. Please use aktualizr-shared-prov instead.')
+            elif prov == "aktualizr-ca-implicit-prov":
+                bb.warn('aktualizr-ca-implicit-prov is deprecated. Please use aktualizr-device-prov instead.')
+            elif prov == "aktualizr-hsm-prov":
+                bb.warn('aktualizr-hsm-prov is deprecated. Please use aktualizr-device-prov-hsm instead.')
     if d.getVar("GARAGE_TARGET_URL") and re.match("^(https?|ftp|file)://.+$", d.getVar("GARAGE_TARGET_URL")) is None:
         status.addresult("GARAGE_TARGET_URL is set to a bad url.\n")
-    if d.getVar("SOTA_POLLING_SEC") and re.match("^(0|\+?[1-9][0-9]*)$", d.getVar("SOTA_POLLING_SEC")) is None:
+    if d.getVar("SOTA_POLLING_SEC") and re.match("^[1-9]\d*|0$", d.getVar("SOTA_POLLING_SEC")) is None:
         status.addresult("SOTA_POLLING_SEC should be an integer.\n")
-    if d.getVar("OSTREE_REPO") and re.match("^\/([a-zA-Z0-9_-]+\/?)+$", d.getVar("OSTREE_REPO")) is None:
-        status.addresult("OSTREE_REPO is not set correctly. Path to your OSTree repository is invalid.\n")
     config = d.getVar("SOTA_SECONDARY_CONFIG")
     if config is not None and config != "":
         path = os.path.abspath(config)
