@@ -20,6 +20,7 @@ def main():
                         help='Boot using UEFI rather than U-Boot. This requires the image to be built with ' +
                              'OSTREE_BOOTLOADER = "grub" and OVMF.fd firmware to be installed (try "apt install ovmf")',
                         action='store_true')
+    parser.add_argument('--bootloader', default=None, help="Path to bootloader, e.g. a u-boot ROM")
     parser.add_argument('--machine', default=None, help="Target MACHINE")
     kvm_group = parser.add_argument_group()
     kvm_group.add_argument('--force-kvm', help='Force use of KVM (default is to autodetect)',

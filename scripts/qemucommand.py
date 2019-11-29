@@ -58,6 +58,8 @@ class QemuCommand(object):
         if args.efi:
             self.bios = 'OVMF.fd'
         else:
+            if args.bootloader:
+                uboot_path = args.bootloader
             uboot_path = abspath(join(args.dir, self.machine, 'u-boot-qemux86-64.rom'))
             if self.overlay:
                 new_uboot_path = self.overlay + '.u-boot.rom'
