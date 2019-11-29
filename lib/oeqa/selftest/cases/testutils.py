@@ -33,6 +33,7 @@ def qemu_boot_image(imagename, **kwargs):
     # subdirectory.
     args.dir = 'tmp/deploy/images'
     args.efi = kwargs.get('efi', False)
+    args.bootloader = kwargs.get('bootloader', None)
     args.machine = kwargs.get('machine', None)
     args.mem = kwargs.get('mem', '128M')
     qemu_use_kvm = get_bb_var("QEMU_USE_KVM")
