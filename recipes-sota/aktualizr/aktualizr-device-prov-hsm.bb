@@ -14,7 +14,7 @@ DEPENDS = "aktualizr"
 # If the config file from aktualizr used here is changed, you will need to bump
 # the version here because of SIGGEN_EXCLUDE_SAFE_RECIPE_DEPS!
 PV = "1.0"
-PR = "6"
+PR = "7"
 
 SRC_URI = ""
 
