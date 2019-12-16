@@ -15,7 +15,7 @@ RDEPENDS_${PN}-ptest += "bash cmake curl net-tools python3-core python3-misc pyt
 PV = "1.0+git${SRCPV}"
 PR = "7"
 
-GARAGE_SIGN_PV = "0.7.0-49-g5ffd420"
+GARAGE_SIGN_PV = "0.7.0-61-g909b804"
 
 SRC_URI = " \
   gitsm://github.com/advancedtelematic/aktualizr;branch=${BRANCH};name=aktualizr \
@@ -27,10 +27,10 @@ SRC_URI = " \
   ${@ d.expand("https://ats-tuf-cli-releases.s3-eu-central-1.amazonaws.com/cli-${GARAGE_SIGN_PV}.tgz;unpack=0;name=garagesign") if d.getVar('GARAGE_SIGN_AUTOVERSION') != '1' else ''} \
   "
 
-SRC_URI[garagesign.md5sum] = "de0877ecb693fd48ec11052e51b0ff1a"
-SRC_URI[garagesign.sha256sum] = "cf25759574c9c1206835daeaf6fc345f6db7b5ccdb95fb828c86d7451f78f0aa"
+SRC_URI[garagesign.md5sum] = "3e1ae6d49cc66fda37cef47f849d9609"
+SRC_URI[garagesign.sha256sum] = "8d49b83efa222db2f092ee14348459ee1bfd048552b57c3cb5ab48db8e347d82"
 
-SRCREV = "1c2f495e47a41cc7c9ad969ff42496208ad6b23a"
+SRCREV = "6633d0d0e6353fdf8970001dc8da70e6a28203cd"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -48,12 +48,13 @@ SYSTEMD_SERVICE_${PN}-secondary = "aktualizr-secondary.service"
 EXTRA_OECMAKE = "-DCMAKE_BUILD_TYPE=Release ${@bb.utils.contains('PTEST_ENABLED', '1', '-DTESTSUITE_VALGRIND=on', '', d)}"
 
 GARAGE_SIGN_OPS = "${@ d.expand('-DGARAGE_SIGN_ARCHIVE=${WORKDIR}/cli-${GARAGE_SIGN_PV}.tgz') if d.getVar('GARAGE_SIGN_AUTOVERSION') != '1' else ''}"
+PKCS11_ENGINE_PATH = "${libdir}/engines-1.1/pkcs11.so"
 
 PACKAGECONFIG ?= "ostree ${@bb.utils.filter('SOTA_CLIENT_FEATURES', 'hsm serialcan ubootenv', d)}"
 PACKAGECONFIG_class-native = "sota-tools"
 PACKAGECONFIG[warning-as-error] = "-DWARNING_AS_ERROR=ON,-DWARNING_AS_ERROR=OFF,"
 PACKAGECONFIG[ostree] = "-DBUILD_OSTREE=ON,-DBUILD_OSTREE=OFF,ostree,"
-PACKAGECONFIG[hsm] = "-DBUILD_P11=ON,-DBUILD_P11=OFF,libp11,"
+PACKAGECONFIG[hsm] = "-DBUILD_P11=ON -DPKCS11_ENGINE_PATH=${PKCS11_ENGINE_PATH},-DBUILD_P11=OFF,libp11,"
 PACKAGECONFIG[sota-tools] = "-DBUILD_SOTA_TOOLS=ON ${GARAGE_SIGN_OPS},-DBUILD_SOTA_TOOLS=OFF,glib-2.0,"
 PACKAGECONFIG[load-tests] = "-DBUILD_LOAD_TESTS=ON,-DBUILD_LOAD_TESTS=OFF,"
 PACKAGECONFIG[serialcan] = ",,,slcand-start"
