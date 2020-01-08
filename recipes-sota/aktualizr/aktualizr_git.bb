@@ -7,8 +7,9 @@ LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=815ca599c9df247a0c7f619bab123dad"
 
 DEPENDS = "boost curl openssl libarchive libsodium sqlite3 asn1c-native"
 DEPENDS_append = "${@bb.utils.contains('PTEST_ENABLED', '1', ' coreutils-native net-tools-native ostree-native aktualizr-native ', '', d)}"
-RDEPENDS_${PN}_class-target = "aktualizr-configs aktualizr-hwid lshw"
+RDEPENDS_${PN}_class-target = "${PN}-configs ${PN}-hwid lshw"
 RDEPENDS_${PN}-host-tools = "aktualizr aktualizr-cert-provider ${@bb.utils.contains('PACKAGECONFIG', 'sota-tools', 'garage-deploy garage-push', '', d)}"
+DEPENDS_garage-push = " ${PN}-sotatools-lib"
 
 RDEPENDS_${PN}-ptest += "bash cmake curl net-tools python3-core python3-misc python3-modules openssl-bin sqlite3 valgrind"
 
@@ -30,8 +31,8 @@ SRC_URI = " \
 SRC_URI[garagesign.md5sum] = "3e1ae6d49cc66fda37cef47f849d9609"
 SRC_URI[garagesign.sha256sum] = "8d49b83efa222db2f092ee14348459ee1bfd048552b57c3cb5ab48db8e347d82"
 
-SRCREV = "2403384097448042c825c485e905deb130ce9fcc"
-BRANCH ?= "master"
+SRCREV = "f78aebda29d28e74e12e3e0988bf3e6c4792ecc6"
+BRANCH ?= "feat/dyn-library"
 
 S = "${WORKDIR}/git"
 
@@ -140,7 +141,7 @@ python split_hosttools_packages () {
 
 PACKAGES_DYNAMIC = "^aktualizr-.* ^garage-.*"
 
-PACKAGES =+ "${PN}-resource-control ${PN}-examples ${PN}-secondary ${PN}-configs ${PN}-host-tools"
+PACKAGES =+ "${PN}-host-tools ${PN}-lib ${PN}-resource-control ${PN}-configs ${PN}-examples ${PN}-secondary ${PN}-secondary-lib ${PN}-sotatools-lib"
 
 ALLOW_EMPTY_${PN}-host-tools = "1"
 
@@ -148,6 +149,10 @@ FILES_${PN} = " \
                 ${bindir}/aktualizr \
                 ${bindir}/aktualizr-info \
                 ${systemd_unitdir}/system/aktualizr.service \
+                "
+
+FILES_${PN}-lib = " \
+                ${libdir}/libaktualizr_lib.so \
                 "
 
 FILES_${PN}-resource-control = " \
@@ -168,6 +173,16 @@ FILES_${PN}-secondary = " \
                 ${libdir}/sota/sota-secondary.toml \
                 ${systemd_unitdir}/system/aktualizr-secondary.service \
                 "
+
+FILES_${PN}-secondary-lib = " \
+                ${libdir}/libaktualizr_secondary_lib.so \
+                "
+
+FILES_${PN}-sotatools-lib = " \
+                ${libdir}/libsota_tools_lib.so \
+                "
+
+FILES_${PN}-dev = ""
 
 BBCLASSEXTEND = "native"
 
