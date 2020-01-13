@@ -42,6 +42,8 @@ class QemuCommand(object):
     def __init__(self, args):
         self.dry_run = args.dry_run
         self.overlay = args.overlay
+        self.host_fwd = None
+
         if args.machine:
             self.machine = args.machine
         else:
@@ -125,10 +127,17 @@ class QemuCommand(object):
         self.pcap = args.pcap
         self.secondary_network = args.secondary_network
 
+        # Append additional port forwarding to QEMU command line.
+        if args.host_forward:
+            self.host_fwd = args.host_forward
+
     def command_line(self):
         netuser = 'user,hostfwd=tcp:0.0.0.0:%d-:22,restrict=off' % self.ssh_port
         if self.gdb:
             netuser += ',hostfwd=tcp:0.0.0.0:2159-:2159'
+        if self.host_fwd:
+            netuser += ",hostfwd=" + self.host_fwd
+
         cmdline = [
             "qemu-system-x86_64",
             "-bios", self.bios

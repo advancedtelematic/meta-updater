@@ -39,6 +39,12 @@ def main():
                         help='Give the image a second network card connected to a virtual network. ' +
                              'This can be used to test Uptane Primary/Secondary communication.')
     parser.add_argument('-n', '--dry-run', help='Print qemu command line rather then run it', action='store_true')
+    parser.add_argument('--host-forward',
+                        help='Redirect incoming TCP or UDP connections to the host port. '
+                             'Example forwarding guest port 10050 to the host port 10555:'
+                             '--host-forward="tcp:0.0.0.0:10556-:10050". '
+                             'For more details please refer to QEMU man page, option <hostfwd>. '
+                             'https://manpages.debian.org/testing/qemu-system-x86/qemu-system-x86_64.1.en.html')
     args = parser.parse_args()
 
     if args.overlay and not exists(args.overlay) and dirname(args.overlay) and not dirname(args.overlay) == '.':
