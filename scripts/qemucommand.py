@@ -128,7 +128,7 @@ class QemuCommand(object):
         self.secondary_network = args.secondary_network
 
         # Append additional port forwarding to QEMU command line.
-        if args.host_forward:
+        if hasattr(args, 'host_forward'):
             self.host_fwd = args.host_forward
 
     def command_line(self):
