@@ -40,9 +40,25 @@ def random_mac():
 
 class QemuCommand(object):
     def __init__(self, args):
+        print(args)
+        self.enable_u_boot = None
         self.dry_run = args.dry_run
         self.overlay = args.overlay
         self.host_fwd = None
+        self.kernel = None
+        self.drive_interface = "ide"
+
+        if hasattr(args, 'uboot_enable'):
+            self.enable_u_boot = args.uboot_enable.lower() in ("yes", "true", "1")
+
+        # Rise an exception if U-Boot is disabled and overlay option is used
+        if not self.enable_u_boot and self.overlay:
+            raise EnvironmentError("An overlay option is currently supported only with U-Boot loader!")
+
+        # If booting with u-boot is disabled we use "ext4" root fs instead of custom one "ota-ext4"
+        if not self.enable_u_boot:
+            self.drive_interface = "virtio"
+            EXTENSIONS['qemux86-64'] = 'ext4'
 
         if args.machine:
             self.machine = args.machine
@@ -59,9 +75,7 @@ class QemuCommand(object):
         # overlay so that we can keep it around just in case.
         if args.efi:
             self.bios = 'OVMF.fd'
-        else:
-            if args.bootloader:
-                uboot_path = args.bootloader
+        elif self.enable_u_boot:
             uboot_path = abspath(join(args.dir, self.machine, 'u-boot-qemux86-64.rom'))
             if self.overlay:
                 new_uboot_path = self.overlay + '.u-boot.rom'
@@ -77,6 +91,8 @@ class QemuCommand(object):
             if not exists(uboot_path) and not (self.dry_run and not exists(self.overlay)):
                 raise ValueError("U-Boot image %s does not exist" % uboot_path)
             self.bios = uboot_path
+        else:
+            self.kernel = abspath(join(args.dir, self.machine, 'bzImage-qemux86-64.bin'))
 
         # If using an overlay, we need to keep the "backing" image around, as
         # bitbake will often clean it up, and the overlay silently depends on
@@ -140,10 +156,14 @@ class QemuCommand(object):
 
         cmdline = [
             "qemu-system-x86_64",
-            "-bios", self.bios
         ]
+        if self.enable_u_boot:
+            cmdline += ["-bios", self.bios]
+        else:
+            cmdline += ["-kernel", self.kernel]
+
         if not self.overlay:
-            cmdline += ["-drive", "file=%s,if=ide,format=raw,snapshot=on" % self.image]
+            cmdline += ["-drive", "file=%s,if=%s,format=raw,snapshot=on" % (self.image, self.drive_interface)]
         cmdline += [
             "-serial", "tcp:127.0.0.1:%d,server,nowait" % self.serial_port,
             "-m", self.mem,
@@ -177,6 +197,10 @@ class QemuCommand(object):
             cmdline += ['-cpu', 'Haswell']
         if self.overlay:
             cmdline.append(self.overlay)
+
+        # If booting with u-boot is disabled, add kernel command line arguments through qemu -append option
+        if not self.enable_u_boot:
+            cmdline += ["-append", "root=/dev/vda rw highres=off console=ttyS0 ip=dhcp"]
         return cmdline
 
     def img_command_line(self):
