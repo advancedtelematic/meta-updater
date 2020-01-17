@@ -12,14 +12,14 @@ SOTA_HARDWARE_ID ?= "${MACHINE}-sndry"
 SECONDARY_HARDWARE_ID ?= "${SOTA_HARDWARE_ID}"
 
 SRC_URI = "\
-    file://30-fake-pacman.toml \
+    file://30-ostree-pacman.toml \
     file://35-network-config.toml \
     file://45-id-config.toml \
     "
 
 do_install () {
     install -m 0700 -d ${D}${libdir}/sota/conf.d
-    install -m 0644 ${WORKDIR}/30-fake-pacman.toml ${D}${libdir}/sota/conf.d/30-fake-pacman.toml
+    install -m 0644 ${WORKDIR}/30-ostree-pacman.toml ${D}${libdir}/sota/conf.d/30-ostree-pacman.toml
 
     install -m 0644 ${WORKDIR}/35-network-config.toml ${D}${libdir}/sota/conf.d/35-network-config.toml
     sed -i -e 's|@PORT@|${SECONDARY_PORT}|g' \
@@ -36,7 +36,7 @@ do_install () {
 
 FILES_${PN} = " \
                 ${libdir}/sota/conf.d \
-                ${libdir}/sota/conf.d/30-fake-pacman.toml \
+                ${libdir}/sota/conf.d/30-ostree-pacman.toml \
                 ${libdir}/sota/conf.d/35-network-config.toml \
                 ${libdir}/sota/conf.d/45-id-config.toml \
                 "
