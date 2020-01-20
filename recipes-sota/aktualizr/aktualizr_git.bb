@@ -15,7 +15,7 @@ RDEPENDS_${PN}-ptest += "bash cmake curl net-tools python3-core python3-misc pyt
 PV = "1.0+git${SRCPV}"
 PR = "7"
 
-GARAGE_SIGN_PV = "0.7.0-61-g909b804"
+GARAGE_SIGN_PV = "0.7.0-64-gc7c279f"
 
 SRC_URI = " \
   gitsm://github.com/advancedtelematic/aktualizr;branch=${BRANCH};name=aktualizr \
@@ -27,10 +27,10 @@ SRC_URI = " \
   ${@ d.expand("https://ats-tuf-cli-releases.s3-eu-central-1.amazonaws.com/cli-${GARAGE_SIGN_PV}.tgz;unpack=0;name=garagesign") if d.getVar('GARAGE_SIGN_AUTOVERSION') != '1' else ''} \
   "
 
-SRC_URI[garagesign.md5sum] = "3e1ae6d49cc66fda37cef47f849d9609"
-SRC_URI[garagesign.sha256sum] = "8d49b83efa222db2f092ee14348459ee1bfd048552b57c3cb5ab48db8e347d82"
+SRC_URI[garagesign.md5sum] = "36dedbf79f71cb697a18251ea121bcc6"
+SRC_URI[garagesign.sha256sum] = "f0a8e4bb258fd65a6f1fe561132d5ab3fe25b76aec0f1873993dc65bf2167608"
 
-SRCREV = "14f7c6e74e8fade755dfdd03c856865127ba12b6"
+SRCREV = "5ead19cf8aefee44e929b7e98bc5aa63e0621aac"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
