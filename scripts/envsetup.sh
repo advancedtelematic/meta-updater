@@ -45,7 +45,7 @@ if [[ ! -f "${BUILDDIR}/conf/local.conf" ]]; then
   cat "${METADIR}/meta-updater/conf/include/bblayers/sota_${MACHINE}.inc" >> conf/bblayers.conf
   sed -e "s/##MACHINE##/$MACHINE/g" \
       -e "s/##DISTRO##/$DISTRO/g" \
-      "${METADIR}/meta-updater/conf/$BASE_CONF" >> conf/local.conf
+         "${METADIR}/meta-updater/conf/$BASE_CONF" >> conf/local.conf
 
   for config in ${DISTRO_CONFIGS[@]}; do
     if [[ "$BASE_CONF" != "$config" ]]; then
