@@ -8,7 +8,7 @@ SOTA_DEPLOY_CREDENTIALS ?= "1"
 SOTA_HARDWARE_ID ??= "${MACHINE}"
 
 IMAGE_INSTALL_append_sota = " ostree os-release ${SOTA_CLIENT} ${SOTA_CLIENT_PROV}"
-IMAGE_CLASSES += " image_types_ostree image_types_ota"
+IMAGE_CLASSES += " image_types_ostree image_types_ota image_repo_manifest"
 
 IMAGE_FSTYPES += "${@bb.utils.contains('DISTRO_FEATURES', 'sota', 'ostreepush garagesign garagecheck ota-ext4 wic', ' ', d)}"
 IMAGE_FSTYPES += "${@bb.utils.contains('BUILD_OSTREE_TARBALL', '1', 'ostree.tar.bz2', ' ', d)}"
@@ -52,4 +52,4 @@ SOTA_MACHINE_am335x-evm ?= "am335x-evm-wifi"
 SOTA_OVERRIDES_BLACKLIST = "ostree ota"
 SOTA_REQUIRED_VARIABLES = "OSTREE_REPO OSTREE_BRANCHNAME OSTREE_OSNAME OSTREE_BOOTLOADER OSTREE_BOOT_PARTITION GARAGE_SIGN_REPO GARAGE_TARGET_NAME"
 
-inherit sota_sanity sota_${SOTA_MACHINE} image_repo_manifest
+inherit sota_sanity sota_${SOTA_MACHINE}
