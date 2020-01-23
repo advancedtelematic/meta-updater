@@ -140,7 +140,7 @@ python split_hosttools_packages () {
 
 PACKAGES_DYNAMIC = "^aktualizr-.* ^garage-.*"
 
-PACKAGES =+ "${PN}-host-tools ${PN}-lib ${PN}-resource-control ${PN}-configs ${PN}-examples ${PN}-secondary ${PN}-secondary-lib ${PN}-sotatools-lib"
+PACKAGES =+ "${PN}-host-tools ${PN}-lib ${PN}-resource-control ${PN}-configs ${PN}-secondary ${PN}-secondary-lib ${PN}-sotatools-lib"
 
 ALLOW_EMPTY_${PN}-host-tools = "1"
 
@@ -161,10 +161,6 @@ FILES_${PN}-resource-control = " \
 FILES_${PN}-configs = " \
                 ${sysconfdir}/sota/* \
                 ${libdir}/sota/* \
-                "
-
-FILES_${PN}-examples = " \
-                ${bindir}/hmi-stub \
                 "
 
 FILES_${PN}-secondary = " \
