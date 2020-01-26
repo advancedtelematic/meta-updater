@@ -9,8 +9,6 @@
 # For more information, see:
 # https://web.archive.org/web/20161224194009/https://wiki.cyanogenmod.org/w/Doc:_Using_manifests 
 
-HOSTTOOLS_NONFATAL += "repo python"
-
 # Write build information to target filesystem
 buildinfo_manifest () {
   if [ $(which repo) ]; then

@@ -1,7 +1,5 @@
 DISTROOVERRIDES .= "${@bb.utils.contains('DISTRO_FEATURES', 'sota', ':sota', '', d)}"
 
-HOSTTOOLS_NONFATAL += "java"
-
 SOTA_CLIENT ??= "aktualizr"
 SOTA_CLIENT_PROV ??= "aktualizr-shared-prov"
 SOTA_DEPLOY_CREDENTIALS ?= "1"
