@@ -13,6 +13,8 @@ IMAGE_LINGUAS = ""
 
 LICENSE = "MIT"
 
+IMAGE_CLASSES_remove = "image_repo_manifest"
+
 IMAGE_FSTYPES = "${INITRAMFS_FSTYPES}"
 
 # Avoid circular dependencies
@@ -28,5 +30,3 @@ IMAGE_ROOTFS_EXTRA_SPACE = "0"
 IMAGE_OVERHEAD_FACTOR = "1.0"
 
 BAD_RECOMMENDATIONS += "busybox-syslog"
-
-IMAGE_PREPROCESS_COMMAND_remove = "buildinfo_manifest;"
