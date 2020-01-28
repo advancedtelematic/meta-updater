@@ -5,6 +5,7 @@ OSTREE_KERNEL ??= "${KERNEL_IMAGETYPE}"
 OSTREE_ROOTFS ??= "${WORKDIR}/ostree-rootfs"
 OSTREE_COMMIT_SUBJECT ??= "Commit-id: ${IMAGE_NAME}"
 OSTREE_COMMIT_BODY ??= ""
+OSTREE_COMMIT_VERSION ??= "${DISTRO_VERSION}"
 OSTREE_UPDATE_SUMMARY ??= "0"
 OSTREE_DEPLOY_DEVICETREE ??= "0"
 
@@ -169,6 +170,7 @@ IMAGE_CMD_ostreecommit () {
            --branch=${OSTREE_BRANCHNAME} \
            --subject="${OSTREE_COMMIT_SUBJECT}" \
            --body="${OSTREE_COMMIT_BODY}" \
+           --add-metadata-string=version="${OSTREE_COMMIT_VERSION}" \
            --bind-ref="${OSTREE_BRANCHNAME}-${IMAGE_BASENAME}"
 
     if [ "${OSTREE_UPDATE_SUMMARY}" = "1" ]; then
