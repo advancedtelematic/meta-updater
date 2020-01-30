@@ -13,6 +13,9 @@ def main():
     parser = ArgumentParser(description='Run meta-updater image in qemu')
     parser.add_argument('imagename', default='core-image-minimal', nargs='?',
                         help="Either the name of the bitbake image target, or a path to the image to run")
+    parser.add_argument('--uboot-enable', default='yes',
+                        help='(yes/no). Determines whether or not to use U-Boot loader for running image, '
+                             'if yes then u-boot binary file will be passed as -bios option into QEMU cmd line.')
     parser.add_argument('mac', default=None, nargs='?')
     parser.add_argument('--dir', default=DEFAULT_DIR,
                         help='Path to build directory containing the image and u-boot-qemux86-64.rom')
