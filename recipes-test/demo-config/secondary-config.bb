@@ -10,16 +10,32 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 SECONDARY_SERIAL_ID ?= ""
 SOTA_HARDWARE_ID ?= "${MACHINE}-sndry"
 SECONDARY_HARDWARE_ID ?= "${SOTA_HARDWARE_ID}"
+SECONDARY_UPDATE_TYPE ?= "ostree"
+
+UPDATE_TYPE = "${SECONDARY_UPDATE_TYPE}"
+python () {
+    update_type = d.getVar('UPDATE_TYPE')
+    if update_type not in [ 'ostree', 'file']:
+        bb.fatal('Unsupported type of an update specified for secondary: SECONDARY_UPDATE_TYPE = {}\n'
+                  'Supported update types are: ostree and file'
+        .format(update_type))
+
+    if update_type == 'file':
+        d.setVar('UPDATE_TYPE', 'none')
+}
 
 SRC_URI = "\
-    file://30-ostree-pacman.toml \
+    file://30-pacman-config.toml \
     file://35-network-config.toml \
     file://45-id-config.toml \
     "
 
+
 do_install () {
     install -m 0700 -d ${D}${libdir}/sota/conf.d
-    install -m 0644 ${WORKDIR}/30-ostree-pacman.toml ${D}${libdir}/sota/conf.d/30-ostree-pacman.toml
+
+    install -m 0644 ${WORKDIR}/30-pacman-config.toml ${D}${libdir}/sota/conf.d/30-pacman-config.toml
+    sed -i -e 's|@UPDATE_TYPE@|${UPDATE_TYPE}|g' ${D}${libdir}/sota/conf.d/30-pacman-config.toml
 
     install -m 0644 ${WORKDIR}/35-network-config.toml ${D}${libdir}/sota/conf.d/35-network-config.toml
     sed -i -e 's|@PORT@|${SECONDARY_PORT}|g' \
@@ -36,7 +52,7 @@ do_install () {
 
 FILES_${PN} = " \
                 ${libdir}/sota/conf.d \
-                ${libdir}/sota/conf.d/30-ostree-pacman.toml \
+                ${libdir}/sota/conf.d/30-pacman-config.toml \
                 ${libdir}/sota/conf.d/35-network-config.toml \
                 ${libdir}/sota/conf.d/45-id-config.toml \
                 "
