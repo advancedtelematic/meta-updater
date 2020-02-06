@@ -40,7 +40,6 @@ def random_mac():
 
 class QemuCommand(object):
     def __init__(self, args):
-        print(args)
         self.enable_u_boot = True
         self.dry_run = args.dry_run
         self.overlay = args.overlay
