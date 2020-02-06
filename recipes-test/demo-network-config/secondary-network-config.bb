@@ -21,7 +21,7 @@ do_install() {
 
 SECONDARY_IP ?= "10.0.3.2"
 IP_ADDR = "${SECONDARY_IP}"
-CONF_TYPE = "static"
+CONF_TYPE ?= "${@ 'multihomed' if d.getVar('MACHINE') == 'raspberrypi3' and d.getVar('RPI_WIFI_ENABLE') != '1' else 'static'}"
 
 require network-config.inc
 
