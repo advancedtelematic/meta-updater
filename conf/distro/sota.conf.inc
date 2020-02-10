@@ -17,4 +17,5 @@ INHERIT += "reproducible_build_simple"
 export SOURCE_DATE_EPOCH = "0"
 REPRODUCIBLE_TIMESTAMP_ROOTFS = "0"
 
-HOSTTOOLS_append = " sync sha256sum"
+HOSTTOOLS += "git sync sha256sum"
+HOSTTOOLS_NONFATAL += "java repo python"
