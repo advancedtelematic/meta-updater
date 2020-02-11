@@ -15,7 +15,7 @@ do_install() {
     install -m 0644 ${WORKDIR}/27-dhcp-client-external.network ${D}${libdir}/systemd/network/
 }
 
-PRIMARY_IP ?= "10.0.3.1"
+PRIMARY_IP ?= "192.168.254.1"
 
 IP_ADDR = "${PRIMARY_IP}"
 CONF_TYPE ?= "${@ 'multihomed' if d.getVar('MACHINE') == 'raspberrypi3' and d.getVar('RPI_WIFI_ENABLE') != '1' else 'static'}"
