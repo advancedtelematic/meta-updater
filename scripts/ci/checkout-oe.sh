@@ -19,6 +19,10 @@ mkdir -p updater-repo
 
 cd updater-repo
 
+# it seems like it's always required now, even if repo is only used to fetch
+git config --global user.email "meta-updater-ci@example.org"
+git config --global user.name "meta-updater-ci"
+
 if [ -d .repo/manifests ]; then
     git -C .repo/manifests reset --hard
 fi
