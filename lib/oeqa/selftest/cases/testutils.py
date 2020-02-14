@@ -49,6 +49,7 @@ def qemu_boot_image(imagename, **kwargs):
     args.overlay = kwargs.get('overlay', None)
     args.dry_run = kwargs.get('dry_run', False)
     args.secondary_network = kwargs.get('secondary_network', False)
+    args.uboot_enable = kwargs.get('uboot_enable', 'yes')
 
     qemu = QemuCommand(args)
     cmdline = qemu.command_line()
