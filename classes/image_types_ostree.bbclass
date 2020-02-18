@@ -238,10 +238,10 @@ IMAGE_CMD_garagesign () {
         target_version=${ostree_target_hash}
         if [ -n "${GARAGE_TARGET_VERSION}" ]; then
             target_version=${GARAGE_TARGET_VERSION}
-            bbwarn "Target version is overriden with GARAGE_TARGET_VERSION variable. It is a dangerous operation, make sure you've read the respective secion in meta-updater/README.adoc"
+            bbwarn "Target version is overriden with GARAGE_TARGET_VERSION variable. This is a dangerous operation! See https://docs.ota.here.com/ota-client/latest/build-configuration.html#_overriding_target_version"
         elif [ -e "${STAGING_DATADIR_NATIVE}/target_version" ]; then
             target_version=$(cat "${STAGING_DATADIR_NATIVE}/target_version")
-            bbwarn "Target version is overriden with target_version file. It is a dangerous operation, make sure you've read the respective secion in meta-updater/README.adoc"
+            bbwarn "Target version is overriden with target_version file. This is a dangerous operation! See https://docs.ota.here.com/ota-client/latest/build-configuration.html#_overriding_target_version"
         fi
 
         # Push may fail due to race condition when multiple build machines try to push simultaneously
