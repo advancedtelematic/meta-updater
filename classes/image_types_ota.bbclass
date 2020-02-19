@@ -63,7 +63,7 @@ IMAGE_CMD_ota () {
 
 	ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME}-${IMAGE_BASENAME})
 
-	ostree --repo=${OTA_SYSROOT}/ostree/repo pull-local --remote=${OSTREE_OSNAME} ${OSTREE_REPO} ${ostree_target_hash}
+	ostree --repo=${OTA_SYSROOT}/ostree/repo pull-local --remote=${OSTREE_OSNAME} ${OSTREE_REPO} "${OSTREE_BRANCHNAME}-${IMAGE_BASENAME}"
 	kargs_list=""
 	for arg in ${OSTREE_KERNEL_ARGS}; do
 		kargs_list="${kargs_list} --karg-append=$arg"
