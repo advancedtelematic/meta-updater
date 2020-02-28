@@ -12,7 +12,10 @@ IMAGE_NAME=${1:-core-image-minimal}
 (
 set +euo pipefail
 set +x
+METADIR=$(realpath "$TEST_REPO_DIR")
+export METADIR
 . "${TEST_REPO_DIR}/meta-updater/scripts/envsetup.sh" "${TEST_MACHINE}" "${TEST_BUILD_DIR}"
 
+set -x
 bitbake "${IMAGE_NAME}"
 )
