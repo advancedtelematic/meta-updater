@@ -22,5 +22,9 @@ set -x
 # see https://git.yoctoproject.org/cgit/cgit.cgi/poky/commit/?id=d3a94e5b9b3c107cf54d5639071cc6609c002f67
 mkdir -p "tmp/log"
 
+# This is apparently required here now as well.
+git config --global user.email "meta-updater-ci@example.org"
+git config --global user.name "meta-updater-ci"
+
 oe-selftest -r "$@"
 )
