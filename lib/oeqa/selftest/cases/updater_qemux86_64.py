@@ -112,6 +112,32 @@ class SharedCredProvTests(OESelftestTestCase):
         verifyProvisioned(self, machine, hwid)
 
 
+class SharedCredProvTestsNonOSTree(SharedCredProvTests):
+
+    def setUpLocal(self):
+        layer = "meta-updater-qemux86-64"
+        result = runCmd('bitbake-layers show-layers')
+        if re.search(layer, result.output) is None:
+            self.meta_qemu = metadir() + layer
+            runCmd('bitbake-layers add-layer "%s"' % self.meta_qemu)
+        else:
+            self.meta_qemu = None
+        self.append_config('MACHINE = "qemux86-64"')
+        self.append_config('SOTA_CLIENT_PROV = ""')
+        self.append_config('IMAGE_FSTYPES_remove = "ostreepush garagesign garagecheck"')
+        self.append_config('SOTA_HARDWARE_ID = "plain_reibekuchen_314"')
+
+        self.append_config('DISTRO = "poky"')
+        self.append_config('DISTRO_FEATURES_append = " systemd"')
+        self.append_config('VIRTUAL-RUNTIME_init_manager = "systemd"')
+        self.append_config('PREFERRED_RPROVIDER_virtual/network-configuration ??= "networkd-dhcp-conf"')
+        self.append_config('PACKAGECONFIG_pn-aktualizr = ""')
+        self.append_config('SOTA_DEPLOY_CREDENTIALS = "1"')
+        self.append_config('IMAGE_INSTALL_append += "aktualizr"')
+        self.append_config('IMAGE_INSTALL_append += " aktualizr-shared-prov"')
+        self.qemu, self.s = qemu_launch(machine='qemux86-64', uboot_enable='no')
+
+
 class ManualControlTests(OESelftestTestCase):
 
     def setUpLocal(self):

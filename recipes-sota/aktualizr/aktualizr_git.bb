@@ -15,7 +15,7 @@ RDEPENDS_${PN}-ptest += "bash cmake curl python3-misc python3-modules openssl-bi
 PV = "1.0+git${SRCPV}"
 PR = "7"
 
-GARAGE_SIGN_PV = "0.7.0-64-gc7c279f"
+GARAGE_SIGN_PV = "0.7.0-70-g3adf982"
 
 SRC_URI = " \
   gitsm://github.com/advancedtelematic/aktualizr;branch=${BRANCH};name=aktualizr \
@@ -27,10 +27,10 @@ SRC_URI = " \
   ${@ d.expand("https://ats-tuf-cli-releases.s3-eu-central-1.amazonaws.com/cli-${GARAGE_SIGN_PV}.tgz;unpack=0;name=garagesign") if d.getVar('GARAGE_SIGN_AUTOVERSION') != '1' else ''} \
   "
 
-SRC_URI[garagesign.md5sum] = "36dedbf79f71cb697a18251ea121bcc6"
-SRC_URI[garagesign.sha256sum] = "f0a8e4bb258fd65a6f1fe561132d5ab3fe25b76aec0f1873993dc65bf2167608"
+SRC_URI[garagesign.md5sum] = "7c4cbeacefd97eae69104d29cf5ff37a"
+SRC_URI[garagesign.sha256sum] = "e9a9b68eaa1ce4104eb2ab7f1f59d99742d50805e93216fb5b21d1f212aa3d82"
 
-SRCREV = "56ac8dafb552b1d15638162ca14e0b818ed5e65f"
+SRCREV = "9f2cc5d7b026eb1a1404f0c77ef6cb9377245423"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -151,7 +151,7 @@ FILES_${PN} = " \
                 "
 
 FILES_${PN}-lib = " \
-                ${libdir}/libaktualizr_lib.so \
+                ${libdir}/libaktualizr.so \
                 "
 
 FILES_${PN}-resource-control = " \
@@ -170,11 +170,11 @@ FILES_${PN}-secondary = " \
                 "
 
 FILES_${PN}-secondary-lib = " \
-                ${libdir}/libaktualizr_secondary_lib.so \
+                ${libdir}/libaktualizr_secondary.so \
                 "
 
 FILES_${PN}-sotatools-lib = " \
-                ${libdir}/libsota_tools_lib.so \
+                ${libdir}/libsota_tools.so \
                 "
 
 FILES_${PN}-dev = ""
