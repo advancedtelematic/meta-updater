@@ -86,9 +86,6 @@ do_install_ptest() {
     cp -r ${B}/ ${D}/${PTEST_PATH}/build
     cp -r ${S}/ ${D}/${PTEST_PATH}/src
 
-    # remove huge external unused repository
-    rm -rf ${D}/${PTEST_PATH}/src/partial/extern/RIOT
-
     # remove huge build artifacts
     find ${D}/${PTEST_PATH}/build/src -name "*.a" -delete
 
