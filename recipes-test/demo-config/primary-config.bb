@@ -11,6 +11,7 @@ PRIMARY_SECONDARIES ?= "${SECONDARY_IP}:${SECONDARY_PORT}"
 SRC_URI = "\
     file://30-secondary-config.toml \
     file://ip_secondary_config.json \
+    ${@('file://' + d.getVar('SOTA_SECONDARY_CONFIG')) if d.getVar('SOTA_SECONDARY_CONFIG') else ''} \
     "
 
 def get_secondary_addrs(d):
