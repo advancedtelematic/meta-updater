@@ -12,6 +12,8 @@ RDEPENDS_${PN}-host-tools = "aktualizr aktualizr-cert-provider ${@bb.utils.conta
 
 RDEPENDS_${PN}-ptest += "bash cmake curl python3-misc python3-modules openssl-bin sqlite3 valgrind"
 
+PRIVATE_LIBS_${PN}-ptest = "libaktualizr.so libaktualizr_secondary.so"
+
 PV = "1.0+git${SRCPV}"
 PR = "7"
 
