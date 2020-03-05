@@ -12,6 +12,8 @@ RDEPENDS_${PN}-host-tools = "aktualizr aktualizr-cert-provider ${@bb.utils.conta
 
 RDEPENDS_${PN}-ptest += "bash cmake curl net-tools python3-core python3-misc python3-modules openssl-bin sqlite3 valgrind"
 
+PRIVATE_LIBS_${PN}-ptest = "libaktualizr.so libaktualizr_secondary.so"
+
 PV = "1.0+git${SRCPV}"
 PR = "7"
 
@@ -85,9 +87,6 @@ do_install_ptest() {
     # copy the complete source directory (contains build)
     cp -r ${B}/ ${D}/${PTEST_PATH}/build
     cp -r ${S}/ ${D}/${PTEST_PATH}/src
-
-    # remove huge external unused repository
-    rm -rf ${D}/${PTEST_PATH}/src/partial/extern/RIOT
 
     # remove huge build artifacts
     find ${D}/${PTEST_PATH}/build/src -name "*.a" -delete
