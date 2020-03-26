@@ -12,10 +12,12 @@ RDEPENDS_${PN}-host-tools = "aktualizr aktualizr-cert-provider ${@bb.utils.conta
 
 RDEPENDS_${PN}-ptest += "bash cmake curl net-tools python3-core python3-misc python3-modules openssl-bin sqlite3 valgrind"
 
+PRIVATE_LIBS_${PN}-ptest = "libaktualizr.so libaktualizr_secondary.so"
+
 PV = "1.0+git${SRCPV}"
 PR = "7"
 
-GARAGE_SIGN_PV = "0.7.0-70-g3adf982"
+GARAGE_SIGN_PV = "0.7.0-87-g905dc3c"
 
 SRC_URI = " \
   gitsm://github.com/advancedtelematic/aktualizr;branch=${BRANCH};name=aktualizr \
@@ -27,10 +29,10 @@ SRC_URI = " \
   ${@ d.expand("https://ats-tuf-cli-releases.s3-eu-central-1.amazonaws.com/cli-${GARAGE_SIGN_PV}.tgz;unpack=0;name=garagesign") if d.getVar('GARAGE_SIGN_AUTOVERSION') != '1' else ''} \
   "
 
-SRC_URI[garagesign.md5sum] = "7c4cbeacefd97eae69104d29cf5ff37a"
-SRC_URI[garagesign.sha256sum] = "e9a9b68eaa1ce4104eb2ab7f1f59d99742d50805e93216fb5b21d1f212aa3d82"
+SRC_URI[garagesign.md5sum] = "064b408c60676dcf282aa9209bff7dac"
+SRC_URI[garagesign.sha256sum] = "75c9b3cf24eb31dacb127d3b3d073359082e2b4ee4eeb27d75e792664800ba82"
 
-SRCREV = "9f2cc5d7b026eb1a1404f0c77ef6cb9377245423"
+SRCREV = "f90e8996e826d130976a7b7f1835947b7e631025"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -85,9 +87,6 @@ do_install_ptest() {
     # copy the complete source directory (contains build)
     cp -r ${B}/ ${D}/${PTEST_PATH}/build
     cp -r ${S}/ ${D}/${PTEST_PATH}/src
-
-    # remove huge external unused repository
-    rm -rf ${D}/${PTEST_PATH}/src/partial/extern/RIOT
 
     # remove huge build artifacts
     find ${D}/${PTEST_PATH}/build/src -name "*.a" -delete
