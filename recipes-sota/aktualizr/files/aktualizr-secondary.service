@@ -1,6 +1,7 @@
 [Unit]
 Description=Aktualizr SOTA Client (UPTANE Secondary)
-After=network.target
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 RestartSec=10

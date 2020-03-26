@@ -139,10 +139,10 @@ def verifyProvisioned(testInst, machine, hwid=''):
         testInst.assertEqual(stderr, b'', 'aktualizr-info failed: ' + stderr.decode() + stdout.decode())
     testInst.assertIn(b'Device ID: ', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
     if hwid == '':
-        testInst.assertIn(b'Primary ecu hardware ID: ' + machine.encode(), stdout,
+        testInst.assertIn(b'Primary ECU hardware ID: ' + machine.encode(), stdout,
                   'Provisioning failed: ' + stderr.decode() + stdout.decode())
     else:
-        testInst.assertIn(b'Primary ecu hardware ID: ' + hwid.encode(), stdout,
+        testInst.assertIn(b'Primary ECU hardware ID: ' + hwid.encode(), stdout,
                   'Provisioning failed: ' + stderr.decode() + stdout.decode())
     testInst.assertIn(b'Fetched metadata: yes', stdout, 'Provisioning failed: ' + stderr.decode() + stdout.decode())
     p = re.compile(r'Device ID: ([a-z0-9-]*)\n')
