@@ -17,7 +17,7 @@ PRIVATE_LIBS_${PN}-ptest = "libaktualizr.so libaktualizr_secondary.so"
 PV = "1.0+git${SRCPV}"
 PR = "7"
 
-GARAGE_SIGN_PV = "0.7.0-87-g905dc3c"
+GARAGE_SIGN_PV = "0.7.0-94-g9df6b17"
 
 SRC_URI = " \
   gitsm://github.com/advancedtelematic/aktualizr;branch=${BRANCH};name=aktualizr \
@@ -26,13 +26,13 @@ SRC_URI = " \
   file://aktualizr-secondary.service \
   file://aktualizr-serialcan.service \
   file://10-resource-control.conf \
-  ${@ d.expand("https://ats-tuf-cli-releases.s3-eu-central-1.amazonaws.com/cli-${GARAGE_SIGN_PV}.tgz;unpack=0;name=garagesign") if d.getVar('GARAGE_SIGN_AUTOVERSION') != '1' else ''} \
+  ${@ d.expand("https://tuf-cli-releases.ota.here.com/cli-${GARAGE_SIGN_PV}.tgz;unpack=0;name=garagesign") if d.getVar('GARAGE_SIGN_AUTOVERSION') != '1' else ''} \
   "
 
-SRC_URI[garagesign.md5sum] = "064b408c60676dcf282aa9209bff7dac"
-SRC_URI[garagesign.sha256sum] = "75c9b3cf24eb31dacb127d3b3d073359082e2b4ee4eeb27d75e792664800ba82"
+SRC_URI[garagesign.md5sum] = "1b9c8191f181b2cb7be9723280878a8d"
+SRC_URI[garagesign.sha256sum] = "401b54ad640c9f54d615bcc250f8863853f2428e490019092a2c176793c8212f"
 
-SRCREV = "f90e8996e826d130976a7b7f1835947b7e631025"
+SRCREV = "20aa2e7785466c75f23e40ab2bd424a4a71ac8ec"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
