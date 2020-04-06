@@ -2,23 +2,27 @@ stages:
   - docker
   - checkout
   - test
+  - trigger
 
 variables:
-  BITBAKE_IMAGE: ${CI_REGISTRY_IMAGE}:ci-${CI_COMMIT_REF_SLUG}-bitbake
-  BITBAKE_CHECKOUT_IMAGE: ${CI_REGISTRY_IMAGE}:ci-${CI_COMMIT_REF_SLUG}-checkout
+  BITBAKE_IMAGE: ${CI_REGISTRY_IMAGE}:ci-master-bitbake
+  BITBAKE_CHECKOUT_IMAGE: ${CI_REGISTRY_IMAGE}:ci-master-checkout
 
 include:
-  - local: "scripts/ci/gitlab/docker.yml"
-  - local: "scripts/ci/gitlab/checkout.yml"
-  - local: "scripts/ci/gitlab/tests.yml"
+  - project: 'olp/edge/ota/connect/client/meta-updater'
+    ref: 'master'
+    file: 'scripts/ci/gitlab/docker.yml'
+  - project: 'olp/edge/ota/connect/client/meta-updater'
+    ref: 'master'
+    file: 'scripts/ci/gitlab/checkout.yml'
+  - project: 'olp/edge/ota/connect/client/meta-updater'
+    ref: 'master'
+    file: 'scripts/ci/gitlab/tests.yml'
 
 Docker setup:
-  extends: .bb_docker_local
+  extends: .bb_docker_remote
 
   stage: docker
-  variables:
-    BITBKAE_IMAGE_MASTER: ${CI_REGISTRY_IMAGE}:ci-master-bitbake
-    BITBAKE_CHECKOUT_IMAGE_MASTER: ${CI_REGISTRY_IMAGE}:ci-master-checkout
   except:
     - pushes
 
@@ -27,7 +31,7 @@ Checkout:
 
   stage: checkout
   variables:
-    MANIFEST: master
+    MANIFEST: dunfell
     CURRENT_PROJECT: meta-updater
   except:
     - pushes
@@ -39,10 +43,6 @@ Build core-image-minimal:
   variables:
     TEST_BUILD_DIR: 'build-core-image-minimal'
     BITBAKE_TARGETS: 'core-image-minimal'
-  artifacts:
-    name: "core-image-minimal_$CI_COMMIT_REF_SLUG"
-    paths:
-      - $TEST_BUILD_DIR/tmp/deploy/images/*/core-image-minimal*
   except:
     - pushes
 
@@ -54,10 +54,6 @@ Build core-image-minimal (rpi):
     TEST_BUILD_DIR: 'build-core-image-minimal-rpi'
     BITBAKE_TARGETS: 'core-image-minimal'
     TEST_MACHINE: 'raspberrypi3'
-  artifacts:
-    name: "core-image-minimal-rpi_$CI_COMMIT_REF_SLUG"
-    paths:
-      - $TEST_BUILD_DIR/tmp/deploy/images/*/core-image-minimal*
   except:
     - pushes
 
@@ -71,8 +67,6 @@ Oe-selftest qemux86_64:
   except:
     - pushes
 
-# Not run by default, triggered on nightlies
-
 Oe-selftest minnowboard:
   extends: .oe-selftest
 
@@ -82,9 +76,6 @@ Oe-selftest minnowboard:
     OE_SELFTESTS: 'updater_minnowboard'
   except:
     - pushes
-  only:
-    variables:
-      - $OE_MINNOWBOARD
 
 Oe-selftest rpi:
   extends: .oe-selftest
@@ -95,9 +86,8 @@ Oe-selftest rpi:
     OE_SELFTESTS: 'updater_raspberrypi'
   except:
     - pushes
-  only:
-    variables:
-      - $OE_RPI
+
+# Not run by default
 
 Ptest qemux86_64:
   extends: .oe-selftest
@@ -111,3 +101,15 @@ Ptest qemux86_64:
   only:
     variables:
       - $OE_PTEST
+
+# -- otf
+
+trigger-otf-on-pr:
+  stage: trigger
+  when: always
+  except:
+    - pushes
+    - schedules
+  script:
+    - apk add --no-cache curl
+    - curl -X POST -F "token=$CI_JOB_TOKEN" -F "ref=master" -F "variables[BITBAKE_JOB_ONLY]=true" -F "variables[BITBAKE_ENV]=dunfell" -F "variables[PROJECT_NAME]=meta-updater" -F "variables[PROJECT_SHA]=$CI_COMMIT_SHA" https://main.gitlab.in.here.com/api/v4/projects/163/trigger/pipeline
