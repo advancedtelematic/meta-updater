@@ -5,7 +5,7 @@ SECTION = "base"
 LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=815ca599c9df247a0c7f619bab123dad"
 
-DEPENDS = "boost curl openssl libarchive libsodium sqlite3 asn1c-native"
+DEPENDS = "boost curl grpc grpc-native openssl libarchive libsodium sqlite3 asn1c-native"
 DEPENDS_append = "${@bb.utils.contains('PTEST_ENABLED', '1', ' coreutils-native net-tools-native ostree-native aktualizr-native ', '', d)}"
 RDEPENDS_${PN}_class-target = "${PN}-configs ${PN}-hwid lshw"
 RDEPENDS_${PN}-host-tools = "aktualizr aktualizr-cert-provider ${@bb.utils.contains('PACKAGECONFIG', 'sota-tools', 'garage-deploy garage-push', '', d)}"
@@ -32,8 +32,8 @@ SRC_URI = " \
 SRC_URI[garagesign.md5sum] = "1b9c8191f181b2cb7be9723280878a8d"
 SRC_URI[garagesign.sha256sum] = "401b54ad640c9f54d615bcc250f8863853f2428e490019092a2c176793c8212f"
 
-SRCREV = "20aa2e7785466c75f23e40ab2bd424a4a71ac8ec"
-BRANCH ?= "master"
+SRCREV = "be145b6ac5021d2ceb349b29be53c45d0bc3b7d3"
+BRANCH ?= "feat/grpc-hmi"
 
 S = "${WORKDIR}/git"
 
@@ -146,6 +146,7 @@ ALLOW_EMPTY_${PN}-host-tools = "1"
 FILES_${PN} = " \
                 ${bindir}/aktualizr \
                 ${bindir}/aktualizr-info \
+                ${bindir}/aktualizr-grpc-srv \
                 ${systemd_unitdir}/system/aktualizr.service \
                 "
 
