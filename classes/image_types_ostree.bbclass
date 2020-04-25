@@ -56,13 +56,11 @@ IMAGE_CMD_ostree () {
         mkdir -p usr/etc/tmpfiles.d
         tmpfiles_conf=usr/etc/tmpfiles.d/00ostree-tmpfiles.conf
         echo "d /var/rootdirs 0755 root root -" >>${tmpfiles_conf}
-        echo "L /var/rootdirs/home - - - - /sysroot/home" >>${tmpfiles_conf}
     else
         mkdir -p usr/etc/init.d
         tmpfiles_conf=usr/etc/init.d/tmpfiles.sh
         echo '#!/bin/sh' > ${tmpfiles_conf}
         echo "mkdir -p /var/rootdirs; chmod 755 /var/rootdirs" >> ${tmpfiles_conf}
-        echo "ln -sf /sysroot/home /var/rootdirs/home" >> ${tmpfiles_conf}
 
         ln -s ../init.d/tmpfiles.sh usr/etc/rcS.d/S20tmpfiles.sh
     fi
