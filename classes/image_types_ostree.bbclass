@@ -71,13 +71,11 @@ IMAGE_CMD_ostree () {
     mkdir -p usr/share/sota/
     echo -n "${OSTREE_BRANCHNAME}" > usr/share/sota/branchname
 
-    # Preserve data in /home to be later copied to /sysroot/home by sysroot
-    # generating procedure
-    mkdir -p usr/homedirs
-    if [ -d "home" ] && [ ! -L "home" ]; then
-        mv home usr/homedirs/home
-        ln -sf var/rootdirs/home home
-    fi
+    # home directories get copied from the OE root later to the final sysroot
+    # Create a symlink to var/rootdirs/home to make sure the OSTree deployment
+    # redirects /home to /var/rootdirs/home.
+    rm -rf home/
+    ln -sf var/rootdirs/home home
 
     # Move persistent directories to /var
     dirs="opt mnt media srv"
