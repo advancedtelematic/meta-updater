@@ -80,8 +80,8 @@ IMAGE_CMD_ota () {
 	# Ensure the permissions are correctly set
 	chmod 700 ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota
 
-	cp -a ${OSTREE_ROOTFS}/var/local ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
-	cp -a ${OSTREE_ROOTFS}/usr/homedirs/home ${OTA_SYSROOT}/ || true
+	cp -a ${IMAGE_ROOTFS}/var/local ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
+	cp -a ${IMAGE_ROOTFS}/home ${OTA_SYSROOT}/ || true
 	# Ensure that /var/local exists (AGL symlinks /usr/local to /var/local)
 	install -d ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/local
 	# Set package version for the first deployment
