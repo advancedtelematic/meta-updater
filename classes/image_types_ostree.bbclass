@@ -38,9 +38,6 @@ IMAGE_CMD_ostree () {
     mkdir sysroot
     ln -sf sysroot/ostree ostree
 
-    rm -rf tmp/*
-    ln -sf sysroot/tmp tmp
-
     mkdir -p usr/rootdirs
 
     mv etc usr/
