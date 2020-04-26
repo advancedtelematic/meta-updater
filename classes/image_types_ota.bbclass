@@ -45,14 +45,17 @@ do_image_ota[cleandirs] = "${OTA_SYSROOT}"
 do_image_ota[depends] = "${@'grub:do_populate_sysroot' if d.getVar('OSTREE_BOOTLOADER') == 'grub' else ''} \
                          ${@'virtual/bootloader:do_deploy' if d.getVar('OSTREE_BOOTLOADER') == 'u-boot' else ''}"
 IMAGE_CMD_ota () {
-	export OSTREE_BOOT_PARTITION=${OSTREE_BOOT_PARTITION}
-
 	ostree admin --sysroot=${OTA_SYSROOT} init-fs ${OTA_SYSROOT}
 	ostree admin --sysroot=${OTA_SYSROOT} os-init ${OSTREE_OSNAME}
+
+	# Preparation required to steer ostree bootloader detection
 	mkdir -p ${OTA_SYSROOT}/boot/loader.0
 	ln -s loader.0 ${OTA_SYSROOT}/boot/loader
 
 	if [ "${OSTREE_BOOTLOADER}" = "grub" ]; then
+		# Used by ostree-grub-generator called by the ostree binary
+		export OSTREE_BOOT_PARTITION=${OSTREE_BOOT_PARTITION}
+
 		mkdir -p ${OTA_SYSROOT}/boot/grub2
 		ln -s ../loader/grub.cfg ${OTA_SYSROOT}/boot/grub2/grub.cfg
 	elif [ "${OSTREE_BOOTLOADER}" = "u-boot" ]; then
