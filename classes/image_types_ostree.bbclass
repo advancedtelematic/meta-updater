@@ -20,14 +20,24 @@ CONVERSION_CMD_tar = "touch ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${
 CONVERSIONTYPES_append = " tar"
 
 TAR_IMAGE_ROOTFS_task-image-ostree = "${OSTREE_ROOTFS}"
+
+python prepare_ostree_rootfs() {
+    import oe.path
+    import shutil
+
+    ostree_rootfs = d.getVar("OSTREE_ROOTFS")
+    if os.path.lexists(ostree_rootfs):
+        bb.utils.remove(ostree_rootfs, True)
+
+    # Copy required as we change permissions on some files.
+    image_rootfs = d.getVar("IMAGE_ROOTFS")
+    oe.path.copyhardlinktree(image_rootfs, ostree_rootfs)
+}
+
 do_image_ostree[dirs] = "${OSTREE_ROOTFS}"
-do_image_ostree[cleandirs] = "${OSTREE_ROOTFS}"
+do_image_ostree[prefuncs] += "prepare_ostree_rootfs"
 do_image_ostree[depends] = "coreutils-native:do_populate_sysroot virtual/kernel:do_deploy ${INITRAMFS_IMAGE}:do_image_complete"
 IMAGE_CMD_ostree () {
-    cp -a ${IMAGE_ROOTFS}/* ${OSTREE_ROOTFS}
-    chmod a+rx ${OSTREE_ROOTFS}
-    sync
-
     for d in var/*; do
       if [ "${d}" != "var/local" ]; then
         rm -rf ${d}
@@ -38,9 +48,6 @@ IMAGE_CMD_ostree () {
     mkdir sysroot
     ln -sf sysroot/ostree ostree
 
-    rm -rf tmp/*
-    ln -sf sysroot/tmp tmp
-
     mkdir -p usr/rootdirs
 
     mv etc usr/
@@ -49,13 +56,11 @@ IMAGE_CMD_ostree () {
         mkdir -p usr/etc/tmpfiles.d
         tmpfiles_conf=usr/etc/tmpfiles.d/00ostree-tmpfiles.conf
         echo "d /var/rootdirs 0755 root root -" >>${tmpfiles_conf}
-        echo "L /var/rootdirs/home - - - - /sysroot/home" >>${tmpfiles_conf}
     else
         mkdir -p usr/etc/init.d
         tmpfiles_conf=usr/etc/init.d/tmpfiles.sh
         echo '#!/bin/sh' > ${tmpfiles_conf}
         echo "mkdir -p /var/rootdirs; chmod 755 /var/rootdirs" >> ${tmpfiles_conf}
-        echo "ln -sf /sysroot/home /var/rootdirs/home" >> ${tmpfiles_conf}
 
         ln -s ../init.d/tmpfiles.sh usr/etc/rcS.d/S20tmpfiles.sh
     fi
@@ -64,13 +69,11 @@ IMAGE_CMD_ostree () {
     mkdir -p usr/share/sota/
     echo -n "${OSTREE_BRANCHNAME}" > usr/share/sota/branchname
 
-    # Preserve data in /home to be later copied to /sysroot/home by sysroot
-    # generating procedure
-    mkdir -p usr/homedirs
-    if [ -d "home" ] && [ ! -L "home" ]; then
-        mv home usr/homedirs/home
-        ln -sf var/rootdirs/home home
-    fi
+    # home directories get copied from the OE root later to the final sysroot
+    # Create a symlink to var/rootdirs/home to make sure the OSTree deployment
+    # redirects /home to /var/rootdirs/home.
+    rm -rf home/
+    ln -sf var/rootdirs/home home
 
     # Move persistent directories to /var
     dirs="opt mnt media srv"

@@ -45,14 +45,17 @@ do_image_ota[cleandirs] = "${OTA_SYSROOT}"
 do_image_ota[depends] = "${@'grub:do_populate_sysroot' if d.getVar('OSTREE_BOOTLOADER') == 'grub' else ''} \
                          ${@'virtual/bootloader:do_deploy' if d.getVar('OSTREE_BOOTLOADER') == 'u-boot' else ''}"
 IMAGE_CMD_ota () {
-	export OSTREE_BOOT_PARTITION=${OSTREE_BOOT_PARTITION}
-
-	ostree admin --sysroot=${OTA_SYSROOT} init-fs ${OTA_SYSROOT}
+	ostree admin --sysroot=${OTA_SYSROOT} init-fs --modern ${OTA_SYSROOT}
 	ostree admin --sysroot=${OTA_SYSROOT} os-init ${OSTREE_OSNAME}
+
+	# Preparation required to steer ostree bootloader detection
 	mkdir -p ${OTA_SYSROOT}/boot/loader.0
 	ln -s loader.0 ${OTA_SYSROOT}/boot/loader
 
 	if [ "${OSTREE_BOOTLOADER}" = "grub" ]; then
+		# Used by ostree-grub-generator called by the ostree binary
+		export OSTREE_BOOT_PARTITION=${OSTREE_BOOT_PARTITION}
+
 		mkdir -p ${OTA_SYSROOT}/boot/grub2
 		ln -s ../loader/grub.cfg ${OTA_SYSROOT}/boot/grub2/grub.cfg
 	elif [ "${OSTREE_BOOTLOADER}" = "u-boot" ]; then
@@ -77,8 +80,11 @@ IMAGE_CMD_ota () {
 	# Ensure the permissions are correctly set
 	chmod 700 ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota
 
-	cp -a ${OSTREE_ROOTFS}/var/local ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
-	cp -a ${OSTREE_ROOTFS}/usr/homedirs/home ${OTA_SYSROOT}/ || true
+	cp -a ${IMAGE_ROOTFS}/var/local ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
+
+	mkdir -p ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/rootdirs
+	cp -a ${IMAGE_ROOTFS}/home ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/rootdirs/home || true
+
 	# Ensure that /var/local exists (AGL symlinks /usr/local to /var/local)
 	install -d ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/local
 	# Set package version for the first deployment
