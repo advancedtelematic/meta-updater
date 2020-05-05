@@ -6,15 +6,23 @@ BUILDDIR="build"
 DISTRO="poky-sota-systemd"
 BASE_CONF="local.conf.base.append"
 
+if [ -n "$ZSH_VERSION" ]; then
+    # be more compatible with bash
+    setopt shwordsplit
+fi
+
 # A definition of a dictionary with a list of configuration files that must be appended
 # to resulting conf/local.conf file for each particular distribution.
-declare -A supported_distros=(
-    ["poky-sota-systemd"]="local.conf.systemd.append"
-    ["poky-sota"]="local.conf.base.append"
-    ["poky"]="local.conf.systemd.append local.conf.nonostree.append"
-)
+declare -A supported_distros
+supported_distros[poky-sota-systemd]="local.conf.systemd.append"
+supported_distros[poky-sota]="local.conf.base.append"
+supported_distros[poky]="local.conf.systemd.append local.conf.nonostree.append"
 
-[[ "$#" -lt 1 ]] && { echo "Usage: ${SCRIPT} <machine> [builddir] [distro=< poky-sota-systemd | poky-sota | poky >]"; return 1; }
+usage () {
+  echo "Usage: ${SCRIPT} <machine> [builddir] [distro=< poky-sota-systemd | poky-sota | poky >]"
+}
+
+[[ "$#" -lt 1 ]] && { usage; return 1; }
 [[ "$#" -ge 2 ]] && { BUILDDIR="$2"; }
 [[ "$#" -eq 3 ]] && { DISTRO="$3"; }
 
@@ -35,19 +43,23 @@ fi
 METADIR=${METADIR:-${SOURCEDIR}/../..}
 
 if [[ ! -f "${BUILDDIR}/conf/local.conf" ]]; then
-  declare -a DISTRO_CONFIGS=${supported_distros[$DISTRO]}
-  [[ -n ${DISTRO_CONFIGS[@]} ]] && { echo "Using (${DISTRO_CONFIGS[*]}) for the specified distro '$DISTRO'"; } || { echo "The specified distro $DISTRO is not supported"; return 1; }
+  if [ -z "${supported_distros[$DISTRO]}" ]; then
+    echo "The specified distro $DISTRO is not supported"
+    usage
+    return 1
+  fi
 
   source "$METADIR/poky/oe-init-build-env" "$BUILDDIR"
 
   echo "METADIR  := \"\${@os.path.abspath('${METADIR}')}\"" >> conf/bblayers.conf
   cat "${METADIR}/meta-updater/conf/include/bblayers/sota.inc" >> conf/bblayers.conf
   cat "${METADIR}/meta-updater/conf/include/bblayers/sota_${MACHINE}.inc" >> conf/bblayers.conf
+
   sed -e "s/##MACHINE##/$MACHINE/g" \
       -e "s/##DISTRO##/$DISTRO/g" \
          "${METADIR}/meta-updater/conf/$BASE_CONF" >> conf/local.conf
 
-  for config in ${DISTRO_CONFIGS[@]}; do
+  for config in ${supported_distros[$DISTRO]}; do
     if [[ "$BASE_CONF" != "$config" ]]; then
       cat "${METADIR}/meta-updater/conf/$config" >> conf/local.conf
     fi
