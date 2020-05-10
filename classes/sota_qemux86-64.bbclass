@@ -13,4 +13,4 @@ IMAGE_ROOTFS_EXTRA_SPACE = "${@bb.utils.contains('DISTRO_FEATURES', 'sota', '655
 # fix for u-boot/swig build issue
 HOSTTOOLS_NONFATAL += "x86_64-linux-gnu-gcc"
 
-IMAGE_INSTALL_append_sota = " virtual/network-configuration "
+IMAGE_INSTALL_append_sota = " network-configuration "
