@@ -8,5 +8,5 @@ OSTREE_BOOTLOADER ?= "u-boot"
 
 UBOOT_MACHINE_sota = "${@d.getVar('SOC_FAMILY').split(':')[1]}_ulcb_defconfig"
 
-PREFERRED_RPROVIDER_virtual/network-configuration ?= "connman"
-IMAGE_INSTALL_append_sota = " virtual/network-configuration "
+PREFERRED_RPROVIDER_network-configuration ?= "connman"
+IMAGE_INSTALL_append_sota = " network-configuration "
