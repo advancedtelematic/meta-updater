@@ -16,7 +16,7 @@ IMAGE_INSTALL_remove = " \
                         aktualizr-device-prov \
                         aktualizr-device-prov-hsm \
                         aktualizr-uboot-env-rollback \
-                        virtual/network-configuration \
+                        network-configuration \
                         "
 
 IMAGE_INSTALL_append = " \
