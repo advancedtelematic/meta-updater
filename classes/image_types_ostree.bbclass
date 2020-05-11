@@ -140,7 +140,7 @@ IMAGE_CMD_ostree () {
         checksum=$(sha256sum ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} | cut -f 1 -d " ")
         touch boot/initramfs-${checksum}
     else
-        if [ "${OSTREE_DEPLOY_DEVICETREE}" = "1"  ] && [ -n "${KERNEL_DEVICETREE}" ]; then
+        if [ ${@ oe.types.boolean('${OSTREE_DEPLOY_DEVICETREE}')} = True ] && [ -n "${KERNEL_DEVICETREE}" ]; then
             checksum=$(cat ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} ${DEPLOY_DIR_IMAGE}/${INITRAMFS_IMAGE}-${MACHINE}.${INITRAMFS_FSTYPES} ${KERNEL_DEVICETREE} | sha256sum | cut -f 1 -d " ")
             for DTS_FILE in ${KERNEL_DEVICETREE}; do
                 DTS_FILE_BASENAME=$(basename ${DTS_FILE})
@@ -176,7 +176,7 @@ IMAGE_CMD_ostreecommit () {
            --add-metadata-string=version="${OSTREE_COMMIT_VERSION}" \
            --bind-ref="${OSTREE_BRANCHNAME}-${IMAGE_BASENAME}"
 
-    if [ "${OSTREE_UPDATE_SUMMARY}" = "1" ]; then
+    if [ ${@ oe.types.boolean('${OSTREE_UPDATE_SUMMARY}')} = True ]; then
         ostree --repo=${OSTREE_REPO} summary -u
     fi
 

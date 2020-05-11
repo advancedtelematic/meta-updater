@@ -1,5 +1,12 @@
 # Sanity check the sota setup for common misconfigurations
 
+def sota_check_boolean_variable(var, d):
+    try:
+        oe.types.boolean(d.getVar(var))
+    except:
+        return False
+    return True
+
 def sota_check_overrides(status, d):
     for var in (d.getVar('SOTA_OVERRIDES_BLACKLIST') or "").split():
         if var in d.getVar('OVERRIDES').split(':'):
@@ -47,14 +54,14 @@ def sota_check_variables_validity(status, d):
         path = os.path.abspath(credentials)
         if not os.path.exists(path):
             status.addresult("SOTA_PACKED_CREDENTIALS is not set correctly. The zipped credentials file does not exist.\n")
-    if d.getVar("OSTREE_UPDATE_SUMMARY") and d.getVar("OSTREE_UPDATE_SUMMARY") not in ("0", "1", ""):
-        status.addresult("OSTREE_UPDATE_SUMMARY should be set to 0 or 1.\n")
-    if d.getVar("OSTREE_DEPLOY_DEVICETREE") and d.getVar("OSTREE_DEPLOY_DEVICETREE") not in ("0", "1", ""):
-        status.addresult("OSTREE_DEPLOY_DEVICETREE should be set to 0 or 1.\n")
-    if d.getVar("GARAGE_SIGN_AUTOVERSION") and d.getVar("GARAGE_SIGN_AUTOVERSION") not in ("0", "1", ""):
-        status.addresult("GARAGE_SIGN_AUTOVERSION should be set to 0 or 1.\n")
-    if d.getVar("SOTA_DEPLOY_CREDENTIALS") and d.getVar("SOTA_DEPLOY_CREDENTIALS") not in ("0", "1", ""):
-        status.addresult("SOTA_DEPLOY_CREDENTIALS should be set to 0 or 1.\n")
+    if not sota_check_boolean_variable("OSTREE_UPDATE_SUMMARY", d):
+        status.addresult("OSTREE_UPDATE_SUMMARY (=%s) should be set to yes/y/true/t/1 or no/n/false/f/0.\n" % d.getVar("OSTREE_UPDATE_SUMMARY"))
+    if not sota_check_boolean_variable("OSTREE_DEPLOY_DEVICETREE", d):
+        status.addresult("OSTREE_DEPLOY_DEVICETREE (=%s) should be set to yes/y/true/t/1 or no/n/false/f/0.\n" % d.getVar("OSTREE_DEPLOY_DEVICETREE"))
+    if not sota_check_boolean_variable("GARAGE_SIGN_AUTOVERSION", d):
+        status.addresult("GARAGE_SIGN_AUTOVERSION (=%s) should be set to yes/y/true/t/1 or no/n/false/f/0.\n" % d.getVar("GARAGE_SIGN_AUTOVERSION"))
+    if not sota_check_boolean_variable("SOTA_DEPLOY_CREDENTIALS", d):
+        status.addresult("SOTA_DEPLOY_CREDENTIALS (=%s) should be set to yes/y/true/t/1 or no/n/false/f/0.\n" % d.getVar("SOTA_DEPLOY_CREDENTIALS"))
     
 def sota_raise_sanity_error(msg, d):
     if d.getVar("SANITY_USE_EVENTS") == "1":
