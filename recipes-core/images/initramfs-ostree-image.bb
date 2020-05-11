@@ -20,7 +20,7 @@ IMAGE_FSTYPES = "${INITRAMFS_FSTYPES}"
 # Avoid circular dependencies
 EXTRA_IMAGEDEPENDS = ""
 
-inherit core-image
+inherit core-image nopackages
 
 IMAGE_ROOTFS_SIZE = "8192"
 
