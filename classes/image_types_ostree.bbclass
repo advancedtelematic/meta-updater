@@ -174,7 +174,8 @@ IMAGE_CMD_ostreecommit () {
            --branch=${OSTREE_BRANCHNAME} \
            --subject="${OSTREE_COMMIT_SUBJECT}" \
            --body="${OSTREE_COMMIT_BODY}" \
-           --add-metadata-string=version="${OSTREE_COMMIT_VERSION}")
+           --add-metadata-string=version="${OSTREE_COMMIT_VERSION}" \
+           ${EXTRA_OSTREE_COMMIT})
 
     echo $ostree_target_hash > ${WORKDIR}/ostree_manifest
 
