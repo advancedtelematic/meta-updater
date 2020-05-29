@@ -8,6 +8,7 @@ OSTREE_COMMIT_BODY ??= ""
 OSTREE_COMMIT_VERSION ??= "${DISTRO_VERSION}"
 OSTREE_UPDATE_SUMMARY ??= "0"
 OSTREE_DEPLOY_DEVICETREE ??= "0"
+OSTREE_DEVICETREE ??= "${KERNEL_DEVICETREE}"
 
 BUILD_OSTREE_TARBALL ??= "1"
 
@@ -142,9 +143,9 @@ IMAGE_CMD_ostree () {
         checksum=$(sha256sum ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} | cut -f 1 -d " ")
         touch boot/initramfs-${checksum}
     else
-        if [ ${@ oe.types.boolean('${OSTREE_DEPLOY_DEVICETREE}')} = True ] && [ -n "${KERNEL_DEVICETREE}" ]; then
-            checksum=$(cat ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} ${DEPLOY_DIR_IMAGE}/${INITRAMFS_IMAGE}-${MACHINE}.${INITRAMFS_FSTYPES} ${KERNEL_DEVICETREE} | sha256sum | cut -f 1 -d " ")
-            for DTS_FILE in ${KERNEL_DEVICETREE}; do
+        if [ ${@ oe.types.boolean('${OSTREE_DEPLOY_DEVICETREE}')} = True ] && [ -n "${OSTREE_DEVICETREE}" ]; then
+            checksum=$(cat ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} ${DEPLOY_DIR_IMAGE}/${INITRAMFS_IMAGE}-${MACHINE}.${INITRAMFS_FSTYPES} ${OSTREE_DEVICETREE} | sha256sum | cut -f 1 -d " ")
+            for DTS_FILE in ${OSTREE_DEVICETREE}; do
                 DTS_FILE_BASENAME=$(basename ${DTS_FILE})
                 cp ${DEPLOY_DIR_IMAGE}/${DTS_FILE_BASENAME} boot/devicetree-${DTS_FILE_BASENAME}-${checksum}
             done
