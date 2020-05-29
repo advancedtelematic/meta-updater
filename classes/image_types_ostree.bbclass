@@ -195,7 +195,7 @@ IMAGE_CMD_ostreepush () {
 
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         if [ -e ${SOTA_PACKED_CREDENTIALS} ]; then
-            garage-push -vv --repo=${OSTREE_REPO} \
+            garage-push --loglevel 0 --repo=${OSTREE_REPO} \
                         --ref=${OSTREE_BRANCHNAME} \
                         --credentials=${SOTA_PACKED_CREDENTIALS} \
                         --cacert=${STAGING_ETCDIR_NATIVE}/ssl/certs/ca-certificates.crt \
