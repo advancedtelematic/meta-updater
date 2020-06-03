@@ -45,14 +45,17 @@ do_image_ota[cleandirs] = "${OTA_SYSROOT}"
 do_image_ota[depends] = "${@'grub:do_populate_sysroot' if d.getVar('OSTREE_BOOTLOADER') == 'grub' else ''} \
                          ${@'virtual/bootloader:do_deploy' if d.getVar('OSTREE_BOOTLOADER') == 'u-boot' else ''}"
 IMAGE_CMD_ota () {
-	export OSTREE_BOOT_PARTITION=${OSTREE_BOOT_PARTITION}
-
 	ostree admin --sysroot=${OTA_SYSROOT} init-fs ${OTA_SYSROOT}
 	ostree admin --sysroot=${OTA_SYSROOT} os-init ${OSTREE_OSNAME}
+
+	# Preparation required to steer ostree bootloader detection
 	mkdir -p ${OTA_SYSROOT}/boot/loader.0
 	ln -s loader.0 ${OTA_SYSROOT}/boot/loader
 
 	if [ "${OSTREE_BOOTLOADER}" = "grub" ]; then
+		# Used by ostree-grub-generator called by the ostree binary
+		export OSTREE_BOOT_PARTITION=${OSTREE_BOOT_PARTITION}
+
 		mkdir -p ${OTA_SYSROOT}/boot/grub2
 		ln -s ../loader/grub.cfg ${OTA_SYSROOT}/boot/grub2/grub.cfg
 	elif [ "${OSTREE_BOOTLOADER}" = "u-boot" ]; then
@@ -61,15 +64,25 @@ IMAGE_CMD_ota () {
 		bbfatal "Invalid bootloader: ${OSTREE_BOOTLOADER}"
 	fi
 
-	ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME}-${IMAGE_BASENAME})
+	ostree_target_hash=$(cat ${WORKDIR}/ostree_manifest)
 
+	# Use OSTree hash to avoid any potential race conditions between
+	# multiple builds accessing the same ${OSTREE_REPO}.
 	ostree --repo=${OTA_SYSROOT}/ostree/repo pull-local --remote=${OSTREE_OSNAME} ${OSTREE_REPO} ${ostree_target_hash}
 	kargs_list=""
 	for arg in ${OSTREE_KERNEL_ARGS}; do
 		kargs_list="${kargs_list} --karg-append=$arg"
 	done
 
-	ostree admin --sysroot=${OTA_SYSROOT} deploy ${kargs_list} --os=${OSTREE_OSNAME} ${ostree_target_hash}
+	# Create the same reference on the device we use in the archive OSTree
+	# repo in ${OSTREE_REPO}. This reference will show up when showing the
+	# deployment on the device:
+	# ostree admin status
+	# If a remote with the name ${OSTREE_OSNAME} is configured, this also
+	# will allow to use:
+	# ostree admin upgrade
+	ostree --repo=${OTA_SYSROOT}/ostree/repo refs --create=${OSTREE_OSNAME}:${OSTREE_BRANCHNAME} ${ostree_target_hash}
+	ostree admin --sysroot=${OTA_SYSROOT} deploy ${kargs_list} --os=${OSTREE_OSNAME} ${OSTREE_OSNAME}:${OSTREE_BRANCHNAME}
 
 	cp -a ${IMAGE_ROOTFS}/var/sota ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
 	# Create /var/sota if it doesn't exist yet
@@ -77,8 +90,8 @@ IMAGE_CMD_ota () {
 	# Ensure the permissions are correctly set
 	chmod 700 ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota
 
-	cp -a ${OSTREE_ROOTFS}/var/local ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
-	cp -a ${OSTREE_ROOTFS}/usr/homedirs/home ${OTA_SYSROOT}/ || true
+	cp -a ${IMAGE_ROOTFS}/var/local ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
+	cp -a ${IMAGE_ROOTFS}/home ${OTA_SYSROOT}/ || true
 	# Ensure that /var/local exists (AGL symlinks /usr/local to /var/local)
 	install -d ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/local
 	# Set package version for the first deployment
