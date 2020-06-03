@@ -10,7 +10,7 @@ inherit allarch
 # We need to get the config files from the aktualizr-host-tools package built by
 # the aktualizr (target) recipe.
 DEPENDS = "aktualizr"
-RDEPENDS_${PN}_append = "${@' aktualizr-shared-prov-creds' if d.getVar('SOTA_DEPLOY_CREDENTIALS') == '1' else ''}"
+RDEPENDS_${PN}_append = "${@' aktualizr-shared-prov-creds' if oe.types.boolean(d.getVar('SOTA_DEPLOY_CREDENTIALS')) else ''}"
 
 # If the config file from aktualizr used here is changed, you will need to bump
 # the version here because of SIGGEN_EXCLUDE_SAFE_RECIPE_DEPS!

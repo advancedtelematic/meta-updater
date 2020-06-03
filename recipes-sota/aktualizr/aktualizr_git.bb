@@ -17,7 +17,7 @@ PRIVATE_LIBS_${PN}-ptest = "libaktualizr.so libaktualizr_secondary.so"
 PV = "1.0+git${SRCPV}"
 PR = "7"
 
-GARAGE_SIGN_PV = "0.7.1"
+GARAGE_SIGN_PV = "0.7.1-4-gf10c1da"
 
 SRC_URI = " \
   gitsm://github.com/advancedtelematic/aktualizr;branch=${BRANCH};name=aktualizr \
@@ -26,13 +26,13 @@ SRC_URI = " \
   file://aktualizr-secondary.service \
   file://aktualizr-serialcan.service \
   file://10-resource-control.conf \
-  ${@ d.expand("https://tuf-cli-releases.ota.here.com/cli-${GARAGE_SIGN_PV}.tgz;unpack=0;name=garagesign") if d.getVar('GARAGE_SIGN_AUTOVERSION') != '1' else ''} \
+  ${@ d.expand("https://tuf-cli-releases.ota.here.com/cli-${GARAGE_SIGN_PV}.tgz;unpack=0;name=garagesign") if not oe.types.boolean(d.getVar('GARAGE_SIGN_AUTOVERSION')) else ''} \
   "
 
-SRC_URI[garagesign.md5sum] = "febc186527b324b23c5be3affcf90e54"
-SRC_URI[garagesign.sha256sum] = "a87c3f39d61492d6f813754159ed7ef1e59966c15726edef4cd188a63cde60d6"
+SRC_URI[garagesign.md5sum] = "5f8eea81d1559d6fcb28d49c4298727c"
+SRC_URI[garagesign.sha256sum] = "8b2f5bb164f19b41972069d3377e39c2eb9edffd471777161691039e12a71738"
 
-SRCREV = "a6392dec3fb9dda3cb8ab8aa10a81b2c0494cb3c"
+SRCREV = "cf44da79555d1897115eb350cbc43db1e213db03"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -49,7 +49,7 @@ SYSTEMD_SERVICE_${PN}-secondary = "aktualizr-secondary.service"
 
 EXTRA_OECMAKE = "-DCMAKE_BUILD_TYPE=Release ${@bb.utils.contains('PTEST_ENABLED', '1', '-DTESTSUITE_VALGRIND=on', '', d)}"
 
-GARAGE_SIGN_OPS = "${@ d.expand('-DGARAGE_SIGN_ARCHIVE=${WORKDIR}/cli-${GARAGE_SIGN_PV}.tgz') if d.getVar('GARAGE_SIGN_AUTOVERSION') != '1' else ''}"
+GARAGE_SIGN_OPS = "${@ d.expand('-DGARAGE_SIGN_ARCHIVE=${WORKDIR}/cli-${GARAGE_SIGN_PV}.tgz') if not oe.types.boolean(d.getVar('GARAGE_SIGN_AUTOVERSION')) else ''}"
 PKCS11_ENGINE_PATH = "${libdir}/engines-1.1/pkcs11.so"
 
 PACKAGECONFIG ?= "ostree ${@bb.utils.filter('SOTA_CLIENT_FEATURES', 'hsm serialcan ubootenv', d)}"

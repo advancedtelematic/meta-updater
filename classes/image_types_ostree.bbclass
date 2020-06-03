@@ -19,14 +19,24 @@ CONVERSIONTYPES_append = " tar"
 
 REQUIRED_DISTRO_FEATURES = "usrmerge"
 TAR_IMAGE_ROOTFS_task-image-ostree = "${OSTREE_ROOTFS}"
+
+python prepare_ostree_rootfs() {
+    import oe.path
+    import shutil
+
+    ostree_rootfs = d.getVar("OSTREE_ROOTFS")
+    if os.path.lexists(ostree_rootfs):
+        bb.utils.remove(ostree_rootfs, True)
+
+    # Copy required as we change permissions on some files.
+    image_rootfs = d.getVar("IMAGE_ROOTFS")
+    oe.path.copyhardlinktree(image_rootfs, ostree_rootfs)
+}
+
 do_image_ostree[dirs] = "${OSTREE_ROOTFS}"
-do_image_ostree[cleandirs] = "${OSTREE_ROOTFS}"
+do_image_ostree[prefuncs] += "prepare_ostree_rootfs"
 do_image_ostree[depends] = "coreutils-native:do_populate_sysroot virtual/kernel:do_deploy ${INITRAMFS_IMAGE}:do_image_complete"
 IMAGE_CMD_ostree () {
-    cp -a ${IMAGE_ROOTFS}/* ${OSTREE_ROOTFS}
-    chmod a+rx ${OSTREE_ROOTFS}
-    sync
-
     for d in var/*; do
       if [ "${d}" != "var/local" ]; then
         rm -rf ${d}
@@ -36,9 +46,6 @@ IMAGE_CMD_ostree () {
     # Create sysroot directory to which physical sysroot will be mounted
     mkdir sysroot
     ln -sf sysroot/ostree ostree
-
-    rm -rf tmp/*
-    ln -sf sysroot/tmp tmp
 
     mkdir -p usr/rootdirs
 
@@ -63,13 +70,11 @@ IMAGE_CMD_ostree () {
     mkdir -p usr/share/sota/
     echo -n "${OSTREE_BRANCHNAME}" > usr/share/sota/branchname
 
-    # Preserve data in /home to be later copied to /sysroot/home by sysroot
-    # generating procedure
-    mkdir -p usr/homedirs
-    if [ -d "home" ] && [ ! -L "home" ]; then
-        mv home usr/homedirs/home
-        ln -sf var/rootdirs/home home
-    fi
+    # home directories get copied from the OE root later to the final sysroot
+    # Create a symlink to var/rootdirs/home to make sure the OSTree deployment
+    # redirects /home to /var/rootdirs/home.
+    rm -rf home/
+    ln -sf var/rootdirs/home home
 
     # Move persistent directories to /var
     dirs="opt mnt media srv"
@@ -137,7 +142,7 @@ IMAGE_CMD_ostree () {
         checksum=$(sha256sum ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} | cut -f 1 -d " ")
         touch boot/initramfs-${checksum}
     else
-        if [ "${OSTREE_DEPLOY_DEVICETREE}" = "1"  ] && [ -n "${KERNEL_DEVICETREE}" ]; then
+        if [ ${@ oe.types.boolean('${OSTREE_DEPLOY_DEVICETREE}')} = True ] && [ -n "${KERNEL_DEVICETREE}" ]; then
             checksum=$(cat ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} ${DEPLOY_DIR_IMAGE}/${INITRAMFS_IMAGE}-${MACHINE}.${INITRAMFS_FSTYPES} ${KERNEL_DEVICETREE} | sha256sum | cut -f 1 -d " ")
             for DTS_FILE in ${KERNEL_DEVICETREE}; do
                 DTS_FILE_BASENAME=$(basename ${DTS_FILE})
@@ -164,25 +169,20 @@ IMAGE_CMD_ostreecommit () {
     fi
 
     # Commit the result
-    ostree --repo=${OSTREE_REPO} commit \
+    ostree_target_hash=$(ostree --repo=${OSTREE_REPO} commit \
            --tree=dir=${OSTREE_ROOTFS} \
            --skip-if-unchanged \
            --branch=${OSTREE_BRANCHNAME} \
            --subject="${OSTREE_COMMIT_SUBJECT}" \
            --body="${OSTREE_COMMIT_BODY}" \
            --add-metadata-string=version="${OSTREE_COMMIT_VERSION}" \
-           --bind-ref="${OSTREE_BRANCHNAME}-${IMAGE_BASENAME}"
+           ${EXTRA_OSTREE_COMMIT})
 
-    if [ "${OSTREE_UPDATE_SUMMARY}" = "1" ]; then
+    echo $ostree_target_hash > ${WORKDIR}/ostree_manifest
+
+    if [ ${@ oe.types.boolean('${OSTREE_UPDATE_SUMMARY}')} = True ]; then
         ostree --repo=${OSTREE_REPO} summary -u
     fi
-
-    # To enable simultaneous bitbaking of two images with the same branch name,
-    # create a new ref in the repo using the basename of the image. (This first
-    # requires deleting it if it already exists.) Fixes OTA-2211.
-    ostree --repo=${OSTREE_REPO} refs --delete ${OSTREE_BRANCHNAME}-${IMAGE_BASENAME}
-    ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME})
-    ostree --repo=${OSTREE_REPO} refs --create=${OSTREE_BRANCHNAME}-${IMAGE_BASENAME} ${ostree_target_hash}
 }
 
 IMAGE_TYPEDEP_ostreepush = "ostreecommit"
@@ -197,7 +197,7 @@ IMAGE_CMD_ostreepush () {
 
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         if [ -e ${SOTA_PACKED_CREDENTIALS} ]; then
-            garage-push -vv --repo=${OSTREE_REPO} \
+            garage-push --loglevel 0 --repo=${OSTREE_REPO} \
                         --ref=${OSTREE_BRANCHNAME} \
                         --credentials=${SOTA_PACKED_CREDENTIALS} \
                         --cacert=${STAGING_ETCDIR_NATIVE}/ssl/certs/ca-certificates.crt \
@@ -232,7 +232,7 @@ IMAGE_CMD_garagesign () {
                          --home-dir ${GARAGE_SIGN_REPO} \
                          --credentials ${SOTA_PACKED_CREDENTIALS}
 
-        ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME}-${IMAGE_BASENAME})
+        ostree_target_hash=$(cat ${WORKDIR}/ostree_manifest)
 
         # Use OSTree target hash as version if none was provided by the user
         target_version=${ostree_target_hash}
@@ -308,7 +308,7 @@ IMAGE_CMD_garagecheck () {
         # if credentials are issued by a server that doesn't support offline signing, exit silently
         unzip -p ${SOTA_PACKED_CREDENTIALS} root.json targets.pub targets.sec tufrepo.url 2>&1 >/dev/null || exit 0
 
-        ostree_target_hash=$(cat ${OSTREE_REPO}/refs/heads/${OSTREE_BRANCHNAME}-${IMAGE_BASENAME})
+        ostree_target_hash=$(cat ${WORKDIR}/ostree_manifest)
 
         garage-check --ref=${ostree_target_hash} \
                      --credentials=${SOTA_PACKED_CREDENTIALS} \
