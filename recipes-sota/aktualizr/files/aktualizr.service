@@ -1,6 +1,7 @@
 [Unit]
 Description=Aktualizr SOTA Client
-After=network-online.target nss-lookup.target
+After=network-online.target nss-lookup.target boot-complete.target
+Requires=boot-complete.target
 Wants=network-online.target
 
 [Service]
