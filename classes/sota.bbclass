@@ -1,12 +1,11 @@
 DISTROOVERRIDES .= "${@bb.utils.contains('DISTRO_FEATURES', 'sota', ':sota', '', d)}"
 
-SOTA_CLIENT ??= "aktualizr"
 SOTA_CLIENT_PROV ??= "aktualizr-shared-prov"
 SOTA_DEPLOY_CREDENTIALS ?= "1"
 SOTA_HARDWARE_ID ??= "${MACHINE}"
 
 IMAGE_CLASSES += " image_types_ostree image_types_ota image_repo_manifest"
-IMAGE_INSTALL_append_sota = " ${SOTA_CLIENT} ${SOTA_CLIENT_PROV} \
+IMAGE_INSTALL_append_sota = " aktualizr aktualizr-info ${SOTA_CLIENT_PROV} \
                               ostree os-release ostree-kernel \
                               ${@'ostree-initramfs' if d.getVar('KERNEL_IMAGETYPE') != 'fitImage' else ''} \
                               ${@'ostree-devicetrees' if oe.types.boolean('${OSTREE_DEPLOY_DEVICETREE}') else ''}"
