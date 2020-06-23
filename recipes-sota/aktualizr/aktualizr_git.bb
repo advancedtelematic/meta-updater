@@ -132,21 +132,23 @@ PACKAGESPLITFUNCS_prepend = "split_hosttools_packages "
 python split_hosttools_packages () {
     bindir = d.getVar('bindir')
 
-    # Split all binaries to their own packages except aktualizr-info,
-    # aktualizr-info should stay in main package aktualizr.
-    do_split_packages(d, bindir, r'^((?!(aktualizr-info)).*)$', '%s', 'Aktualizr tool - %s', extra_depends='aktualizr-configs', prepend=False)
+    # Split all binaries to their own packages.
+    do_split_packages(d, bindir, '^(.*)$', '%s', 'Aktualizr tool - %s', extra_depends='aktualizr-configs', prepend=False)
 }
 
 PACKAGES_DYNAMIC = "^aktualizr-.* ^garage-.*"
 
-PACKAGES =+ "${PN}-host-tools ${PN}-lib ${PN}-resource-control ${PN}-configs ${PN}-secondary ${PN}-secondary-lib ${PN}-sotatools-lib"
+PACKAGES =+ "${PN}-host-tools ${PN}-info ${PN}-lib ${PN}-resource-control ${PN}-configs ${PN}-secondary ${PN}-secondary-lib ${PN}-sotatools-lib"
 
 ALLOW_EMPTY_${PN}-host-tools = "1"
 
 FILES_${PN} = " \
                 ${bindir}/aktualizr \
-                ${bindir}/aktualizr-info \
                 ${systemd_unitdir}/system/aktualizr.service \
+                "
+
+FILES_${PN}-info = " \
+                ${bindir}/aktualizr-info \
                 "
 
 FILES_${PN}-lib = " \
