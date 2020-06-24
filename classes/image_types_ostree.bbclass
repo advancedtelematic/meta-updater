@@ -249,7 +249,7 @@ IMAGE_CMD_garagesign () {
                                     --length 0 \
                                     ${target_url} \
                                     --sha256 ${ostree_target_hash} \
-                                    --hardwareids ${SOTA_HARDWARE_ID}
+                                    --hardwareids ${GARAGE_TARGET_COMPATIBLE_HWIDS}
             if [ -n "${GARAGE_CUSTOMIZE_TARGET}" ]; then
                 bbplain "Running command(${GARAGE_CUSTOMIZE_TARGET}) to customize target"
                 ${GARAGE_CUSTOMIZE_TARGET} \
