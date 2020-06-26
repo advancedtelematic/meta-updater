@@ -49,4 +49,5 @@ do_install() {
     fi
 }
 do_install[vardepsexclude] = "KERNEL_VERSION"
+INITRAMFS_IMAGE ?= ""
 do_install[depends] = "virtual/kernel:do_deploy ${@['${INITRAMFS_IMAGE}:do_image_complete', ''][d.getVar('INITRAMFS_IMAGE') == '']}"
