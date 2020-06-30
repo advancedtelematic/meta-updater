@@ -41,7 +41,7 @@ do_install() {
 
         if [ ${@ oe.types.boolean('${OSTREE_DEPLOY_DEVICETREE}')} = True ] && [ -n "${OSTREE_DEVICETREE}" ]; then
             mkdir -p $kerneldir/dtb
-            for dts_file in ${KERNEL_DEVICETREE}; do
+            for dts_file in ${OSTREE_DEVICETREE}; do
                 dts_file_basename=$(basename $dts_file)
                 cp ${DEPLOY_DIR_IMAGE}/$dts_file_basename $kerneldir/dtb/$dts_file_basename
             done
