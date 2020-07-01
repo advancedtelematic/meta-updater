@@ -51,3 +51,8 @@ do_install() {
 do_install[vardepsexclude] = "KERNEL_VERSION"
 INITRAMFS_IMAGE ?= ""
 do_install[depends] = "virtual/kernel:do_deploy ${@['${INITRAMFS_IMAGE}:do_image_complete', ''][d.getVar('INITRAMFS_IMAGE') == '']}"
+
+python() {
+    if not d.getVar('OSTREE_KERNEL'):
+        raise bb.parse.SkipRecipe('OSTREE_KERNEL is not defined, maybe your MACHINE config does not inherit sota.bbclass?')
+}
