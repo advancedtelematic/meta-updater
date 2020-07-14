@@ -130,11 +130,10 @@ class SharedCredProvTestsNonOSTree(SharedCredProvTests):
         self.append_config('DISTRO = "poky"')
         self.append_config('DISTRO_FEATURES_append = " systemd"')
         self.append_config('VIRTUAL-RUNTIME_init_manager = "systemd"')
-        self.append_config('PREFERRED_RPROVIDER_virtual/network-configuration ??= "networkd-dhcp-conf"')
+        self.append_config('PREFERRED_RPROVIDER_network-configuration ??= "networkd-dhcp-conf"')
         self.append_config('PACKAGECONFIG_pn-aktualizr = ""')
         self.append_config('SOTA_DEPLOY_CREDENTIALS = "1"')
-        self.append_config('IMAGE_INSTALL_append += "aktualizr"')
-        self.append_config('IMAGE_INSTALL_append += " aktualizr-shared-prov"')
+        self.append_config('IMAGE_INSTALL_append += "aktualizr aktualizr-info aktualizr-shared-prov"')
         self.qemu, self.s = qemu_launch(machine='qemux86-64', uboot_enable='no')
 
 

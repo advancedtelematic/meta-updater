@@ -13,7 +13,7 @@ UBOOT_DTBO_LOADADDRESS = "0x06000000"
 IMAGE_INSTALL_append = " fit-conf"
 
 DEV_MATCH_DIRECTIVE_pn-networkd-dhcp-conf = "Driver=smsc95xx lan78xx"
-IMAGE_INSTALL_append_sota = " virtual/network-configuration "
+IMAGE_INSTALL_append_sota = " network-configuration "
 
 PREFERRED_PROVIDER_virtual/bootloader_sota ?= "u-boot"
 UBOOT_ENTRYPOINT_sota ?= "0x00080000"

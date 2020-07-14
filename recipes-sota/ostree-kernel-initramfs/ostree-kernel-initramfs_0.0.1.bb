@@ -14,7 +14,9 @@ ALLOW_EMPTY_ostree-devicetrees = "1"
 
 FILES_ostree-kernel = "${nonarch_base_libdir}/modules/*/vmlinuz"
 FILES_ostree-initramfs = "${nonarch_base_libdir}/modules/*/initramfs.img"
-FILES_ostree-devicetrees = "${nonarch_base_libdir}/modules/*/dtb/*"
+FILES_ostree-devicetrees = "${nonarch_base_libdir}/modules/*/dtb/* \
+    ${nonarch_base_libdir}/modules/*/devicetree \
+"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
@@ -45,9 +47,15 @@ do_install() {
                 dts_file_basename=$(basename $dts_file)
                 cp ${DEPLOY_DIR_IMAGE}/$dts_file_basename $kerneldir/dtb/$dts_file_basename
             done
+            cp $kerneldir/dtb/$(basename $(echo ${OSTREE_DEVICETREE} | awk '{print $1}')) $kerneldir/devicetree
         fi
     fi
 }
 do_install[vardepsexclude] = "KERNEL_VERSION"
 INITRAMFS_IMAGE ?= ""
 do_install[depends] = "virtual/kernel:do_deploy ${@['${INITRAMFS_IMAGE}:do_image_complete', ''][d.getVar('INITRAMFS_IMAGE') == '']}"
+
+python() {
+    if not d.getVar('OSTREE_KERNEL'):
+        raise bb.parse.SkipRecipe('OSTREE_KERNEL is not defined, maybe your MACHINE config does not inherit sota.bbclass?')
+}
