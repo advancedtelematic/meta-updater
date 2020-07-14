@@ -17,7 +17,7 @@ PRIVATE_LIBS_${PN}-ptest = "libaktualizr.so libaktualizr_secondary.so"
 PV = "1.0+git${SRCPV}"
 PR = "7"
 
-GARAGE_SIGN_PV = "0.7.1-4-gf10c1da"
+GARAGE_SIGN_PV = "0.7.1-10-ga0a099a"
 
 SRC_URI = " \
   gitsm://github.com/advancedtelematic/aktualizr;branch=${BRANCH};name=aktualizr \
@@ -29,10 +29,10 @@ SRC_URI = " \
   ${@ d.expand("https://tuf-cli-releases.ota.here.com/cli-${GARAGE_SIGN_PV}.tgz;unpack=0;name=garagesign") if not oe.types.boolean(d.getVar('GARAGE_SIGN_AUTOVERSION')) else ''} \
   "
 
-SRC_URI[garagesign.md5sum] = "5f8eea81d1559d6fcb28d49c4298727c"
-SRC_URI[garagesign.sha256sum] = "8b2f5bb164f19b41972069d3377e39c2eb9edffd471777161691039e12a71738"
+SRC_URI[garagesign.md5sum] = "e2354fb75ae56c2d253be26617b2bd10"
+SRC_URI[garagesign.sha256sum] = "2ddb26b19090a42d7aeeda287ed40123ffa3ab55b5dcc4ea4c9320d0a0fd59a0"
 
-SRCREV = "cf44da79555d1897115eb350cbc43db1e213db03"
+SRCREV = "4169157a1874fca3fb55571c60507c1aefd4e1e5"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -132,21 +132,23 @@ PACKAGESPLITFUNCS_prepend = "split_hosttools_packages "
 python split_hosttools_packages () {
     bindir = d.getVar('bindir')
 
-    # Split all binaries to their own packages except aktualizr-info,
-    # aktualizr-info should stay in main package aktualizr.
-    do_split_packages(d, bindir, r'^((?!(aktualizr-info)).*)$', '%s', 'Aktualizr tool - %s', extra_depends='aktualizr-configs', prepend=False)
+    # Split all binaries to their own packages.
+    do_split_packages(d, bindir, '^(.*)$', '%s', 'Aktualizr tool - %s', extra_depends='aktualizr-configs', prepend=False)
 }
 
 PACKAGES_DYNAMIC = "^aktualizr-.* ^garage-.*"
 
-PACKAGES =+ "${PN}-host-tools ${PN}-lib ${PN}-resource-control ${PN}-configs ${PN}-secondary ${PN}-secondary-lib ${PN}-sotatools-lib"
+PACKAGES =+ "${PN}-host-tools ${PN}-info ${PN}-lib ${PN}-resource-control ${PN}-configs ${PN}-secondary ${PN}-secondary-lib ${PN}-sotatools-lib"
 
 ALLOW_EMPTY_${PN}-host-tools = "1"
 
 FILES_${PN} = " \
                 ${bindir}/aktualizr \
-                ${bindir}/aktualizr-info \
                 ${systemd_unitdir}/system/aktualizr.service \
+                "
+
+FILES_${PN}-info = " \
+                ${bindir}/aktualizr-info \
                 "
 
 FILES_${PN}-lib = " \
