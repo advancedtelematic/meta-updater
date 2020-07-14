@@ -1,12 +1,14 @@
 DISTROOVERRIDES .= "${@bb.utils.contains('DISTRO_FEATURES', 'sota', ':sota', '', d)}"
 
-SOTA_CLIENT ??= "aktualizr"
 SOTA_CLIENT_PROV ??= "aktualizr-shared-prov"
 SOTA_DEPLOY_CREDENTIALS ?= "1"
 SOTA_HARDWARE_ID ??= "${MACHINE}"
 
-IMAGE_INSTALL_append_sota = " ostree os-release ${SOTA_CLIENT} ${SOTA_CLIENT_PROV}"
 IMAGE_CLASSES += " image_types_ostree image_types_ota image_repo_manifest"
+IMAGE_INSTALL_append_sota = " aktualizr aktualizr-info ${SOTA_CLIENT_PROV} \
+                              ostree os-release ostree-kernel \
+                              ${@'ostree-initramfs' if d.getVar('KERNEL_IMAGETYPE') != 'fitImage' else ''} \
+                              ${@'ostree-devicetrees' if oe.types.boolean('${OSTREE_DEPLOY_DEVICETREE}') else ''}"
 
 IMAGE_FSTYPES += "${@bb.utils.contains('DISTRO_FEATURES', 'sota', 'ostreepush garagesign garagecheck ota-ext4 wic', ' ', d)}"
 IMAGE_FSTYPES += "${@bb.utils.contains('BUILD_OSTREE_TARBALL', '1', 'ostree.tar.bz2', ' ', d)}"
@@ -27,6 +29,9 @@ OSTREE_BRANCHNAME ?= "${SOTA_HARDWARE_ID}"
 OSTREE_OSNAME ?= "poky"
 OSTREE_BOOTLOADER ??= 'u-boot'
 OSTREE_BOOT_PARTITION ??= "/boot"
+OSTREE_KERNEL ??= "${KERNEL_IMAGETYPE}"
+OSTREE_DEPLOY_DEVICETREE ??= "0"
+OSTREE_DEVICETREE ??= "${KERNEL_DEVICETREE}"
 
 INITRAMFS_IMAGE ?= "initramfs-ostree-image"
 

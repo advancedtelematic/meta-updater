@@ -3,13 +3,11 @@ inherit features_check
 
 REQUIRED_DISTRO_FEATURES = "usrmerge"
 
-OSTREE_KERNEL ??= "${KERNEL_IMAGETYPE}"
 OSTREE_ROOTFS ??= "${WORKDIR}/ostree-rootfs"
 OSTREE_COMMIT_SUBJECT ??= "Commit-id: ${IMAGE_NAME}"
 OSTREE_COMMIT_BODY ??= ""
 OSTREE_COMMIT_VERSION ??= "${DISTRO_VERSION}"
 OSTREE_UPDATE_SUMMARY ??= "0"
-OSTREE_DEPLOY_DEVICETREE ??= "0"
 
 BUILD_OSTREE_TARBALL ??= "1"
 
@@ -133,27 +131,6 @@ IMAGE_CMD_ostree () {
     done
 
     ln -sf ../var/usrlocal usr/local
-
-    if [ "${KERNEL_IMAGETYPE}" = "fitImage" ]; then
-        # this is a hack for ostree not to override init= in kernel cmdline -
-        # make it think that the initramfs is present (while it is in FIT image)
-        # since initramfs is fake file, it does not need to be included in checksum
-        checksum=$(sha256sum ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} | cut -f 1 -d " ")
-        touch boot/initramfs-${checksum}
-    else
-        if [ ${@ oe.types.boolean('${OSTREE_DEPLOY_DEVICETREE}')} = True ] && [ -n "${KERNEL_DEVICETREE}" ]; then
-            checksum=$(cat ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} ${DEPLOY_DIR_IMAGE}/${INITRAMFS_IMAGE}-${MACHINE}.${INITRAMFS_FSTYPES} ${KERNEL_DEVICETREE} | sha256sum | cut -f 1 -d " ")
-            for DTS_FILE in ${KERNEL_DEVICETREE}; do
-                DTS_FILE_BASENAME=$(basename ${DTS_FILE})
-                cp ${DEPLOY_DIR_IMAGE}/${DTS_FILE_BASENAME} boot/devicetree-${DTS_FILE_BASENAME}-${checksum}
-            done
-        else
-            checksum=$(cat ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} ${DEPLOY_DIR_IMAGE}/${INITRAMFS_IMAGE}-${MACHINE}.${INITRAMFS_FSTYPES} | sha256sum | cut -f 1 -d " ")
-        fi
-        cp ${DEPLOY_DIR_IMAGE}/${INITRAMFS_IMAGE}-${MACHINE}.${INITRAMFS_FSTYPES} boot/initramfs-${checksum}
-    fi
-
-    cp ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} boot/vmlinuz-${checksum}
 
     # Copy image manifest
     cat ${IMAGE_MANIFEST} | cut -d " " -f1,3 > usr/package.manifest

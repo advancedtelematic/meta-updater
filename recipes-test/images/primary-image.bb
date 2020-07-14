@@ -5,7 +5,7 @@ SUMMARY = "A minimal Uptane Primary image running aktualizr, for testing with a 
 LICENSE = "MPL-2.0"
 
 IMAGE_INSTALL_remove = " \
-			virtual/network-configuration \
+			network-configuration \
                         "
 
 IMAGE_INSTALL_append = " \
