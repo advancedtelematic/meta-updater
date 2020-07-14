@@ -1,1 +1,1 @@
-RPROVIDES_${PN} += "virtual/network-configuration"
+RPROVIDES_${PN} += "network-configuration"
