@@ -254,7 +254,10 @@ IMAGE_CMD_garagesign () {
                 bbplain "Running command(${GARAGE_CUSTOMIZE_TARGET}) to customize target"
                 ${GARAGE_CUSTOMIZE_TARGET} \
                     ${GARAGE_SIGN_REPO}/tufrepo/roles/unsigned/targets.json \
-                    ${GARAGE_TARGET_NAME}-${target_version}
+                    ${GARAGE_TARGET_NAME}-${target_version} \
+                    ${MACHINE} \
+                    ${IMAGE_BASENAME} \
+                    ${TARGET_ARCH}
             fi
             garage-sign targets sign --repo tufrepo \
                                      --home-dir ${GARAGE_SIGN_REPO} \
