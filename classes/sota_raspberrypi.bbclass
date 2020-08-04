@@ -39,11 +39,12 @@ def make_dtb_boot_files(d):
 
     return ' '.join([transform(dtb) for dtb in alldtbs.split(' ') if dtb])
 
-IMAGE_BOOT_FILES_sota = "bcm2835-bootfiles/* \
+IMAGE_BOOT_FILES_sota = "${BOOTFILES_DIR_NAME}/* \
                          u-boot.bin;${SDIMG_KERNELIMAGE} \
                          "
 
-# OSTree puts its own boot.scr to bcm2835-bootfiles
+# OSTree puts its own boot.scr in ${BOOTFILES_DIR_NAME} (historically
+# bcm2835-bootfiles, now just bootfiles).
 # rpi4 and recent rpi3 firmwares needs dtb in /boot partition
 # so that they can be read by the firmware
 IMAGE_BOOT_FILES_append_sota = "${@make_dtb_boot_files(d)}"
