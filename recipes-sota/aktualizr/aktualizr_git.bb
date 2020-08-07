@@ -32,7 +32,7 @@ SRC_URI = " \
 SRC_URI[garagesign.md5sum] = "e2354fb75ae56c2d253be26617b2bd10"
 SRC_URI[garagesign.sha256sum] = "2ddb26b19090a42d7aeeda287ed40123ffa3ab55b5dcc4ea4c9320d0a0fd59a0"
 
-SRCREV = "4169157a1874fca3fb55571c60507c1aefd4e1e5"
+SRCREV = "753c2d73c36e3221f5e7800727d94b5c74c01499"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -178,7 +178,9 @@ FILES_${PN}-sotatools-lib = " \
                 ${libdir}/libsota_tools.so \
                 "
 
-FILES_${PN}-dev = ""
+FILES_${PN}-dev = " \
+                ${includedir}/lib${PN} \
+                "
 
 BBCLASSEXTEND = "native"
 
