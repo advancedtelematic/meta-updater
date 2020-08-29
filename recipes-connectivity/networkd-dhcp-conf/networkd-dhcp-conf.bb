@@ -4,7 +4,7 @@ interfaces through systemd-networkd"
 LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7f619bab123dad"
 
-inherit systemd
+inherit systemd features_check
 
 RPROVIDES_${PN} = "network-configuration"
 
@@ -15,7 +15,7 @@ SRC_URI = " \
   "
 PR = "r1"
 
-REQUIRED_DISTRO_FEATURES_${PN} = "systemd"
+REQUIRED_DISTRO_FEATURES = "systemd"
 RCONFLICTS_${PN} = "connman"
 
 S = "${WORKDIR}"
