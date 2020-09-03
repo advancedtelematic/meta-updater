@@ -1,0 +1,13 @@
+[Unit]
+Description=NFS home mount @LOCALSTATEDIR@/local/lib/nfs -> @LOCALSTATEDIR@/lib/nfs.
+DefaultDependencies=no
+Conflicts=umount.target
+After=local-fs.target
+
+[Service]
+ExecStartPre=@BASE_BINDIR@/mkdir -p @LOCALSTATEDIR@/lib/nfs
+ExecStart=@BASE_BINDIR@/mount -o bind @LOCALSTATEDIR@/local/lib/nfs @LOCALSTATEDIR@/lib/nfs
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
