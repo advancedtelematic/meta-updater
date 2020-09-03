@@ -15,7 +15,7 @@ ALLOW_EMPTY_ostree-devicetrees = "1"
 FILES_ostree-kernel = "${nonarch_base_libdir}/modules/*/vmlinuz"
 FILES_ostree-initramfs = "${nonarch_base_libdir}/modules/*/initramfs.img"
 FILES_ostree-devicetrees = "${nonarch_base_libdir}/modules/*/dtb/* \
-    ${nonarch_base_libdir}/modules/*/devicetree \
+    ${@'' if oe.types.boolean(d.getVar('OSTREE_MULTI_DEVICETREE_SUPPORT')) else '${nonarch_base_libdir}/modules/*/devicetree'} \
 "
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
@@ -47,7 +47,10 @@ do_install() {
                 dts_file_basename=$(basename $dts_file)
                 cp ${DEPLOY_DIR_IMAGE}/$dts_file_basename $kerneldir/dtb/$dts_file_basename
             done
-            cp $kerneldir/dtb/$(basename $(echo ${OSTREE_DEVICETREE} | awk '{print $1}')) $kerneldir/devicetree
+
+            if [ ${@ oe.types.boolean('${OSTREE_MULTI_DEVICETREE_SUPPORT}')} = False ]; then
+                cp $kerneldir/dtb/$(basename $(echo ${OSTREE_DEVICETREE} | awk '{print $1}')) $kerneldir/devicetree
+            fi
         fi
     fi
 }
