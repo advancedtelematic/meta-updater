@@ -7,6 +7,8 @@ FILES_${PN} = "/usr/lib/big-update"
 
 DEPENDS = "coreutils-native"
 
+inherit python3native
+
 do_install() {
    install -d ${D}/usr/lib/big-update
    python ${S}/../rand_file.py ${D}/usr/lib/big-update/a-big-file $(numfmt --from=iec 10M)
