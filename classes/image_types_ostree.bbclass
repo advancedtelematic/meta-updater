@@ -87,7 +87,7 @@ IMAGE_CMD_ostree () {
         if [ -n "${SYSTEMD_USED}" ]; then
             echo "d /var/rootdirs/${dir} 0755 root root -" >>${tmpfiles_conf}
         else
-            echo "mkdir -p /var/rootdirs/${dir}; chown 755 /var/rootdirs/${dir}" >>${tmpfiles_conf}
+            echo "mkdir -p /var/rootdirs/${dir}; chmod 755 /var/rootdirs/${dir}" >>${tmpfiles_conf}
         fi
         ln -sf var/rootdirs/${dir} ${dir}
     done
@@ -100,7 +100,7 @@ IMAGE_CMD_ostree () {
         if [ -n "${SYSTEMD_USED}" ]; then
             echo "d /var/roothome 0700 root root -" >>${tmpfiles_conf}
         else
-            echo "mkdir -p /var/roothome; chown 700 /var/roothome" >>${tmpfiles_conf}
+            echo "mkdir -p /var/roothome; chmod 700 /var/roothome" >>${tmpfiles_conf}
         fi
 
         rm -rf root
@@ -117,7 +117,7 @@ IMAGE_CMD_ostree () {
     if [ -n "${SYSTEMD_USED}" ]; then
         echo "d /var/usrlocal 0755 root root -" >>${tmpfiles_conf}
     else
-        echo "mkdir -p /var/usrlocal; chown 755 /var/usrlocal" >>${tmpfiles_conf}
+        echo "mkdir -p /var/usrlocal; chmod 755 /var/usrlocal" >>${tmpfiles_conf}
     fi
 
     dirs="bin etc games include lib man sbin share src"
@@ -126,7 +126,7 @@ IMAGE_CMD_ostree () {
         if [ -n "${SYSTEMD_USED}" ]; then
             echo "d /var/usrlocal/${dir} 0755 root root -" >>${tmpfiles_conf}
         else
-            echo "mkdir -p /var/usrlocal/${dir}; chown 755 /var/usrlocal/${dir}" >>${tmpfiles_conf}
+            echo "mkdir -p /var/usrlocal/${dir}; chmod 755 /var/usrlocal/${dir}" >>${tmpfiles_conf}
         fi
     done
 
