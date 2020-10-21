@@ -7,8 +7,7 @@ LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=815ca599c9df247a0c7f619bab123dad"
 
 DEPENDS = "boost curl openssl libarchive libsodium sqlite3 asn1c-native"
 DEPENDS_append = "${@bb.utils.contains('PTEST_ENABLED', '1', ' coreutils-native net-tools-native ostree-native aktualizr-native ', '', d)}"
-RDEPENDS_${PN}_class-target = "${PN}-configs ${PN}-hwid lshw"
-RDEPENDS_${PN}-host-tools = "aktualizr aktualizr-cert-provider ${@bb.utils.contains('PACKAGECONFIG', 'sota-tools', 'garage-deploy garage-push', '', d)}"
+RDEPENDS_${PN}_class-target = "${PN}-hwid lshw"
 
 RDEPENDS_${PN}-ptest += "bash cmake curl net-tools python3-core python3-misc python3-modules openssl-bin sqlite3 valgrind"
 
@@ -133,14 +132,12 @@ python split_hosttools_packages () {
     bindir = d.getVar('bindir')
 
     # Split all binaries to their own packages.
-    do_split_packages(d, bindir, '^(.*)$', '%s', 'Aktualizr tool - %s', extra_depends='aktualizr-configs', prepend=False)
+    do_split_packages(d, bindir, '^(.*)$', '%s', 'Aktualizr tool - %s', extra_depends='', prepend=False)
 }
 
 PACKAGES_DYNAMIC = "^aktualizr-.* ^garage-.*"
 
-PACKAGES =+ "${PN}-host-tools ${PN}-info ${PN}-lib ${PN}-resource-control ${PN}-configs ${PN}-secondary ${PN}-secondary-lib ${PN}-sotatools-lib"
-
-ALLOW_EMPTY_${PN}-host-tools = "1"
+PACKAGES =+ "${PN}-info ${PN}-lib ${PN}-resource-control ${PN}-configs ${PN}-secondary ${PN}-secondary-lib ${PN}-sotatools-lib"
 
 FILES_${PN} = " \
                 ${bindir}/aktualizr \
