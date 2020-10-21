@@ -7,7 +7,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7
 
 inherit allarch
 
-# We need to get the config files from the aktualizr-host-tools package built by
+# We need to get the config files from the aktualizr-configs package built by
 # the aktualizr (target) recipe.
 DEPENDS = "aktualizr"
 
