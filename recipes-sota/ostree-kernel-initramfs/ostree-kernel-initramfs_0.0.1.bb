@@ -36,7 +36,13 @@ do_install() {
 
     cp ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} $kerneldir/vmlinuz
 
-    if [ "${KERNEL_IMAGETYPE}" != "fitImage" ]; then
+    if [ "${KERNEL_IMAGETYPE}" = "fitImage" ]; then
+        if [ -n "${INITRAMFS_IMAGE}" ]; then
+            # this is a hack for ostree not to override init= in kernel cmdline -
+            # make it think that the initramfs is present (while it is in FIT image)
+            touch $kerneldir/initramfs.img
+        fi
+    else
         if [ -n "${INITRAMFS_IMAGE}" ]; then
             cp ${DEPLOY_DIR_IMAGE}/${INITRAMFS_IMAGE}-${MACHINE}.${INITRAMFS_FSTYPES} $kerneldir/initramfs.img
         fi
