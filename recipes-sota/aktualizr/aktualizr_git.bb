@@ -7,8 +7,7 @@ LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=815ca599c9df247a0c7f619bab123dad"
 
 DEPENDS = "boost curl openssl libarchive libsodium sqlite3 asn1c-native"
 DEPENDS_append = "${@bb.utils.contains('PTEST_ENABLED', '1', ' coreutils-native net-tools-native ostree-native aktualizr-native ', '', d)}"
-RDEPENDS_${PN}_class-target = "${PN}-configs ${PN}-hwid lshw"
-RDEPENDS_${PN}-host-tools = "aktualizr aktualizr-cert-provider ${@bb.utils.contains('PACKAGECONFIG', 'sota-tools', 'garage-deploy garage-push', '', d)}"
+RDEPENDS_${PN}_class-target = "${PN}-hwid lshw"
 
 RDEPENDS_${PN}-ptest += "bash cmake curl python3-misc python3-modules openssl-bin sqlite3 valgrind"
 
@@ -17,7 +16,7 @@ PRIVATE_LIBS_${PN}-ptest = "libaktualizr.so libaktualizr_secondary.so"
 PV = "1.0+git${SRCPV}"
 PR = "7"
 
-GARAGE_SIGN_PV = "0.7.1-22-g1d0d714"
+GARAGE_SIGN_PV = "0.7.2-9-g80ae114"
 
 SRC_URI = " \
   gitsm://github.com/advancedtelematic/aktualizr;branch=${BRANCH};name=aktualizr \
@@ -29,10 +28,10 @@ SRC_URI = " \
   ${@ d.expand("https://tuf-cli-releases.ota.here.com/cli-${GARAGE_SIGN_PV}.tgz;unpack=0;name=garagesign") if not oe.types.boolean(d.getVar('GARAGE_SIGN_AUTOVERSION')) else ''} \
   "
 
-SRC_URI[garagesign.md5sum] = "7be214beb64ce4ae443f7a4288b6d491"
-SRC_URI[garagesign.sha256sum] = "b8524a03bb31551889790eca4ed44070f679d33a98b09e8220d7e0e965de68d8"
+SRC_URI[garagesign.md5sum] = "2598ce3a468c40a58df3304fb71ea14b"
+SRC_URI[garagesign.sha256sum] = "acbc814a9ed962a0d3b5bc397b14fef6a139e874e6cc3075671dab69bc8541fd"
 
-SRCREV = "d4811f900c765f3b4e5b9ea76531bad7d830a691"
+SRCREV = "1255aa24fe55f99b606027c8acc8cd80db29a282"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
@@ -133,14 +132,12 @@ python split_hosttools_packages () {
     bindir = d.getVar('bindir')
 
     # Split all binaries to their own packages.
-    do_split_packages(d, bindir, '^(.*)$', '%s', 'Aktualizr tool - %s', extra_depends='aktualizr-configs', prepend=False)
+    do_split_packages(d, bindir, '^(.*)$', '%s', 'Aktualizr tool - %s', extra_depends='', prepend=False)
 }
 
 PACKAGES_DYNAMIC = "^aktualizr-.* ^garage-.*"
 
-PACKAGES =+ "${PN}-host-tools ${PN}-info ${PN}-lib ${PN}-resource-control ${PN}-configs ${PN}-secondary ${PN}-secondary-lib ${PN}-sotatools-lib"
-
-ALLOW_EMPTY_${PN}-host-tools = "1"
+PACKAGES =+ "${PN}-info ${PN}-lib ${PN}-resource-control ${PN}-configs ${PN}-secondary ${PN}-secondary-lib ${PN}-sotatools-lib"
 
 FILES_${PN} = " \
                 ${bindir}/aktualizr \
