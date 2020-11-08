@@ -125,7 +125,7 @@ def verifyProvisioned(testInst, machine, hwid=''):
     # Verify that device HAS provisioned.
     # First loop while waiting for the device to boot.
     ran_ok = False
-    for delay in [5, 5, 5, 5, 10, 10, 10, 10]:
+    for delay in [15, 10, 10, 10, 10, 10, 10, 15, 15]:
         stdout, stderr, retcode = testInst.qemu_command('aktualizr-info')
         if retcode == 0 and stderr == b'':
             ran_ok = True
