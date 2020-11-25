@@ -1,42 +1,3 @@
-# Image to use with u-boot as BIOS and OSTree deployment system
-
-# Boot filesystem size in MiB
-# OSTree updates may require some space on boot file system for
-# boot scripts, kernel and initramfs images
-#
-calculate_size () {
-	BASE=$1
-	SCALE=$2
-	MIN=$3
-	MAX=$4
-	EXTRA=$5
-	ALIGN=$6
-
-	SIZE=`echo "$BASE * $SCALE" | bc -l`
-	REM=`echo $SIZE | cut -d "." -f 2`
-	SIZE=`echo $SIZE | cut -d "." -f 1`
-
-	if [ -n "$REM" -o ! "$REM" -eq 0 ]; then
-		SIZE=`expr $SIZE \+ 1`
-	fi
-
-	if [ "$SIZE" -lt "$MIN" ]; then
-		SIZE=$MIN
-	fi
-
-	SIZE=`expr $SIZE \+ $EXTRA`
-	SIZE=`expr $SIZE \+ $ALIGN \- 1`
-	SIZE=`expr $SIZE \- $SIZE \% $ALIGN`
-
-	if [ -n "$MAX" ]; then
-		if [ "$SIZE" -gt "$MAX" ]; then
-			return -1
-		fi
-	fi
-	
-	echo "${SIZE}"
-}
-
 OTA_SYSROOT = "${WORKDIR}/ota-sysroot"
 TAR_IMAGE_ROOTFS_task-image-ota = "${OTA_SYSROOT}"
 IMAGE_TYPEDEP_ota = "ostreecommit"
@@ -108,24 +69,13 @@ IMAGE_CMD_ota () {
 	echo "{\"${ostree_target_hash}\":\"${GARAGE_TARGET_NAME}-${target_version}\"}" > ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota/import/installed_versions
 }
 
+EXTRA_IMAGECMD_ota-ext4 = "-O ^64bit -L otaroot -i 4096"
 IMAGE_TYPEDEP_ota-ext4 = "ota"
-do_image_ota_ext4[depends] = "e2fsprogs-native:do_populate_sysroot"
+IMAGE_ROOTFS_task-image-ota-ext4 = "${OTA_SYSROOT}"
 IMAGE_CMD_ota-ext4 () {
-	# Calculate image size
-	OTA_ROOTFS_SIZE=$(calculate_size `du -ks ${OTA_SYSROOT} | cut -f 1`  "${IMAGE_OVERHEAD_FACTOR}" "${IMAGE_ROOTFS_SIZE}" "${IMAGE_ROOTFS_MAXSIZE}" `expr ${IMAGE_ROOTFS_EXTRA_SPACE}` "${IMAGE_ROOTFS_ALIGNMENT}")
-
-	if [ ${OTA_ROOTFS_SIZE} -lt 0 ]; then
-		bbfatal "create_ota failed to calculate OTA rootfs size!"
-	fi
-
-	eval local COUNT=\"0\"
-	eval local MIN_COUNT=\"60\"
-	if [ ${OTA_ROOTFS_SIZE} -lt ${MIN_COUNT} ]; then
-		eval COUNT=\"${MIN_COUNT}\"
-	fi
-
-	dd if=/dev/zero of=${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.ota-ext4 seek=${OTA_ROOTFS_SIZE} count=${COUNT} bs=1024
-	mkfs.ext4 -O ^64bit ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.ota-ext4 -L otaroot -d ${OTA_SYSROOT}
+	ln -sf ${STAGING_DIR_NATIVE}${base_sbindir_native}/mkfs.ext4 ${STAGING_DIR_NATIVE}${base_sbindir_native}/mkfs.ota-ext4
+	ln -sf ${STAGING_DIR_NATIVE}${base_sbindir_native}/fsck.ext4 ${STAGING_DIR_NATIVE}${base_sbindir_native}/fsck.ota-ext4
+	oe_mkext234fs ota-ext4 ${EXTRA_IMAGECMD}
 }
-
+do_image_ota_ext4[depends] = "e2fsprogs-native:do_populate_sysroot"
 do_image_wic[depends] += "${@bb.utils.contains('DISTRO_FEATURES', 'sota', '%s:do_image_ota_ext4' % d.getVar('PN'), '', d)}"
