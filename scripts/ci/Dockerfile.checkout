@@ -5,8 +5,11 @@ RUN sed -i 's#deb http://deb.debian.org/debian stretch main#deb http://deb.debia
 RUN sed -i 's#deb http://deb.debian.org/debian stretch-updates main#deb http://deb.debian.org/debian stretch-updates main contrib#g' /etc/apt/sources.list
 RUN apt-get update -q && apt-get install -qy \
     git \
-    repo \
-    xmlstarlet
+    xmlstarlet \
+    python3 \
+    repo
+
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
 # checkout script
 RUN mkdir /scripts
