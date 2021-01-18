@@ -163,6 +163,7 @@ IMAGE_CMD_ostreecommit () {
 
 IMAGE_TYPEDEP_ostreepush = "ostreecommit"
 do_image_ostreepush[depends] += "aktualizr-native:do_populate_sysroot ca-certificates-native:do_populate_sysroot"
+do_image_ostreepush[lockfiles] += "${OSTREE_REPO}/ostree.lock"
 IMAGE_CMD_ostreepush () {
     # send a copy of the repo manifest to backend if available
     local SEND_MANIFEST=""
