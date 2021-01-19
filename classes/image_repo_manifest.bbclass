@@ -15,7 +15,7 @@ inherit python3native
 buildinfo_manifest () {
   repotool=`which repo || true`
   if [ -n "$repotool" ]; then
-    python3 $repotool manifest --revision-as-HEAD -o ${IMAGE_ROOTFS}${sysconfdir}/manifest.xml || bbwarn "Android repo tool failed to run; manifest not copied"
+    cd ${THISDIR} && python3 $repotool manifest --revision-as-HEAD -o ${IMAGE_ROOTFS}${sysconfdir}/manifest.xml || bbwarn "Android repo tool failed to run; manifest not copied"
   else
     bbwarn "Android repo tool not found; manifest not copied."
   fi
