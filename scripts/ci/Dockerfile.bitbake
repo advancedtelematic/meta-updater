@@ -1,8 +1,8 @@
-FROM debian:stretch
+FROM debian:buster
 LABEL Description="Image for bitbaking"
 
-RUN sed -i 's#deb http://deb.debian.org/debian stretch main#deb http://deb.debian.org/debian stretch main contrib#g' /etc/apt/sources.list
-RUN sed -i 's#deb http://deb.debian.org/debian stretch-updates main#deb http://deb.debian.org/debian stretch-updates main contrib#g' /etc/apt/sources.list
+RUN sed -i 's#deb http://deb.debian.org/debian buster main#deb http://deb.debian.org/debian buster main contrib#g' /etc/apt/sources.list
+RUN sed -i 's#deb http://deb.debian.org/debian buster-updates main#deb http://deb.debian.org/debian buster-updates main contrib#g' /etc/apt/sources.list
 RUN apt-get update -q && apt-get install --no-install-suggests --no-install-recommends -qy \
      awscli \
      build-essential \
@@ -16,8 +16,8 @@ RUN apt-get update -q && apt-get install --no-install-suggests --no-install-reco
      gcc-multilib \
      git-core \
      iputils-ping \
-     iproute \
-     libpython-dev \
+     iproute2 \
+     libpython3-dev \
      libsdl1.2-dev \
      libvirt-clients \
      libvirt-daemon-system \
@@ -25,7 +25,6 @@ RUN apt-get update -q && apt-get install --no-install-suggests --no-install-reco
      ovmf \
      openssh-client \
      procps \
-     python \
      python3 \
      python3-pexpect \
      qemu-kvm \
