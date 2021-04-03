@@ -11,5 +11,5 @@ inherit python3native
 
 do_install() {
    install -d ${D}/usr/lib/big-update
-   python ${S}/../rand_file.py ${D}/usr/lib/big-update/a-big-file $(numfmt --from=iec 12M)
+   python3 ${S}/../rand_file.py ${D}/usr/lib/big-update/a-big-file $(numfmt --from=iec 12M)
 }
