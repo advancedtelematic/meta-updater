@@ -31,6 +31,7 @@ python prepare_ostree_rootfs() {
     image_rootfs = d.getVar("IMAGE_ROOTFS")
     oe.path.copyhardlinktree(image_rootfs, ostree_rootfs)
 }
+prepare_ostree_rootfs[fakeroot] = "1"
 
 do_image_ostree[dirs] = "${OSTREE_ROOTFS}"
 do_image_ostree[prefuncs] += "prepare_ostree_rootfs"
