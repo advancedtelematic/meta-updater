@@ -70,14 +70,6 @@ RESOURCE_CPU_WEIGHT = "100"
 RESOURCE_MEMORY_HIGH = "100M"
 RESOURCE_MEMORY_MAX = "80%"
 
-do_configure_prepend() {
-    # CMake has trouble finding yocto's git when cross-compiling, let's do this step manually
-    cd ${S}
-    if [ ! -f VERSION ]; then
-        ./scripts/get_version.sh > VERSION
-    fi
-}
-
 do_compile_ptest() {
     cmake_runcmake_build --target build_tests "${PARALLEL_MAKE}"
 }
