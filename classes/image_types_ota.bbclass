@@ -45,6 +45,10 @@ IMAGE_CMD_ota () {
 	ostree --repo=${OTA_SYSROOT}/ostree/repo refs --create=${OSTREE_OSNAME}:${OSTREE_BRANCHNAME} ${ostree_target_hash}
 	ostree admin --sysroot=${OTA_SYSROOT} deploy ${kargs_list} --os=${OSTREE_OSNAME} ${OSTREE_OSNAME}:${OSTREE_BRANCHNAME}
 
+	if [ ${@ oe.types.boolean('${OSTREE_SYSROOT_READONLY}')} = True ]; then
+		ostree config --repo=${OTA_SYSROOT}/ostree/repo set sysroot.readonly true
+	fi
+
 	cp -a ${IMAGE_ROOTFS}/var/sota ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
 	# Create /var/sota if it doesn't exist yet
 	mkdir -p ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota
