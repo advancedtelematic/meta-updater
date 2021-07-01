@@ -19,24 +19,13 @@ CONVERSIONTYPES_append = " tar"
 
 TAR_IMAGE_ROOTFS_task-image-ostree = "${OSTREE_ROOTFS}"
 
-python prepare_ostree_rootfs() {
-    import oe.path
-    import shutil
-
-    ostree_rootfs = d.getVar("OSTREE_ROOTFS")
-    if os.path.lexists(ostree_rootfs):
-        bb.utils.remove(ostree_rootfs, True)
-
-    # Copy required as we change permissions on some files.
-    image_rootfs = d.getVar("IMAGE_ROOTFS")
-    oe.path.copyhardlinktree(image_rootfs, ostree_rootfs)
-}
-prepare_ostree_rootfs[fakeroot] = "1"
-
 do_image_ostree[dirs] = "${OSTREE_ROOTFS}"
-do_image_ostree[prefuncs] += "prepare_ostree_rootfs"
+do_image_ostree[cleandirs] = "${OSTREE_ROOTFS}"
 do_image_ostree[depends] = "coreutils-native:do_populate_sysroot virtual/kernel:do_deploy ${INITRAMFS_IMAGE}:do_image_complete"
 IMAGE_CMD_ostree () {
+    # Copy required as we change permissions on some files.
+    tar --xattrs --xattrs-include='*' -cf - -S -C ${IMAGE_ROOTFS} -p . | tar --xattrs --xattrs-include='*' -xf - -C ${OSTREE_ROOTFS}
+
     for d in var/*; do
       if [ "${d}" != "var/local" ]; then
         rm -rf ${d}
