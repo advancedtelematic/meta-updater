@@ -21,6 +21,10 @@ IMAGE_CMD_ota () {
 		ln -s ../loader/grub.cfg ${OTA_SYSROOT}/boot/grub2/grub.cfg
 	elif [ "${OSTREE_BOOTLOADER}" = "u-boot" ]; then
 		touch ${OTA_SYSROOT}/boot/loader/uEnv.txt
+	elif [ "${OSTREE_BOOTLOADER}" = "syslinux" ]; then
+		mkdir -p ${OTA_SYSROOT}/boot/syslinux
+		touch ${OTA_SYSROOT}/boot/loader/syslinux.cfg
+		ln -s ../loader/syslinux.cfg ${OTA_SYSROOT}/boot/syslinux/syslinux.cfg
 	else
 		bbfatal "Invalid bootloader: ${OSTREE_BOOTLOADER}"
 	fi
