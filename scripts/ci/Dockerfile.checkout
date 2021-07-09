@@ -6,10 +6,13 @@ RUN sed -i 's#deb http://deb.debian.org/debian buster-updates main#deb http://de
 RUN apt-get update -q && apt-get install -qy \
     git \
     python3 \
-    repo \
+    curl \
     xmlstarlet
 
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
+# Install repo
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2 && \
+    curl https://storage.googleapis.com/git-repo-downloads/repo > /usr/bin/repo && \
+    chmod a+x /usr/bin/repo
 
 # checkout script
 RUN mkdir /scripts
