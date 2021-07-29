@@ -16,7 +16,7 @@ do_install() {
     fi
 }
 
-FILES_${PN} = " \
+FILES:${PN} = " \
                 ${libdir}/sota/conf.d \
                 ${libdir}/sota/conf.d/40-hardware-id.toml \
                 "

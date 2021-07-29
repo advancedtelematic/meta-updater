@@ -13,7 +13,7 @@ IMAGE_LINGUAS = ""
 
 LICENSE = "MIT"
 
-IMAGE_CLASSES_remove = "image_repo_manifest qemuboot"
+IMAGE_CLASSES:remove = "image_repo_manifest qemuboot"
 
 IMAGE_FSTYPES = "${INITRAMFS_FSTYPES}"
 

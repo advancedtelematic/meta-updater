@@ -15,16 +15,16 @@ class RpiTests(OESelftestTestCase):
     def setUpLocal(self):
         # Add layers before changing the machine type, otherwise the sanity
         # checker complains loudly.
-        layer_rpi = "meta-raspberrypi"
-        layer_upd_rpi = "meta-updater-raspberrypi"
+        layer:rpi = "meta-raspberrypi"
+        layer_upd:rpi = "meta-updater-raspberrypi"
         result = runCmd('bitbake-layers show-layers')
         if re.search(layer_rpi, result.output) is None:
-            self.meta_rpi = metadir() + layer_rpi
+            self.meta_rpi = metadir() + layer:rpi
             runCmd('bitbake-layers add-layer "%s"' % self.meta_rpi)
         else:
             self.meta_rpi = None
         if re.search(layer_upd_rpi, result.output) is None:
-            self.meta_upd_rpi = metadir() + layer_upd_rpi
+            self.meta_upd_rpi = metadir() + layer_upd:rpi
             runCmd('bitbake-layers add-layer "%s"' % self.meta_upd_rpi)
         else:
             self.meta_upd_rpi = None

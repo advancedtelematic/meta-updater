@@ -6,12 +6,12 @@ LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=815ca599c9df247a0c7f619bab123dad"
 
 DEPENDS = "boost curl openssl libarchive libsodium sqlite3 asn1c-native"
-DEPENDS_append = "${@bb.utils.contains('PTEST_ENABLED', '1', ' coreutils-native net-tools-native ostree-native aktualizr-native ', '', d)}"
-RDEPENDS_${PN}_class-target = "${PN}-hwid lshw"
+DEPENDS:append = "${@bb.utils.contains('PTEST_ENABLED', '1', ' coreutils-native net-tools-native ostree-native aktualizr-native ', '', d)}"
+RDEPENDS:${PN}:class-target = "${PN}-hwid lshw"
 
-RDEPENDS_${PN}-ptest += "bash cmake curl net-tools python3-core python3-misc python3-modules openssl-bin sqlite3 valgrind"
+RDEPENDS:${PN}-ptest += "bash cmake curl net-tools python3-core python3-misc python3-modules openssl-bin sqlite3 valgrind"
 
-PRIVATE_LIBS_${PN}-ptest = "libaktualizr.so libaktualizr_secondary.so"
+PRIVATE_LIBS:${PN}-ptest = "libaktualizr.so libaktualizr_secondary.so"
 
 PV = "1.0+git${SRCPV}"
 PR = "7"
@@ -39,12 +39,12 @@ S = "${WORKDIR}/git"
 inherit cmake pkgconfig ptest systemd
 
 # disable ptest by default as it slows down builds quite a lot
-# can be enabled manually by setting 'PTEST_ENABLED_pn-aktualizr' to '1' in local.conf
+# can be enabled manually by setting 'PTEST_ENABLED:pn-aktualizr' to '1' in local.conf
 PTEST_ENABLED = "0"
 
 SYSTEMD_PACKAGES = "${PN} ${PN}-secondary"
-SYSTEMD_SERVICE_${PN} = "aktualizr.service"
-SYSTEMD_SERVICE_${PN}-secondary = "aktualizr-secondary.service"
+SYSTEMD_SERVICE:${PN} = "aktualizr.service"
+SYSTEMD_SERVICE:${PN}-secondary = "aktualizr-secondary.service"
 
 EXTRA_OECMAKE = "-DCMAKE_BUILD_TYPE=Release ${@bb.utils.contains('PTEST_ENABLED', '1', '-DTESTSUITE_VALGRIND=on', '', d)}"
 
@@ -52,7 +52,7 @@ GARAGE_SIGN_OPS = "${@ d.expand('-DGARAGE_SIGN_ARCHIVE=${WORKDIR}/cli-${GARAGE_S
 PKCS11_ENGINE_PATH = "${libdir}/engines-1.1/pkcs11.so"
 
 PACKAGECONFIG ?= "ostree ${@bb.utils.filter('SOTA_CLIENT_FEATURES', 'hsm serialcan ubootenv', d)}"
-PACKAGECONFIG_class-native = "sota-tools"
+PACKAGECONFIG:class-native = "sota-tools"
 PACKAGECONFIG[warning-as-error] = "-DWARNING_AS_ERROR=ON,-DWARNING_AS_ERROR=OFF,"
 PACKAGECONFIG[ostree] = "-DBUILD_OSTREE=ON,-DBUILD_OSTREE=OFF,ostree,"
 PACKAGECONFIG[hsm] = "-DBUILD_P11=ON -DPKCS11_ENGINE_PATH=${PKCS11_ENGINE_PATH},-DBUILD_P11=OFF,libp11,"
@@ -87,7 +87,7 @@ do_install_ptest() {
     find ${D}/${PTEST_PATH}/build -name "*.cmake" -or -name "DartConfiguration.tcl" -or -name "run-valgrind" | xargs sed -e "s|${S}|${PTEST_PATH}/src|g" -e "s|${B}|${PTEST_PATH}/build|g" -e "s|\"--gtest_output[^\"]*\"||g" -i
 }
 
-do_install_append () {
+do_install:append () {
     install -d ${D}${libdir}/sota
     install -m 0644 ${S}/config/sota-shared-cred.toml ${D}/${libdir}/sota/sota-shared-cred.toml
     install -m 0644 ${S}/config/sota-device-cred-hsm.toml ${D}/${libdir}/sota/sota-device-cred-hsm.toml
@@ -118,7 +118,7 @@ do_install_append () {
            ${D}${systemd_system_unitdir}/aktualizr.service.d/10-resource-control.conf
 }
 
-PACKAGESPLITFUNCS_prepend = "split_hosttools_packages "
+PACKAGESPLITFUNCS:prepend = "split_hosttools_packages "
 
 python split_hosttools_packages () {
     bindir = d.getVar('bindir')
@@ -131,43 +131,43 @@ PACKAGES_DYNAMIC = "^aktualizr-.* ^garage-.*"
 
 PACKAGES =+ "${PN}-info ${PN}-lib ${PN}-resource-control ${PN}-configs ${PN}-secondary ${PN}-secondary-lib ${PN}-sotatools-lib"
 
-FILES_${PN} = " \
+FILES:${PN} = " \
                 ${bindir}/aktualizr \
                 ${systemd_unitdir}/system/aktualizr.service \
                 "
 
-FILES_${PN}-info = " \
+FILES:${PN}-info = " \
                 ${bindir}/aktualizr-info \
                 "
 
-FILES_${PN}-lib = " \
+FILES:${PN}-lib = " \
                 ${libdir}/libaktualizr.so \
                 "
 
-FILES_${PN}-resource-control = " \
+FILES:${PN}-resource-control = " \
                 ${systemd_system_unitdir}/aktualizr.service.d/10-resource-control.conf \
                 "
 
-FILES_${PN}-configs = " \
+FILES:${PN}-configs = " \
                 ${sysconfdir}/sota/* \
                 ${libdir}/sota/* \
                 "
 
-FILES_${PN}-secondary = " \
+FILES:${PN}-secondary = " \
                 ${bindir}/aktualizr-secondary \
                 ${libdir}/sota/sota-secondary.toml \
                 ${systemd_unitdir}/system/aktualizr-secondary.service \
                 "
 
-FILES_${PN}-secondary-lib = " \
+FILES:${PN}-secondary-lib = " \
                 ${libdir}/libaktualizr_secondary.so \
                 "
 
-FILES_${PN}-sotatools-lib = " \
+FILES:${PN}-sotatools-lib = " \
                 ${libdir}/libsota_tools.so \
                 "
 
-FILES_${PN}-dev = " \
+FILES:${PN}-dev = " \
                 ${includedir}/lib${PN} \
                 "
 

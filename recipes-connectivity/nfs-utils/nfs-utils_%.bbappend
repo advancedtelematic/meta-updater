@@ -1,12 +1,12 @@
-FILESEXTRAPATHS_prepend_sota := "${THISDIR}/${BPN}:"
+FILESEXTRAPATHS:prepend:sota := "${THISDIR}/${BPN}:"
 
-SRC_URI_append_sota = " file://nfs-home-mount.service"
+SRC_URI:append:sota = " file://nfs-home-mount.service"
 
-SYSTEMD_SERVICE_${PN}_append_sota = " nfs-home-mount.service"
+SYSTEMD_SERVICE:${PN}:append:sota = " nfs-home-mount.service"
 
-CONFFILES_${PN}-client_append_sota = " ${localstatedir}/local/lib"
+CONFFILES:${PN}-client:append:sota = " ${localstatedir}/local/lib"
 
-do_install_append_sota () {
+do_install:append:sota () {
     install -d ${D}${localstatedir}/local
     cp -aPR ${D}${localstatedir}/lib ${D}${localstatedir}/local
 

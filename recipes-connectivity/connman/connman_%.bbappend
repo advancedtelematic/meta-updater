@@ -1,1 +1,1 @@
-RPROVIDES_${PN} += "network-configuration"
+RPROVIDES:${PN} += "network-configuration"

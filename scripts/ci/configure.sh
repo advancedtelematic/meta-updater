@@ -52,18 +52,18 @@ if [ -n "$TEST_AKTUALIZR_REMOTE" ]; then
     if [ -n "$TEST_AKTUALIZR_TAG" ]; then
         # tag case
         cat << EOF >> "$SITE_CONF"
-SRCREV_pn-aktualizr = ""
-SRCREV_pn-aktualizr-native = ""
-BRANCH_pn-aktualizr = ";nobranch=1;tag=$TEST_AKTUALIZR_TAG"
-BRANCH_pn-aktualizr-native = "\${BRANCH_pn-aktualizr}"
+SRCREV:pn-aktualizr = ""
+SRCREV:pn-aktualizr-native = ""
+BRANCH:pn-aktualizr = ";nobranch=1;tag=$TEST_AKTUALIZR_TAG"
+BRANCH:pn-aktualizr-native = "\${BRANCH_pn-aktualizr}"
 EOF
     else
         # branch case
         cat << EOF >> "$SITE_CONF"
-SRCREV_pn-aktualizr = "$TEST_AKTUALIZR_REV"
-SRCREV_pn-aktualizr-native = "\${SRCREV_pn-aktualizr}"
-BRANCH_pn-aktualizr = "$TEST_AKTUALIZR_BRANCH"
-BRANCH_pn-aktualizr-native = "\${BRANCH_pn-aktualizr}"
+SRCREV:pn-aktualizr = "$TEST_AKTUALIZR_REV"
+SRCREV:pn-aktualizr-native = "\${SRCREV_pn-aktualizr}"
+BRANCH:pn-aktualizr = "$TEST_AKTUALIZR_BRANCH"
+BRANCH:pn-aktualizr-native = "\${BRANCH_pn-aktualizr}"
 EOF
     fi
 fi

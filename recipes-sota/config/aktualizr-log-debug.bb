@@ -11,12 +11,12 @@ SRC_URI = " \
             file://05-log-debug.toml \
             "
 
-do_install_append () {
+do_install:append () {
     install -m 0700 -d ${D}${libdir}/sota/conf.d
     install -m 0644 ${WORKDIR}/05-log-debug.toml ${D}${libdir}/sota/conf.d/05-log-debug.toml
 }
 
-FILES_${PN} = " \
+FILES:${PN} = " \
                 ${libdir}/sota/conf.d/05-log-debug.toml \
                 "
 

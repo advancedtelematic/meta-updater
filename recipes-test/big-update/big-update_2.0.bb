@@ -4,7 +4,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7
 
 SRC_URI = "file://rand_file.py"
 
-FILES_${PN} = "${libdir}/big-update"
+FILES:${PN} = "${libdir}/big-update"
 
 DEPENDS = "coreutils-native"
 

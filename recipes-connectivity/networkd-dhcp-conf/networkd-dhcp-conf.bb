@@ -6,7 +6,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7
 
 inherit systemd features_check
 
-RPROVIDES_${PN} = "network-configuration"
+RPROVIDES:${PN} = "network-configuration"
 
 SRC_URI = " \
   file://20-wired-dhcp.network \
@@ -16,19 +16,19 @@ SRC_URI = " \
 PR = "r1"
 
 REQUIRED_DISTRO_FEATURES = "systemd"
-RCONFLICTS_${PN} = "connman"
+RCONFLICTS:${PN} = "connman"
 
 S = "${WORKDIR}"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
-FILES_${PN} = " \
+FILES:${PN} = " \
         ${systemd_unitdir}/network/* \
         ${sbindir}/resolvconf-clean \
         ${systemd_unitdir}/system/clean-connman-symlink.service \
         "
 
-SYSTEMD_SERVICE_${PN} = "clean-connman-symlink.service"
+SYSTEMD_SERVICE:${PN} = "clean-connman-symlink.service"
 
 DEV_MATCH_DIRECTIVE ?= "Name=en*"
 

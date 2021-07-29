@@ -15,14 +15,14 @@ SYSTEMD_USED = "${@oe.utils.ifelse(d.getVar('VIRTUAL-RUNTIME_init_manager') == '
 
 IMAGE_CMD_TAR = "tar --xattrs --xattrs-include=*"
 CONVERSION_CMD_tar = "touch ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type}; ${IMAGE_CMD_TAR} --numeric-owner -cf ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type}.tar -C ${TAR_IMAGE_ROOTFS} . || [ $? -eq 1 ]"
-CONVERSIONTYPES_append = " tar"
+CONVERSIONTYPES:append = " tar"
 
 TAR_IMAGE_ROOTFS_task-image-ostree = "${OSTREE_ROOTFS}"
 
 do_image_ostree[dirs] = "${OSTREE_ROOTFS}"
 do_image_ostree[cleandirs] = "${OSTREE_ROOTFS}"
 do_image_ostree[depends] = "coreutils-native:do_populate_sysroot virtual/kernel:do_deploy ${INITRAMFS_IMAGE}:do_image_complete"
-IMAGE_CMD_ostree () {
+IMAGE_CMD:ostree () {
     # Copy required as we change permissions on some files.
     tar --xattrs --xattrs-include='*' -cf - -S -C ${IMAGE_ROOTFS} -p . | tar --xattrs --xattrs-include='*' -xf - -C ${OSTREE_ROOTFS}
 
@@ -129,7 +129,7 @@ IMAGE_CMD_ostree () {
 IMAGE_TYPEDEP_ostreecommit = "ostree"
 do_image_ostreecommit[depends] += "ostree-native:do_populate_sysroot"
 do_image_ostreecommit[lockfiles] += "${OSTREE_REPO}/ostree.lock"
-IMAGE_CMD_ostreecommit () {
+IMAGE_CMD:ostreecommit () {
     if ! ostree --repo=${OSTREE_REPO} refs 2>&1 > /dev/null; then
         ostree --repo=${OSTREE_REPO} init --mode=archive-z2
     fi
@@ -154,7 +154,7 @@ IMAGE_CMD_ostreecommit () {
 IMAGE_TYPEDEP_ostreepush = "ostreecommit"
 do_image_ostreepush[depends] += "aktualizr-native:do_populate_sysroot ca-certificates-native:do_populate_sysroot"
 do_image_ostreepush[lockfiles] += "${OSTREE_REPO}/ostree.lock"
-IMAGE_CMD_ostreepush () {
+IMAGE_CMD:ostreepush () {
     # send a copy of the repo manifest to backend if available
     local SEND_MANIFEST=""
     # check if garage-push supports the --repo-manifest option before trying
@@ -182,7 +182,7 @@ do_image_garagesign[depends] += "unzip-native:do_populate_sysroot"
 # This lock solves OTA-1866, which is that removing GARAGE_SIGN_REPO while using
 # garage-sign simultaneously for two images often causes problems.
 do_image_garagesign[lockfiles] += "${DEPLOY_DIR_IMAGE}/garagesign.lock"
-IMAGE_CMD_garagesign () {
+IMAGE_CMD:garagesign () {
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         # if credentials are issued by a server that doesn't support offline signing, exit silently
         unzip -p ${SOTA_PACKED_CREDENTIALS} root.json targets.pub targets.sec tufrepo.url 2>&1 >/dev/null || exit 0
@@ -270,7 +270,7 @@ IMAGE_CMD_garagesign () {
 }
 
 IMAGE_TYPEDEP_garagecheck = "garagesign"
-IMAGE_CMD_garagecheck () {
+IMAGE_CMD:garagecheck () {
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         # if credentials are issued by a server that doesn't support offline signing, exit silently
         unzip -p ${SOTA_PACKED_CREDENTIALS} root.json targets.pub targets.sec tufrepo.url 2>&1 >/dev/null || exit 0

@@ -17,4 +17,4 @@ do_install() {
 
 inherit allarch
 
-FILES_${PN} += " /dev /etc/initrd-release /init "
+FILES:${PN} += " /dev /etc/initrd-release /init "

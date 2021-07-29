@@ -12,13 +12,13 @@ SRC_URI = " \
             file://virtualsec.json \
             "
 
-do_install_append () {
+do_install:append () {
     install -m 0700 -d ${D}${libdir}/sota/conf.d
     install -m 0644 ${WORKDIR}/30-virtualsec.toml ${D}${libdir}/sota/conf.d/30-virtualsec.toml
     install -m 0644 ${WORKDIR}/virtualsec.json ${D}${libdir}/sota/virtualsec.json
 }
 
-FILES_${PN} = " \
+FILES:${PN} = " \
                 ${libdir}/sota/conf.d/30-virtualsec.toml \
                 ${libdir}/sota/virtualsec.json \
                 "

@@ -63,7 +63,7 @@ do_install () {
     sed -i "s|@CFG_FILEPATH@|$SECONDARY_CONFIG_FILEPATH_ON_IMAGE|g" ${D}${libdir}/sota/conf.d/30-secondary-config.toml
 }
 
-FILES_${PN} = " \
+FILES:${PN} = " \
                 ${libdir}/sota/conf.d/* \
                 ${sysconfdir}/sota/ecus/* \
                 "

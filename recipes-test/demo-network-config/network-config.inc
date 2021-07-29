@@ -1,4 +1,4 @@
-SRC_URI_append = "\
+SRC_URI:append = "\
     file://26-${CONF_TYPE}-client.network \
     "
 
@@ -7,7 +7,7 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 SECONDARY_INTERFACE ?= "${@ 'eth0' if d.getVar('MACHINE') == 'raspberrypi3' else 'enp0s5'}"
 
-do_install_append() {
+do_install:append() {
     bbnote "Network configuration type to be applied: ${CONF_TYPE}"
     install -d ${D}${libdir}/systemd/network
     install -m 0644 ${WORKDIR}/26-${CONF_TYPE}-client.network ${D}${libdir}/systemd/network/

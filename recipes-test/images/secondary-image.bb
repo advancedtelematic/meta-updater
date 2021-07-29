@@ -9,7 +9,7 @@ SOTA_HARDWARE_ID ?= "${MACHINE}-sndry"
 
 # Remove default aktualizr primary, and the provisioning configuration (which
 # RDEPENDS on aktualizr)
-IMAGE_INSTALL_remove = " \
+IMAGE_INSTALL:remove = " \
                         aktualizr \
                         aktualizr-shared-prov \
                         aktualizr-shared-prov-creds \
@@ -19,7 +19,7 @@ IMAGE_INSTALL_remove = " \
                         network-configuration \
                         "
 
-IMAGE_INSTALL_append = " \
+IMAGE_INSTALL:append = " \
                         aktualizr-secondary \
                         secondary-network-config \
                         secondary-config \
