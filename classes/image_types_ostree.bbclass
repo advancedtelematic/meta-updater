@@ -17,7 +17,7 @@ IMAGE_CMD_TAR = "tar --xattrs --xattrs-include=*"
 CONVERSION_CMD_tar = "touch ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type}; ${IMAGE_CMD_TAR} --numeric-owner -cf ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type}.tar -C ${TAR_IMAGE_ROOTFS} . || [ $? -eq 1 ]"
 CONVERSIONTYPES:append = " tar"
 
-TAR_IMAGE_ROOTFS_task-image-ostree = "${OSTREE_ROOTFS}"
+TAR_IMAGE_ROOTFS:task-image-ostree = "${OSTREE_ROOTFS}"
 
 do_image_ostree[dirs] = "${OSTREE_ROOTFS}"
 do_image_ostree[cleandirs] = "${OSTREE_ROOTFS}"

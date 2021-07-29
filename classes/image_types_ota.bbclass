@@ -1,5 +1,5 @@
 OTA_SYSROOT = "${WORKDIR}/ota-sysroot"
-TAR_IMAGE_ROOTFS_task-image-ota = "${OTA_SYSROOT}"
+TAR_IMAGE_ROOTFS:task-image-ota = "${OTA_SYSROOT}"
 IMAGE_TYPEDEP_ota = "ostreecommit"
 do_image_ota[dirs] = "${OTA_SYSROOT}"
 do_image_ota[cleandirs] = "${OTA_SYSROOT}"
@@ -79,7 +79,7 @@ IMAGE_CMD:ota () {
 
 EXTRA_IMAGECMD:ota-ext4 = "-L otaroot -i 4096 -t ext4"
 IMAGE_TYPEDEP_ota-ext4 = "ota"
-IMAGE_ROOTFS_task-image-ota-ext4 = "${OTA_SYSROOT}"
+IMAGE_ROOTFS:task-image-ota-ext4 = "${OTA_SYSROOT}"
 IMAGE_CMD:ota-ext4 () {
 	ln -sf ${STAGING_DIR_NATIVE}${base_sbindir_native}/mkfs.ext4 ${STAGING_DIR_NATIVE}${base_sbindir_native}/mkfs.ota-ext4
 	ln -sf ${STAGING_DIR_NATIVE}${base_sbindir_native}/fsck.ext4 ${STAGING_DIR_NATIVE}${base_sbindir_native}/fsck.ota-ext4

@@ -67,7 +67,7 @@ Oe-selftest qemux86_64:
   stage: test
   variables:
     TEST_BUILD_DIR: 'build-oe-qemux86_64'
-    OE_SELFTESTS: 'updater_native updater:qemux86_64'
+    OE_SELFTESTS: 'updater_native updater_qemux86_64'
   except:
     - pushes
 
@@ -105,7 +105,7 @@ Ptest qemux86_64:
   stage: test
   variables:
     TEST_BUILD_DIR: 'build-oe-qemux86_64-ptest'
-    OE_SELFTESTS: 'updater:qemux86_64_ptest'
+    OE_SELFTESTS: 'updater_qemux86_64_ptest'
   except:
     - pushes
   only:
