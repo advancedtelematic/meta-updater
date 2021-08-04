@@ -1,6 +1,6 @@
 OTA_SYSROOT = "${WORKDIR}/ota-sysroot"
 TAR_IMAGE_ROOTFS:task-image-ota = "${OTA_SYSROOT}"
-IMAGE_TYPEDEP_ota = "ostreecommit"
+IMAGE_TYPEDEP:ota = "ostreecommit"
 do_image_ota[dirs] = "${OTA_SYSROOT}"
 do_image_ota[cleandirs] = "${OTA_SYSROOT}"
 do_image_ota[depends] = "${@'grub:do_populate_sysroot' if d.getVar('OSTREE_BOOTLOADER') == 'grub' else ''} \
@@ -78,7 +78,7 @@ IMAGE_CMD:ota () {
 }
 
 EXTRA_IMAGECMD:ota-ext4 = "-L otaroot -i 4096 -t ext4"
-IMAGE_TYPEDEP_ota-ext4 = "ota"
+IMAGE_TYPEDEP:ota-ext4 = "ota"
 IMAGE_ROOTFS:task-image-ota-ext4 = "${OTA_SYSROOT}"
 IMAGE_CMD:ota-ext4 () {
 	ln -sf ${STAGING_DIR_NATIVE}${base_sbindir_native}/mkfs.ext4 ${STAGING_DIR_NATIVE}${base_sbindir_native}/mkfs.ota-ext4

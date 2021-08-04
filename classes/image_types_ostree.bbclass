@@ -14,7 +14,7 @@ BUILD_OSTREE_TARBALL ??= "1"
 SYSTEMD_USED = "${@oe.utils.ifelse(d.getVar('VIRTUAL-RUNTIME_init_manager') == 'systemd', 'true', '')}"
 
 IMAGE_CMD_TAR = "tar --xattrs --xattrs-include=*"
-CONVERSION_CMD_tar = "touch ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type}; ${IMAGE_CMD_TAR} --numeric-owner -cf ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type}.tar -C ${TAR_IMAGE_ROOTFS} . || [ $? -eq 1 ]"
+CONVERSION_CMD:tar = "touch ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type}; ${IMAGE_CMD_TAR} --numeric-owner -cf ${IMGDEPLOYDIR}/${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type}.tar -C ${TAR_IMAGE_ROOTFS} . || [ $? -eq 1 ]"
 CONVERSIONTYPES:append = " tar"
 
 TAR_IMAGE_ROOTFS:task-image-ostree = "${OSTREE_ROOTFS}"
@@ -126,7 +126,7 @@ IMAGE_CMD:ostree () {
     cat ${IMAGE_MANIFEST} | cut -d " " -f1,3 > usr/package.manifest
 }
 
-IMAGE_TYPEDEP_ostreecommit = "ostree"
+IMAGE_TYPEDEP:ostreecommit = "ostree"
 do_image_ostreecommit[depends] += "ostree-native:do_populate_sysroot"
 do_image_ostreecommit[lockfiles] += "${OSTREE_REPO}/ostree.lock"
 IMAGE_CMD:ostreecommit () {
@@ -151,7 +151,7 @@ IMAGE_CMD:ostreecommit () {
     fi
 }
 
-IMAGE_TYPEDEP_ostreepush = "ostreecommit"
+IMAGE_TYPEDEP:ostreepush = "ostreecommit"
 do_image_ostreepush[depends] += "aktualizr-native:do_populate_sysroot ca-certificates-native:do_populate_sysroot"
 do_image_ostreepush[lockfiles] += "${OSTREE_REPO}/ostree.lock"
 IMAGE_CMD:ostreepush () {
@@ -177,7 +177,7 @@ IMAGE_CMD:ostreepush () {
     fi
 }
 
-IMAGE_TYPEDEP_garagesign = "ostreepush"
+IMAGE_TYPEDEP:garagesign = "ostreepush"
 do_image_garagesign[depends] += "unzip-native:do_populate_sysroot"
 # This lock solves OTA-1866, which is that removing GARAGE_SIGN_REPO while using
 # garage-sign simultaneously for two images often causes problems.
@@ -269,7 +269,7 @@ IMAGE_CMD:garagesign () {
     fi
 }
 
-IMAGE_TYPEDEP_garagecheck = "garagesign"
+IMAGE_TYPEDEP:garagecheck = "garagesign"
 IMAGE_CMD:garagecheck () {
     if [ -n "${SOTA_PACKED_CREDENTIALS}" ]; then
         # if credentials are issued by a server that doesn't support offline signing, exit silently
