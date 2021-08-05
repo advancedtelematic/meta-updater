@@ -3,7 +3,7 @@ LICENSE = "MPL-2.0"
 
 SRC_URI = "file://rand_file.py"
 
-FILES_${PN} = "/usr/lib/big-update"
+FILES:${PN} = "/usr/lib/big-update"
 
 DEPENDS = "coreutils-native"
 

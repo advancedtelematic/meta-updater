@@ -28,7 +28,7 @@ class SotaToolsTests(OESelftestTestCase):
 
 class GeneralTests(OESelftestTestCase):
 
-    def test_feature_sota(self):
+    def test_feature:sota(self):
         result = get_bb_var('DISTRO_FEATURES').find('sota')
         self.assertNotEqual(result, -1, 'Feature "sota" not set at DISTRO_FEATURES')
 

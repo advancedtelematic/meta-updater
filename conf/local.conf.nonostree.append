@@ -1,11 +1,11 @@
 
-DISTRO_FEATURES_append = " systemd"
+DISTRO_FEATURES:append = " systemd"
 VIRTUAL-RUNTIME_init_manager = "systemd"
 
 PREFERRED_RPROVIDER_network-configuration ??= "networkd-dhcp-conf"
 
 SOTA_DEPLOY_CREDENTIALS ?= "1"
-PACKAGECONFIG_pn-aktualizr = ""
+PACKAGECONFIG:pn-aktualizr = ""
 
-IMAGE_INSTALL_append += "aktualizr"
-IMAGE_INSTALL_append += "aktualizr-shared-prov"
+IMAGE_INSTALL:append += "aktualizr"
+IMAGE_INSTALL:append += "aktualizr-shared-prov"

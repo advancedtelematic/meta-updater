@@ -20,7 +20,7 @@ do_install() {
     install -m 0644 ${STAGING_DIR_HOST}${libdir}/sota/sota-uboot-env.toml ${D}${libdir}/sota/conf.d/30-rollback.toml
 }
 
-FILES_${PN} = " \
+FILES:${PN} = " \
                 ${libdir}/sota/conf.d \
                 ${libdir}/sota/conf.d/30-rollback.toml \
                 "

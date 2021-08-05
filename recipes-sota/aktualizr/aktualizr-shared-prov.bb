@@ -10,7 +10,7 @@ inherit allarch
 # We need to get the config files from the aktualizr-configs package built by
 # the aktualizr (target) recipe.
 DEPENDS = "aktualizr"
-RDEPENDS_${PN}_append = "${@' aktualizr-shared-prov-creds' if oe.types.boolean(d.getVar('SOTA_DEPLOY_CREDENTIALS')) else ''}"
+RDEPENDS:${PN}:append = "${@' aktualizr-shared-prov-creds' if oe.types.boolean(d.getVar('SOTA_DEPLOY_CREDENTIALS')) else ''}"
 
 # If the config file from aktualizr used here is changed, you will need to bump
 # the version here because of SIGGEN_EXCLUDE_SAFE_RECIPE_DEPS!
@@ -38,7 +38,7 @@ do_install() {
         ${D}${libdir}/sota/conf.d/20-sota-shared-cred.toml
 }
 
-FILES_${PN} = " \
+FILES:${PN} = " \
                 ${libdir}/sota/conf.d \
                 ${libdir}/sota/conf.d/20-sota-shared-cred.toml \
                 "

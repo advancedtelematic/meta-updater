@@ -5,7 +5,7 @@ SOTA_DEPLOY_CREDENTIALS ?= "1"
 SOTA_HARDWARE_ID ??= "${MACHINE}"
 
 IMAGE_CLASSES += " image_types_ostree image_types_ota image_repo_manifest"
-IMAGE_INSTALL_append_sota = " aktualizr aktualizr-info ${SOTA_CLIENT_PROV} \
+IMAGE_INSTALL:append:sota = " aktualizr aktualizr-info ${SOTA_CLIENT_PROV} \
                               ostree os-release ostree-kernel ostree-initramfs \
                               ${@'ostree-devicetrees' if oe.types.boolean('${OSTREE_DEPLOY_DEVICETREE}') else ''}"
 
@@ -13,12 +13,12 @@ IMAGE_FSTYPES += "${@bb.utils.contains('DISTRO_FEATURES', 'sota', 'ostreepush ga
 IMAGE_FSTYPES += "${@bb.utils.contains('BUILD_OSTREE_TARBALL', '1', 'ostree.tar.bz2', ' ', d)}"
 IMAGE_FSTYPES += "${@bb.utils.contains('BUILD_OTA_TARBALL', '1', 'ota.tar.xz', ' ', d)}"
 
-PACKAGECONFIG_append_pn-curl = " ssl"
-PACKAGECONFIG_remove_pn-curl = "gnutls"
+PACKAGECONFIG:append:pn-curl = " ssl"
+PACKAGECONFIG:remove:pn-curl = "gnutls"
 
-WKS_FILE_sota ?= "sdimage-sota.wks"
+WKS_FILE:sota ?= "sdimage-sota.wks"
 
-EXTRA_IMAGEDEPENDS_append_sota = " parted-native mtools-native dosfstools-native"
+EXTRA_IMAGEDEPENDS:append:sota = " parted-native mtools-native dosfstools-native"
 
 INITRAMFS_FSTYPES ?= "${@oe.utils.ifelse(d.getVar('OSTREE_BOOTLOADER') == 'u-boot', 'cpio.gz.u-boot', 'cpio.gz')}"
 
@@ -46,13 +46,13 @@ GARAGE_TARGET_EXPIRE_AFTER ?= ""
 GARAGE_CUSTOMIZE_TARGET ?= ""
 
 SOTA_MACHINE ??="none"
-SOTA_MACHINE_rpi ?= "raspberrypi"
-SOTA_MACHINE_porter ?= "porter"
-SOTA_MACHINE_m3ulcb = "m3ulcb"
-SOTA_MACHINE_intel-corei7-64 ?= "minnowboard"
-SOTA_MACHINE_qemux86-64 ?= "qemux86-64"
-SOTA_MACHINE_am335x-evm ?= "am335x-evm-wifi"
-SOTA_MACHINE_freedom-u540 ?= "freedom-u540"
+SOTA_MACHINE:rpi ?= "raspberrypi"
+SOTA_MACHINE:porter ?= "porter"
+SOTA_MACHINE:m3ulcb = "m3ulcb"
+SOTA_MACHINE:intel-corei7-64 ?= "minnowboard"
+SOTA_MACHINE:qemux86-64 ?= "qemux86-64"
+SOTA_MACHINE:am335x-evm ?= "am335x-evm-wifi"
+SOTA_MACHINE:freedom-u540 ?= "freedom-u540"
 
 SOTA_OVERRIDES_BLACKLIST = "ostree ota"
 SOTA_REQUIRED_VARIABLES = "OSTREE_REPO OSTREE_BRANCHNAME OSTREE_OSNAME OSTREE_BOOTLOADER OSTREE_BOOT_PARTITION GARAGE_SIGN_REPO GARAGE_TARGET_NAME"

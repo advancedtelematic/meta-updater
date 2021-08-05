@@ -13,7 +13,7 @@ SRC_URI = " \
 
 SOTA_POLLING_SEC ?= "30"
 
-do_install_append () {
+do_install:append () {
     install -m 0700 -d ${D}${libdir}/sota/conf.d
     install -m 0644 ${WORKDIR}/60-polling-interval.toml ${D}${libdir}/sota/conf.d/60-polling-interval.toml
 
@@ -21,7 +21,7 @@ do_install_append () {
            ${D}${libdir}/sota/conf.d/60-polling-interval.toml
 }
 
-FILES_${PN} = " \
+FILES:${PN} = " \
                 ${libdir}/sota/conf.d/60-polling-interval.toml \
                 "
 

@@ -8,7 +8,7 @@ SRC_URI = "\
     file://10-pacman.toml \
     "
 
-FILES_${PN} = " \
+FILES:${PN} = " \
                 ${libdir}/sota/conf.d \
                 ${libdir}/sota/conf.d/10-pacman.toml \
               "

@@ -21,4 +21,4 @@ do_install() {
 	done
 }
 
-FILES_${PN} += "${libdir}/fit_conf"
+FILES:${PN} += "${libdir}/fit_conf"

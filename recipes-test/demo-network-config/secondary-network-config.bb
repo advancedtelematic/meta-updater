@@ -10,7 +10,7 @@ SRC_URI = "\
     file://27-dhcp-client-external.network \
     "
 
-FILES_${PN} = "${libdir}/systemd/network"
+FILES:${PN} = "${libdir}/systemd/network"
 
 PR = "1"
 

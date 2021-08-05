@@ -1,5 +1,5 @@
 
-do_install_append() {
+do_install:append() {
 
     # Set the zabbix Server 
     if [ ! -z ${SOTA_COMM_CONF_ZABBIX_SERVER} ]; then

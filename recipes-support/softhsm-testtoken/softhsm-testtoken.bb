@@ -4,14 +4,14 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda
 
 inherit systemd
 
-RDEPENDS_${PN} = "softhsm libp11 opensc openssl-bin"
-DEPENDS_append = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', ' systemd', '', d)}"
+RDEPENDS:${PN} = "softhsm libp11 opensc openssl-bin"
+DEPENDS:append = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', ' systemd', '', d)}"
 
 
 SRC_URI = "file://createtoken.service \
 	   file://createtoken.sh"
 
-SYSTEMD_SERVICE_${PN} = "createtoken.service"
+SYSTEMD_SERVICE:${PN} = "createtoken.service"
 
 do_install() {
   install -d ${D}${systemd_unitdir}/system
@@ -20,6 +20,6 @@ do_install() {
   install -m 0744 ${WORKDIR}/createtoken.sh ${D}${bindir}/createtoken.sh
 }
 
-FILES_${PN} = "${bindir}/createtoken.sh \
+FILES:${PN} = "${bindir}/createtoken.sh \
 	       ${systemd_unitdir}/system/createtoken.service"
 

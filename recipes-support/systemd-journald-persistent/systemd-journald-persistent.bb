@@ -6,12 +6,12 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
-SRC_URI_append = " file://10-persistent-journal.conf"
+SRC_URI:append = " file://10-persistent-journal.conf"
 PR = "r1"
 
 S = "${WORKDIR}"
 
-FILES_${PN} = "${systemd_unitdir}/journald.conf.d/*"
+FILES:${PN} = "${systemd_unitdir}/journald.conf.d/*"
 
 do_install() {
     install -d ${D}/${systemd_unitdir}/journald.conf.d

@@ -24,7 +24,7 @@ do_install() {
         ${D}${libdir}/sota/conf.d/20-sota-device-cred-hsm.toml
 }
 
-FILES_${PN} = " \
+FILES:${PN} = " \
                 ${libdir}/sota/conf.d \
                 ${libdir}/sota/conf.d/20-sota-device-cred-hsm.toml \
                 "

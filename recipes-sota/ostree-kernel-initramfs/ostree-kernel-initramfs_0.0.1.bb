@@ -9,12 +9,12 @@ inherit module-base kernel-artifact-names
 
 PACKAGES = "ostree-kernel ostree-initramfs ostree-devicetrees"
 
-ALLOW_EMPTY_ostree-initramfs = "1"
-ALLOW_EMPTY_ostree-devicetrees = "1"
+ALLOW_EMPTY:ostree-initramfs = "1"
+ALLOW_EMPTY:ostree-devicetrees = "1"
 
-FILES_ostree-kernel = "${nonarch_base_libdir}/modules/*/vmlinuz"
-FILES_ostree-initramfs = "${nonarch_base_libdir}/modules/*/initramfs.img"
-FILES_ostree-devicetrees = "${nonarch_base_libdir}/modules/*/dtb/* \
+FILES:ostree-kernel = "${nonarch_base_libdir}/modules/*/vmlinuz"
+FILES:ostree-initramfs = "${nonarch_base_libdir}/modules/*/initramfs.img"
+FILES:ostree-devicetrees = "${nonarch_base_libdir}/modules/*/dtb/* \
     ${@'' if oe.types.boolean(d.getVar('OSTREE_MULTI_DEVICETREE_SUPPORT')) else '${nonarch_base_libdir}/modules/*/devicetree'} \
 "
 

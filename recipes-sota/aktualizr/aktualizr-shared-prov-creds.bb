@@ -7,7 +7,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MPL-2.0;md5=815ca599c9df247a0c7
 inherit allarch
 
 DEPENDS = "zip-native"
-ALLOW_EMPTY_${PN} = "1"
+ALLOW_EMPTY:${PN} = "1"
 
 # If the config file from aktualizr used here is changed, you will need to bump
 # the version here because of SIGGEN_EXCLUDE_SAFE_RECIPE_DEPS!
@@ -35,7 +35,7 @@ do_install() {
     fi
 }
 
-FILES_${PN} = " \
+FILES:${PN} = " \
                 ${localstatedir}/sota/sota_provisioning_credentials.zip \
                 "
 

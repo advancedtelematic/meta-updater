@@ -1,11 +1,11 @@
 OTA_SYSROOT = "${WORKDIR}/ota-sysroot"
-TAR_IMAGE_ROOTFS_task-image-ota = "${OTA_SYSROOT}"
-IMAGE_TYPEDEP_ota = "ostreecommit"
+TAR_IMAGE_ROOTFS:task-image-ota = "${OTA_SYSROOT}"
+IMAGE_TYPEDEP:ota = "ostreecommit"
 do_image_ota[dirs] = "${OTA_SYSROOT}"
 do_image_ota[cleandirs] = "${OTA_SYSROOT}"
 do_image_ota[depends] = "${@'grub:do_populate_sysroot' if d.getVar('OSTREE_BOOTLOADER') == 'grub' else ''} \
                          ${@'virtual/bootloader:do_deploy' if d.getVar('OSTREE_BOOTLOADER') == 'u-boot' else ''}"
-IMAGE_CMD_ota () {
+IMAGE_CMD:ota () {
 	ostree admin --sysroot=${OTA_SYSROOT} init-fs --modern ${OTA_SYSROOT}
 	ostree admin --sysroot=${OTA_SYSROOT} os-init ${OSTREE_OSNAME}
 
@@ -77,10 +77,10 @@ IMAGE_CMD_ota () {
 	echo "{\"${ostree_target_hash}\":\"${GARAGE_TARGET_NAME}-${target_version}\"}" > ${OTA_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota/import/installed_versions
 }
 
-EXTRA_IMAGECMD_ota-ext4 = "-L otaroot -i 4096 -t ext4"
-IMAGE_TYPEDEP_ota-ext4 = "ota"
-IMAGE_ROOTFS_task-image-ota-ext4 = "${OTA_SYSROOT}"
-IMAGE_CMD_ota-ext4 () {
+EXTRA_IMAGECMD:ota-ext4 = "-L otaroot -i 4096 -t ext4"
+IMAGE_TYPEDEP:ota-ext4 = "ota"
+IMAGE_ROOTFS:task-image-ota-ext4 = "${OTA_SYSROOT}"
+IMAGE_CMD:ota-ext4 () {
 	ln -sf ${STAGING_DIR_NATIVE}${base_sbindir_native}/mkfs.ext4 ${STAGING_DIR_NATIVE}${base_sbindir_native}/mkfs.ota-ext4
 	ln -sf ${STAGING_DIR_NATIVE}${base_sbindir_native}/fsck.ext4 ${STAGING_DIR_NATIVE}${base_sbindir_native}/fsck.ota-ext4
 	oe_mkext234fs ota-ext4 ${EXTRA_IMAGECMD}

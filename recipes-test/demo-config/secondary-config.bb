@@ -50,7 +50,7 @@ do_install () {
 
 }
 
-FILES_${PN} = " \
+FILES:${PN} = " \
                 ${libdir}/sota/conf.d \
                 ${libdir}/sota/conf.d/30-pacman-config.toml \
                 ${libdir}/sota/conf.d/35-network-config.toml \

@@ -3,7 +3,7 @@
 # It greatly helps diagnosing issues on testing devices but should be
 # carefully weighted against file system usage and flash device wear for
 # production systems. Please refer to systemd's docs for more details
-IMAGE_INSTALL_append += " systemd-journald-persistent"
+IMAGE_INSTALL:append += " systemd-journald-persistent"
 
 # Set resource limits for aktualizr service
 #
@@ -12,4 +12,4 @@ IMAGE_INSTALL_append += " systemd-journald-persistent"
 #RESOURCE_CPU_WEIGHT_pn-aktualizr = "100"
 #RESOURCE_MEMORY_HIGH_pn-aktualizr = "100M"
 #RESOURCE_MEMORY_MAX_pn-aktualizr = "80%"
-IMAGE_INSTALL_append += " aktualizr-resource-control"
+IMAGE_INSTALL:append += " aktualizr-resource-control"
