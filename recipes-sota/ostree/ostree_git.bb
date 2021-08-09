@@ -6,7 +6,7 @@ inherit autotools-brokensep pkgconfig systemd gobject-introspection
 
 INHERIT_remove_class-native = "systemd"
 
-SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master"
+SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=main"
 
 SRCREV="854a823e05d6fe8b610c02c2a71eaeb2bf1e98a6"
 
