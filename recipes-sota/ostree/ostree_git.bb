@@ -5,7 +5,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=5f30f0716dfdd0d91eb439ebec522ec2"
 
 inherit autotools pkgconfig systemd bash-completion gobject-introspection
 
-SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master"
+SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=main"
 
 SRCREV = "f3eba6bcec39c163eb831c02c148ffa483292906"
 
