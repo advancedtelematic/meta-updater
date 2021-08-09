@@ -7,7 +7,7 @@ inherit autotools pkgconfig systemd bash-completion gobject-introspection
 
 INHERIT_remove_class-native = "systemd"
 
-SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master"
+SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=main"
 
 SRCREV="3e96ec9811b5cfc5481f8b6b06c8d34d9a35408e"
 
