@@ -5,9 +5,6 @@
   #   - CURRENT_PROJECT (will be symlinked instead of pulled)
 
   image: $BITBAKE_CHECKOUT_IMAGE
-  cache:
-    paths:
-      - updater-repo
   artifacts:
     expire_in: "1 day"
     paths:
