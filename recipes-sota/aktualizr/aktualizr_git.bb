@@ -16,7 +16,7 @@ PRIVATE_LIBS_${PN}-ptest = "libaktualizr.so libaktualizr_secondary.so"
 PV = "1.0+git${SRCPV}"
 PR = "7"
 
-GARAGE_SIGN_PV = "0.7.2-9-g80ae114"
+GARAGE_SIGN_PV = "0.7.3-8-g29f5922"
 
 SRC_URI = " \
   gitsm://github.com/advancedtelematic/aktualizr;branch=${BRANCH};name=aktualizr \
@@ -28,8 +28,8 @@ SRC_URI = " \
   ${@ d.expand("https://tuf-cli-releases.ota.here.com/cli-${GARAGE_SIGN_PV}.tgz;unpack=0;name=garagesign") if not oe.types.boolean(d.getVar('GARAGE_SIGN_AUTOVERSION')) else ''} \
   "
 
-SRC_URI[garagesign.md5sum] = "2598ce3a468c40a58df3304fb71ea14b"
-SRC_URI[garagesign.sha256sum] = "acbc814a9ed962a0d3b5bc397b14fef6a139e874e6cc3075671dab69bc8541fd"
+SRC_URI[garagesign.md5sum] = "ac817ae389160f1dd419aa2314ecc09b"
+SRC_URI[garagesign.sha256sum] = "9086664940ad6fce3e9675bc8165025ffde505da23324ca571e0428c46a79791"
 
 SRCREV = "1255aa24fe55f99b606027c8acc8cd80db29a282"
 BRANCH ?= "master"
