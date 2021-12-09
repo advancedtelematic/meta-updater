@@ -1,7 +1,7 @@
 {
     "virtual": [
         {
-            "partial_verifying": "false",
+            "partial_verifying": false,
             "ecu_hardware_id": "external-config",
             "full_client_dir": "/var/sota/external-config",
             "ecu_private_key": "sec.private",
