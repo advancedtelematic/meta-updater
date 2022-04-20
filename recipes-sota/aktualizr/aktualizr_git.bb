@@ -9,7 +9,7 @@ DEPENDS = "boost curl openssl libarchive libsodium sqlite3 asn1c-native"
 DEPENDS_append = "${@bb.utils.contains('PTEST_ENABLED', '1', ' coreutils-native net-tools-native ostree-native aktualizr-native ', '', d)}"
 RDEPENDS_${PN}_class-target = "${PN}-hwid lshw"
 
-RDEPENDS_${PN}-ptest += "bash cmake curl net-tools python3-core python3-misc python3-modules openssl-bin sqlite3 valgrind"
+RDEPENDS_${PN}-ptest += "bash cmake curl net-tools python3-core python3-misc python3-modules openssl-bin sqlite3 valgrind perl"
 
 PRIVATE_LIBS_${PN}-ptest = "libaktualizr.so libaktualizr_secondary.so"
 
