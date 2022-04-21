@@ -50,7 +50,6 @@ Build core-image-minimal (rpi):
   extends: .bitbake
 
   stage: test
-  when: manual
   variables:
     TEST_BUILD_DIR: 'build-core-image-minimal-rpi'
     BITBAKE_TARGETS: 'core-image-minimal'
@@ -72,7 +71,6 @@ Oe-selftest minnowboard:
   extends: .oe-selftest
 
   stage: test
-  when: manual
   variables:
     TEST_BUILD_DIR: 'build-oe-minnowboard'
     OE_SELFTESTS: 'updater_minnowboard'
@@ -83,7 +81,6 @@ Oe-selftest rpi:
   extends: .oe-selftest
 
   stage: test
-  when: manual
   variables:
     TEST_BUILD_DIR: 'build-oe-rpi'
     OE_SELFTESTS: 'updater_raspberrypi'
@@ -109,7 +106,7 @@ Ptest qemux86_64:
 
 trigger-otf-on-pr:
   stage: trigger
-  when: manual
+  when: always
   except:
     - pushes
     - schedules
