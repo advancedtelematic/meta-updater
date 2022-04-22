@@ -9,7 +9,7 @@ DEPENDS = "boost curl openssl libarchive libsodium sqlite3 asn1c-native"
 DEPENDS_append = "${@bb.utils.contains('PTEST_ENABLED', '1', ' coreutils-native net-tools-native ostree-native aktualizr-native ', '', d)}"
 RDEPENDS_${PN}_class-target = "${PN}-hwid lshw"
 
-RDEPENDS_${PN}-ptest += "bash cmake curl net-tools python3-core python3-misc python3-modules openssl-bin sqlite3 valgrind"
+RDEPENDS_${PN}-ptest += "bash cmake curl net-tools python3-core python3-misc python3-modules openssl-bin sqlite3 valgrind perl"
 
 PRIVATE_LIBS_${PN}-ptest = "libaktualizr.so libaktualizr_secondary.so"
 
@@ -31,7 +31,7 @@ SRC_URI = " \
 SRC_URI[garagesign.md5sum] = "2598ce3a468c40a58df3304fb71ea14b"
 SRC_URI[garagesign.sha256sum] = "acbc814a9ed962a0d3b5bc397b14fef6a139e874e6cc3075671dab69bc8541fd"
 
-SRCREV = "1255aa24fe55f99b606027c8acc8cd80db29a282"
+SRCREV = "13800e0cfda285485e632f0a2d50490ba88d0f72"
 BRANCH ?= "master"
 
 S = "${WORKDIR}/git"
