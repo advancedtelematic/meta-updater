@@ -9,7 +9,7 @@ IMAGE_INSTALL:append += " systemd-journald-persistent"
 #
 # Uncomment these lines to change the default parameters.
 #
-#RESOURCE_CPU_WEIGHT_pn-aktualizr = "100"
-#RESOURCE_MEMORY_HIGH_pn-aktualizr = "100M"
-#RESOURCE_MEMORY_MAX_pn-aktualizr = "80%"
+#RESOURCE_CPU_WEIGHT:pn-aktualizr = "100"
+#RESOURCE_MEMORY_HIGH:pn-aktualizr = "100M"
+#RESOURCE_MEMORY_MAX:pn-aktualizr = "80%"
 IMAGE_INSTALL:append += " aktualizr-resource-control"

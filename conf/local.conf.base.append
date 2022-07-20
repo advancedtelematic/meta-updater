@@ -15,4 +15,4 @@ DISTRO = "##DISTRO##"
 
 # Uncomment this line to set the log level of aktualizr to 'debug' (from 'info'
 # by default)
-#IMAGE_INSTALL_append += " aktualizr-log-debug"
+#IMAGE_INSTALL:append += " aktualizr-log-debug"

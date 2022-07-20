@@ -19,7 +19,7 @@ PR = "7"
 GARAGE_SIGN_PV = "0.7.2-9-g80ae114"
 
 SRC_URI = " \
-  gitsm://github.com/advancedtelematic/aktualizr;branch=${BRANCH};name=aktualizr \
+  gitsm://github.com/advancedtelematic/aktualizr;branch=${BRANCH};name=aktualizr;protocol=https \
   file://run-ptest \
   file://aktualizr.service \
   file://aktualizr-secondary.service \
